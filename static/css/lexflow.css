@@ -115,7 +115,7 @@ a { text-underline-offset: 3px; }
 .lf-panel { background: var(--lf-sheet); border: 1px solid var(--lf-rule); border-radius: var(--radius-panel); }
 .lf-panel-pad { padding: 20px 22px; }
 .lf-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--lf-rule); }
-.lf-panel-head h2 { margin: 0; font-size: 15.5px; font-weight: 650; }
+.lf-panel-head h2, .lf-panel-head h3 { margin: 0; font-size: 15.5px; font-weight: 650; }
 .lf-well { background: var(--lf-fill); border-radius: var(--radius-control); padding: 12px 14px; }
 
 /* ---------- buttons ---------- */
@@ -189,6 +189,31 @@ a { text-underline-offset: 3px; }
 .lf-progress { padding: 0; margin: 0; }
 
 /* ---------- metrics ---------- */
+.lf-analytics-head, .lf-analytics-filter-actions, .lf-analytics-pagination { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.lf-analytics-head { margin-bottom: 18px; }
+.lf-analytics-filter { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 18px; }
+.lf-analytics-filter-actions { grid-column: 1 / -1; }
+.lf-analytics-filter .errorlist { padding-left: 18px; margin: 4px 0 0; }
+.lf-analytics-scope { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; font-size: 13px; color: var(--lf-muted); }
+.lf-analytics-scope strong { color: var(--lf-ink); font-weight: 600; }
+.lf-analytics-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.lf-analytics-kpi { padding: 18px 20px; min-width: 0; }
+.lf-analytics-kpi h3 { font-size: 13px; font-weight: 600; color: var(--lf-muted); margin: 0 0 10px; }
+.lf-analytics-value { font-size: 30px; font-weight: 650; letter-spacing: -.03em; line-height: 1.2; color: var(--lf-ink); margin-bottom: 8px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.lf-analytics-signals { display: flex; gap: 10px 22px; flex-wrap: wrap; padding: 14px 0; font-size: 13px; }
+.lf-analytics-signals a { color: var(--lf-muted); text-decoration: none; }
+.lf-analytics-signals a:hover { color: var(--lf-petrol); text-decoration: underline; }
+.lf-analytics-signals strong { color: var(--lf-ink); }
+.lf-analytics-stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.lf-analytics-stat-grid .lf-well { display: grid; gap: 8px; }
+.lf-analytics-stat-grid span { font-size: 12.5px; color: var(--lf-muted); }
+.lf-analytics-stat-grid strong { font-size: 21px; font-variant-numeric: tabular-nums; }
+.lf-analytics-stat-grid small { font-size: 12px; font-weight: 400; }
+.lf-analytics-empty { min-height: 180px; display: grid; place-content: center; text-align: center; color: var(--lf-muted); font-size: 13px; }
+.lf-analytics-empty i { font-size: 28px; margin-bottom: 10px; }
+.lf-chart-data summary { color: var(--lf-petrol); cursor: pointer; }
+.lf-chart-data th[scope="row"] { background: transparent; font-weight: 400; white-space: normal; }
+.lf-chart.lf-chart--tall { height: 290px; }
 .lf-metric { display: grid; grid-template-columns: 1fr auto auto; gap: 4px 18px; align-items: baseline; padding: 13px 0; border-bottom: 1px solid var(--lf-rule); }
 .lf-metric:last-child { border-bottom: 0; }
 .lf-metric .name { font-weight: 600; font-size: 14px; }
@@ -433,6 +458,7 @@ a { text-underline-offset: 3px; }
   .lf-desk { position: static; max-height: none; }
 }
 @media (max-width: 1100px) {
+  .lf-analytics-stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .lf-pipeline { grid-template-columns: repeat(4, 1fr); }
   .lf-stage:nth-child(4) { border-right: 0; }
   .lf-stage:nth-child(4)::after { display: none; }
@@ -444,6 +470,10 @@ a { text-underline-offset: 3px; }
   .lf-iso { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 860px) {
+  .lf-analytics-filter { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lf-analytics-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .lf-analytics-kpi { padding: 14px; }
+  .lf-analytics-value { font-size: 26px; }
   .lf-shell { grid-template-columns: 1fr; }
   .lf-rail { position: static; height: auto; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 10px 16px; gap: 6px; }
   .lf-brand { padding: 0 8px 0 0; }

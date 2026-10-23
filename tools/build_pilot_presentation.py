@@ -22,6 +22,7 @@ E.register_namespace("a", A)
 E.register_namespace("r", R)
 EMU = 914400
 INK, PETROL, PAPER, WHITE, MUTED, GOLD = "142D2C", "1E5250", "F3F5F1", "FFFFFF", "5D6A67", "F4E4A1"
+DATE = "23 OCTOBER 2026"
 
 SLIDES = [
     ("LEXFLOW AI / PILOT DEMONSTRATION", "From documents to an approved handoff", "Secure workflow automation for a dedicated notary office", [
@@ -49,14 +50,14 @@ SLIDES = [
         ("Presentation environment", "The launcher creates one office, a separate database, vault and keys. Local OCR reads scans; original-source review remains mandatory. A remote scanner/email client uses only the intake API."),
         ("Deployment package", "Concurrency and complete encrypted restore passed on local PostgreSQL. A dedicated HTTPS stack is supplied. Its container build, client hosting, TLS and operational recovery still need validation.")]),
     ("08 / PILOT EVIDENCE", "Measure results without mixing demo data", "Demonstration history is clearly labelled and excluded from live-pilot measurements.", [
-        ("What to measure", "The synthetic corpus passed 64 checks across 12 cases, including scans, missing values and conflicts. Office metrics cover corrections, review time, confirmed handoffs and audit completeness."),
-        ("How to compare", "Synthetic pass rates are regression evidence, not office accuracy. Record a manual baseline and a separate sanitized cohort. Measure handling time separately from elapsed approval time.")]),
+        ("Four analytics tabs", "Filter by intake receipt period, workflow, source and demo/live cohort. Inspect extraction and review, workload and median/P90 timing, delivery and audit. Charts have exact-value tables, case links and aggregate CSV export."),
+        ("Compare the right measures", "First-extraction coverage differs from human-completed fields. Elapsed approval time includes waiting; staff handling time and re-keying errors need separate office measurements. Synthetic checks do not establish customer accuracy or savings.")]),
     ("09 / LIVE DEMONSTRATION", "A seven-minute walkthrough", "Use /presentation/ as your presenter guide.", [
         ("Minutes 1–4", "Open the unprocessed intake. Process the documents. Show the Blatt 812 / 872 conflict. Resolve the source choice and confirm the price as the clerk."),
         ("Minutes 5–7", "Sign in as the notary. Approve, create the HTTP export and send it. Show its verified receipt and audit trail. Optionally demonstrate scanned intake and mandatory source review.")]),
-    ("10 / WHAT IS NEXT", "A precise client pilot agreement", "Keep the first real integration as narrow as the demonstrated workflow.", [
-        ("Decide with the office", "Confirm the property-purchase schema, required approvals, dedicated hosting boundary, retention policy, representative sanitized documents and exact destination interface."),
-        ("Validate before live use", "Validate the actual vendor import and receipt, client deployment and restore procedures. Evaluate sanitized office samples against agreed limits. Native Office plugins and SSO remain roadmap items.")]),
+    ("10 / WHAT IS NEXT", "Expand plugins and destinations", "Build the shared foundation, then validate Outlook intake and one actual destination.", [
+        ("Shared foundation — proposed", "Separate scoped plugin credentials, integration setup and connection tests, versioned destination mappings, and queued delivery. Preserve the existing approval, idempotency and verified-receipt controls."),
+        ("First integrations — proposed", "Build Outlook intake and one office-selected vendor adapter against documented APIs/imports. Validate the exact product/version and durable receipt. Word template filling and cloud intake follow. Native plugins remain unimplemented.")]),
     ("LEXFLOW AI / THE NEXT STEP", "Select one destination. Validate one workflow.", "A controlled, demonstrable foundation for the first office pilot.", [
         ("What you can present today", "A working case from PDF or scan to reviewed data, frozen approval, authenticated HTTP handoff and signed receipt, with PostgreSQL, recovery and extraction evidence."),
         ("What the client supplies next", "A supported destination interface and test environment, sanitized examples, an accepted deployment boundary and agreed success criteria.")]),
@@ -118,7 +119,7 @@ def slide_xml(index, kicker, title, subtitle, cards):
         shape(x, 3.55, 5.95, 2.7, PETROL if dark else WHITE)
         shape(x+.24, 3.82, 5.43, .5, None, heading, 20, GOLD if dark else PETROL, True)
         shape(x+.24, 4.4, 5.43, 1.64, None, body, 17, WHITE if dark else INK)
-    shape(.6, 7.02, 11.8, .24, None, "ALLGIFT TECHNOLOGIES LTD  /  SYNTHETIC PRESENTATION DEMO  /  22 OCTOBER 2026", 9, "C3D3D0" if dark else MUTED)
+    shape(.6, 7.02, 11.8, .24, None, "ALLGIFT TECHNOLOGIES LTD  /  SYNTHETIC PRESENTATION DEMO  /  " + DATE, 9, "C3D3D0" if dark else MUTED)
     shape(12.15, 7.0, .55, .3, None, f"{index:02d}", 12, GOLD if dark else PETROL, True)
     element(element(root, P, "clrMapOvr"), A, "masterClrMapping")
     return E.tostring(root, encoding="utf-8", xml_declaration=True)
@@ -219,7 +220,7 @@ def build_pdf():
             text(x+18,284,heading,15,GOLD if dark else PETROL,bold,390)
             last_y=text(x+18,321,body,12.5,WHITE if dark else INK,normal,390)
             if last_y < 95: raise ValueError(f"PDF slide {index} overflows")
-        text(44,518,"ALLGIFT TECHNOLOGIES LTD / SYNTHETIC DEMONSTRATION / 22 OCTOBER 2026",7,"C3D3D0" if dark else MUTED)
+        text(44,518,"ALLGIFT TECHNOLOGIES LTD / SYNTHETIC DEMONSTRATION / " + DATE,7,"C3D3D0" if dark else MUTED)
         text(895,518,f"{index:02d}",9,GOLD if dark else PETROL,bold)
         c.showPage()
     c.save()

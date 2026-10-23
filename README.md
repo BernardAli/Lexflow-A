@@ -47,6 +47,14 @@ slide text, a timed presenter script and verification notes. Rebuild the slides
 with `.venv/bin/python tools/build_pilot_presentation.py`. The generator uses the
 original client deck's theme; keep that referenced source file available.
 
+The printable [demonstration guide](presentation/LexFlow_Demo_Guide.pdf) covers
+sample uploads, review, handoff, analytics and the integration roadmap. Rebuild
+the guide and its existing sample archive without regenerating source PDFs:
+
+```sh
+.venv/bin/python tools/build_demo_documents.py --guide-only
+```
+
 ## Page sections
 
 Overview separates the work queue from pilot analytics. Workflow Studio,
@@ -55,6 +63,51 @@ Matter review keeps source documents beside extracted data, with a separate
 Activity tab. Arrow keys, Home and End switch tabs; section and field links open
 the relevant panel. Switching tabs preserves unsaved form values, and all
 sections remain readable when JavaScript is disabled.
+
+## Office analytics
+
+Open **Overview → Pilot analytics** for summary, extraction/review, workload/timing
+and delivery/audit tabs. Filter by receipt period (including custom dates up to
+366 days), workflow, intake source and synthetic/live cohort. Filters apply to
+every report section and the downloadable CSV. Dates use the configured reporting
+timezone and select intake receipt dates; outcomes include subsequent review and
+delivery of those intakes. Prior-period comparisons use the preceding interval
+of the same length and the same filters.
+
+The report includes first-extraction coverage, field review priorities, source
+acknowledgements, confidence distributions, case aging, median/P90 turnaround,
+reviewer actions, connector outcomes, pending receipts and audit coverage. Workflow
+and source links narrow the report; case references open the underlying records.
+Charts include exact-value tables, and the case list is paginated. CSV export
+contains aggregate metadata without document text or extracted case values.
+
+Confidence scores remain heuristic. Elapsed approval time includes waiting and
+does not measure staff handling time; correction counts do not measure manual
+re-keying errors. Office baselines are shown as context without invented savings.
+Empty samples display no rate or duration. Synthetic data stays explicitly labelled
+and separate from live-office measurements.
+
+## Plugins and destination integrations
+
+The existing plugin API and remote scanner/email client provide intake and
+office-scoped case reads. Destinations support approved XML/JSON/CSV files and
+authenticated HTTP JSON with signed receipts. Native Outlook/Word add-ins,
+cloud-storage plugins and named vendor adapters remain planned.
+
+The [integration expansion guide](integrations/EXPANSION_GUIDE.txt) documents
+current API requests/responses, credential limits, HTTP configuration, proposed
+adapter operations, versioned mappings and acceptance criteria. The recommended
+sequence is shared configuration/credentials, Outlook intake, one actual office
+destination, then Word template filling and the office's chosen cloud storage.
+
+The current office token permits intake AND case reads, and rotating it replaces
+the token for every client. Individual plugin credentials/scopes, a setup catalog,
+per-destination mapping profiles and automatic background delivery are proposed
+work. The Connectors page currently lists configured destinations and transfers;
+HTTP destinations are configured by the operator. The
+[handoff v1 contract](integrations/HANDOFF_V1.txt) remains the exact implemented
+wire format; each vendor's interface and durable acceptance need their own adapter
+and validation.
 
 ## Password reset and visibility
 
@@ -139,8 +192,19 @@ the office's mail service before relying on self-service recovery.
 
 The regression suite covers the original review failures, actual folder-export
 bytes, receipt validation, tenant/role gates, raw database encryption and demo
-isolation. `lexflow_pilot_check --demo --json` checks the isolated synthetic demo;
+isolation, analytics filter boundaries, denominators and aggregate CSV privacy.
+`lexflow_pilot_check --demo --json` checks the isolated synthetic demo;
 without `--demo` it fails closed on unmet live-pilot conditions.
+
+On 23 October 2026, the SQLite suite ran 128 tests: 123 passed and five
+PostgreSQL-only tests skipped. The last recorded PostgreSQL run covered 100 tests
+on 22 October; it has not been rerun for the expanded 128-test suite. Analytics,
+tabs and the review/approval/file/HTTP workflow also passed Chromium checks. See
+[verification notes](presentation/VERIFICATION.txt) and
+[analytics browser evidence](presentation/analytics-browser-verification.json).
+The browser tools under `tools/` use an installed Playwright package through
+`LEXFLOW_PLAYWRIGHT_MODULE`; run mutation walkthroughs only on an isolated
+synthetic demo copy.
 
 The original `PROJECT_REVIEW.txt` and `review/` files are a dated pre-hardening
 baseline. Their diagnostic script illustrates old failure paths; use the current

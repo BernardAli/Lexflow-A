@@ -1,14 +1,50 @@
 LEXFLOW AI — CURRENT PILOT PROTOTYPE VERIFICATION
-22 October 2026
+Updated 23 October 2026; earlier acceptance evidence recorded 22 October 2026.
 
 ASSESSED SCOPE
 
 One dedicated office; synthetic property-purchase intake; local PDF/text and scan
 reading; source review; frozen approval; file export or authenticated HTTP handoff;
 signed receipt; remote scanner/email intake; audit and encrypted recovery.
+The current build also includes password reset/visibility, accessible section tabs
+and four analytics tabs with shared filters, chart tables, case links and CSV.
 The original presentation's broader platform roadmap is not fully implemented.
 
+23 OCTOBER UPDATE
+
+- Latest full SQLite suite: 128 tests in 49.775 seconds; 123 passed and five
+  PostgreSQL-only concurrency tests skipped. Nineteen analytics tests cover
+  receipt-date boundaries, office/demo separation, previous cohorts, current vs
+  initial extraction, re-extraction history, confidence counts, receipt rates,
+  durations, file acknowledgements, aggregate CSV/privacy and bounded queries.
+- Analytics Chromium walkthrough passed against an isolated demo and again
+  against the refreshed presentation demo: four tabs, seven initialized charts,
+  date presets, workflow/source drill-downs, live/demo separation, invalid/empty
+  filters, matching CSV scope, pagination, keyboard/deep links and no-JavaScript
+  tables. At 390px all four tabs fit without page overflow; no browser errors.
+  See analytics-browser-verification.json and screenshots/13-analytics-summary.png
+  and screenshots/14-analytics-mobile.png.
+- Section-tab and existing approval/file/HTTP/scan browser regressions passed on
+  an isolated synthetic copy. See tabs-browser-verification.json and
+  browser-verification.json. These checks did not mutate the presentation cases.
+- Django system checks, migration drift and JavaScript syntax checks passed.
+- No new PostgreSQL, hosted deployment or real-vendor acceptance run is claimed.
+  The 100-test PostgreSQL result below belongs to the earlier 22 October suite.
+- Documentation now includes integrations/EXPANSION_GUIDE.txt. Native Office and
+  cloud plugins, a named vendor adapter, per-plugin credentials/scopes, a setup
+  catalog, per-destination mapping profiles and background retries remain planned.
+- Documentation artifacts regenerated: five-page demonstration guide, matching
+  sample ZIP, and 12-slide PowerPoint/PDF with reusable slide text. All PowerPoint
+  XML/relationships resolve; the PDFs contain text on every page. The new analytics
+  and roadmap pages/slides were visually checked. The ZIP contains the updated
+  guide and all seven source PDFs, unchanged from their prior bytes. README links,
+  the presenter template and Django system checks passed. Desktop PowerPoint
+  rendering remains untested.
+
 CHECKS COMPLETED
+
+Items 1–5 and the deployment/migration acceptance evidence below describe the
+recorded 22 October run. Later browser/UI checks are identified above.
 
 1. PostgreSQL: all 100 tests passed in 64.433 seconds. This includes actual row-lock
    tests for a stale edit waiting behind approval, concurrent idempotent exports,
@@ -82,6 +118,8 @@ CHECKS COMPLETED
 NEW OPERATIONAL DELIVERABLES
 
 - integrations/HANDOFF_V1.txt: concrete authenticated request/receipt contract.
+- integrations/EXPANSION_GUIDE.txt: implemented API/configuration and proposed
+  plugin/adapter expansion, credentials, mappings, delivery and acceptance plan.
 - integrations/reference_receiver.py: independent synthetic contract destination.
 - tools/scanner_agent.py: remote, token-only scanner and saved-email client.
 - tools/verify_pilot_acceptance.py: reproducible isolated acceptance/recovery drill.
@@ -106,5 +144,5 @@ verification, SSO, additional hosting models and commercial administration remai
 roadmap scope. No legal certification, customer accuracy or savings are claimed.
 
 The original client PowerPoint remains unchanged. PROJECT_REVIEW.txt and review/
-are the historical pre-hardening baseline. verification.json is the current
-machine-readable evidence index; START_HERE.txt is the updated presenter script.
+are the historical pre-hardening baseline. verification.json is the evidence index
+with dates for the different test runs; START_HERE.txt is the presenter script.

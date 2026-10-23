@@ -1,0 +1,19 @@
+<section class="lf-panel lf-panel-pad">
+  <h3 class="lf-h2">{{ chart.title }}</h3>
+  <p class="lf-small lf-muted">{{ chart.hint }}</p>
+  {% if chart.empty %}
+    <div class="lf-analytics-empty"><i class="bi bi-bar-chart" aria-hidden="true"></i><p>No observations for these filters.</p></div>
+  {% else %}
+    <div id="{{ chart.id }}" class="lf-chart{% if chart.kind == 'horizontal' %} lf-chart--tall{% endif %}" data-analytics-chart="{{ chart.key }}" role="img" aria-label="{{ chart.title }}. Exact values follow in the data table."></div>
+  {% endif %}
+  <details class="lf-chart-data mt-2">
+    <summary class="lf-small">View chart data</summary>
+    <div class="lf-table-wrap mt-2">
+      <table class="lf-table lf-small">
+        <caption class="visually-hidden">{{ chart.title }}</caption>
+        <thead><tr><th scope="col">Category</th>{% for series in chart.series %}<th scope="col" class="text-end">{{ series.name }}</th>{% endfor %}</tr></thead>
+        <tbody>{% for row in chart.rows %}<tr><th scope="row">{{ row.label }}</th>{% for value in row.values %}<td class="text-end num">{{ value }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  </details>
+</section>

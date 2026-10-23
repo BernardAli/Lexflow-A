@@ -16,7 +16,7 @@
 <li><strong>Control the schema.</strong> Show <a href="{% url 'studio:matter_type' 'property-purchase' %}">required fields, review policy and destination mappings</a>. Source selections fill the case; reusable rules are managed separately.</li>
 <li><strong>Approve.</strong> Sign in as keller.notar. Approve the reviewed matter. This freezes values, mappings and the approval identity.</li>
 <li><strong>Prove the handoff.</strong> Create the XML export. Its status remains awaiting receipt. Run the demo receiver: it reads the actual file, validates its checksum and confirms a synthetic receipt.</li>
-<li><strong>Trace the outcome.</strong> Open <a href="{% url 'audit:index' %}">Audit</a> and <a href="{% url 'core:dashboard' %}">Overview</a>. Explain that demonstration metrics are a separate synthetic cohort.</li>
+<li><strong>Trace the outcome.</strong> Open <a href="{% url 'audit:index' %}">Audit</a> and <a href="{% url 'core:dashboard' %}#analytics-summary">Pilot analytics</a>. Show the shared filters, workflow links and aggregate CSV download. Demonstration metrics are a separate synthetic intake cohort.</li>
 </ol>
 <h2 class="lf-h2 mt-4">Extended pilot evidence</h2>
 <p><strong>HTTP handoff.</strong> With the reference receiver running, choose HTTP reference receiver after approval, create its export and select Send to HTTP destination. A signed receipt confirms the actual network handoff. This is an independent reference destination.</p>
@@ -25,9 +25,13 @@
 <section class="lf-panel lf-panel-pad" id="demo-scope" data-tab-panel>
 <h2 class="lf-h2">What you can demonstrate</h2>
 <p>Digital PDF/text intake, {% if ocr_enabled %}local scan reading, {% endif %}source evidence, conflicting values, human correction, role-based approval, frozen exports, authenticated HTTP receipts, encrypted case data and a signed audit checkpoint.</p>
+<p><strong>Office analytics.</strong> Summary, Extraction and review, Workload and timing, and Delivery and audit share receipt-date, workflow, source and cohort filters. Charts include exact-value tables; case links open the underlying records. Elapsed approval time includes waiting and does not measure staff handling time.</p>
 <h2 class="lf-h2 mt-4">What the client pilot adds</h2>
 <p>The chosen vendor's import schema and test environment; dedicated deployment and operational validation; sanitized office documents; an agreed baseline and acceptance thresholds.</p>
 <p>Local PostgreSQL concurrency, encrypted restore and remote scanner/email intake have acceptance drills. Client hosting and the chosen vendor still need acceptance. Native Outlook/Word plugins, SSO and additional hosting profiles remain roadmap items.</p>
+<h2 class="lf-h2 mt-4">Plugin and destination expansion</h2>
+<p>The existing API supports intake and office-scoped case reads. The remote scanner/email client, approved file exports and signed HTTP handoff are implemented. The current office token is shared across clients; rotating it replaces access for all of them.</p>
+<p>Planned work starts with integration setup and connection tests, separate scoped plugin credentials, versioned destination mappings and queued delivery. Then build native Outlook intake and one office-selected vendor adapter, followed by Word template filling and the office's chosen cloud source. Each destination needs its documented interface, exact product/version, test environment and verified acceptance receipt.</p>
 <div class="lf-well mt-4"><strong>Audit status:</strong> {% if chain.ok %}verified{% else %}requires investigation{% endif %} · {{ chain.checked }} events.<br><strong>Demo accounts:</strong> keller.clerk, keller.notar, admin.<br><strong>Demo password:</strong> lexflow-demo-2026.</div>
 <p class="lf-small lf-muted mt-3">For a fresh walkthrough use a new isolated demo database. Previously approved examples must be reopened before editing; acknowledged deliveries remain immutable.</p>
 </section>

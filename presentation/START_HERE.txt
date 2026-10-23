@@ -4,6 +4,14 @@ Open LexFlow_Pilot_Presentation.pptx for the editable 12-slide deck, or use
 LexFlow_Pilot_Presentation.pdf. slide-content.json contains reusable slide text.
 The original client deck remains unchanged.
 
+LexFlow_Demo_Guide.pdf is the printable sample-upload walkthrough, analytics guide
+and integration roadmap. LexFlow_Demo_Documents.zip contains that guide and the
+seven existing synthetic source PDFs. Rebuild just the guide/archive with:
+
+  .venv/bin/python tools/build_demo_documents.py --guide-only
+
+integrations/EXPANSION_GUIDE.txt is the developer/operator integration roadmap.
+
 START
 
   .venv/bin/python tools/presentation_demo.py --http-handoff --port 8010
@@ -47,10 +55,14 @@ the signed request, commits the actual bytes and returns a matching signed
 receipt. Delivery is recorded only after verification. Explain that this is a
 reference destination using the documented LexFlow contract, not a vendor system.
 
-06:00–07:00 — Show Audit and Overview > Pilot analytics. Conflict, review, approval, export, send
-and signed receipt are traceable. Metrics are a labelled synthetic cohort. Show
-the verification evidence: 100 PostgreSQL tests, real concurrency, encrypted
-restore drills on both database engines, and 64 synthetic extraction checks.
+06:00–07:00 — Show Audit and Overview > Pilot analytics > Summary. Conflict,
+review, approval, export, send and signed receipt are traceable. Show the filters,
+workflow links and Download analytics CSV. Metrics are a labelled synthetic intake
+cohort; dates select receipt, with later review/delivery outcomes included.
+The latest SQLite suite ran 128 tests: 123 passed, five PostgreSQL-only skipped.
+The separately recorded 22 October PostgreSQL run passed 100 tests; it has not
+been rerun for the expanded suite. Both engines have recorded encrypted-restore
+drills; the synthetic extraction corpus passed 64 checks across 12 cases.
 
 OPTIONAL TWO-MINUTE EXTENSION
 
@@ -63,6 +75,23 @@ The XML file export and checksum-checking demo receiver remain available as an
 alternative. Select the XML connector, create the export and run the demo receiver.
 Its receipt is explicitly a synthetic file-receiver receipt.
 
+ANALYTICS EXTENSION
+
+Open Overview > Pilot analytics. All four report tabs use the same receipt-date,
+workflow, source and demo/live filters:
+- Summary: six KPI cards, daily/confidence charts and workflow drill-downs.
+- Extraction and review: first-extraction coverage, current field review state,
+  changed fields, source methods and pending scan acknowledgements.
+- Workload and timing: median/P90 elapsed durations with sample counts, age bands,
+  sources, paginated case links and recorded reviewer actions.
+- Delivery and audit: connector outcomes/retries, pending receipts and audit checks.
+
+Expand View chart data for exact values or export the applied report as CSV.
+The CSV contains aggregate metadata, without source text or extracted case values.
+Confidence scores are heuristic. Approval time includes waiting; staff handling
+time and manual re-keying errors require separate measurements. No savings are
+inferred. Synthetic values remain separate from live-office results.
+
 WHAT THE BUILD NOW SUPPORTS
 
 - Local digital PDF/text and OCR for scanned PDFs/images, with explicit review.
@@ -72,6 +101,23 @@ WHAT THE BUILD NOW SUPPORTS
 - Encrypted private data, signed audit state and independent audit checkpoints.
 - Encrypted backup/restore with source, private-field, approval and export checks.
 - PostgreSQL row-lock tests and reproducible synthetic acceptance drills.
+- Four filtered analytics tabs, chart data tables, case links and aggregate CSV.
+- Section tabs with keyboard/deep-link support, password visibility and reset.
+
+PLUGIN AND DESTINATION ROADMAP
+
+Current: intake/case-read API, remote scanner/saved email, approved XML/JSON/CSV
+exports and authenticated HTTP handoff. The reference receiver is synthetic-only.
+Planned: integration setup/status and connection tests; separate scoped plugin
+credentials; versioned per-destination mappings; automatic background delivery.
+Then build native Outlook intake and one actual office-selected vendor adapter,
+followed by Word template filling and the office's chosen cloud document source.
+
+Confirm the destination product/version, documented interface, credentials, schema,
+sandbox and durable acceptance/receipt before implementation. Native Outlook/Word,
+cloud-storage plugins and named vendor adapters are not supplied by this build.
+The current single office token permits intake AND case reads; rotating it affects
+every client. HTTP configuration is operator-managed, not a self-service catalog.
 
 WHAT STILL NEEDS CLIENT ACCEPTANCE
 
@@ -86,5 +132,7 @@ presentation/VERIFICATION.txt and verification.json: current results and limits.
 presentation/postgres-acceptance.json and sqlite-acceptance.json: complete drills.
 presentation/extraction-evaluation.json: 12 cases / 64 checks, explicitly synthetic.
 integrations/HANDOFF_V1.txt: implementable sender/receiver contract.
+integrations/EXPANSION_GUIDE.txt: current plugin API and proposed expansion plan.
+presentation/analytics-browser-verification.json: analytics browser checks.
 deployment/OPERATIONS.txt: provisioning, agent, backup, recovery and custody steps.
 README.md: setup and commands. PROJECT_REVIEW.txt and review/ are historical.

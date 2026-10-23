@@ -25,6 +25,35 @@ file import and receipt procedure. An HTTP reference-receiver receipt is not
 evidence of a real vendor's acceptance. Reject mismatched receipts; retry uncertain
 network outcomes with the same idempotency key. Investigate pending transfers.
 
+Integration expansion
+---------------------
+Use integrations/EXPANSION_GUIDE.txt for the current plugin API, operator HTTP
+configuration and proposed adapter architecture. Record the exact destination
+product/version, supported schema/API, sandbox and durable receipt behavior
+before building its adapter. The current Connectors page lists configuration and
+history; a self-service setup wizard, connection tests and automatic background
+send/retry workers are planned work.
+
+There is one active API token per office, permitting intake AND case reads.
+It has no per-plugin scope or expiry; rotation replaces it for all clients.
+Coordinate rotation across agent hosts. Separate plugin credentials and user-based
+authentication for native add-ins need implementation before wider distribution;
+do not embed the permanent shared token in a distributed browser/add-in bundle.
+Native Outlook/Word and cloud-storage adapters are not supplied by this build.
+
+For the current HTTP transport, use configure_http_connector with a private secret
+file and an exact operator-configured HTTPS endpoint. A receiver must implement
+HANDOFF_V1.txt or translate it through a vendor adapter. Once exports exist,
+provision a new versioned connector instead of changing its contract or secret.
+Current field destination paths belong to a workflow; independent per-destination
+profiles are still proposed. Approval/export bytes must remain stable on retry.
+
+Overview > Pilot analytics > Delivery and audit reports connector outcomes for
+the selected intake cohort. Filters select intake receipt dates and include later
+receipts; they do not select sends by event date. Pending, delivered and failed
+exports have distinct denominators. Use case links and Transfer history to
+investigate the selected work; synthetic results are not office measurements.
+
 Remote scanner / saved email intake
 -----------------------------------
 Create an office intake token in Security and put it in a private regular file

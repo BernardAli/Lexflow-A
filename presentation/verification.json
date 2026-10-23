@@ -1,5 +1,48 @@
 {
   "date": "2026-10-22",
+  "updated": "2026-10-23",
+  "latest_application_checks": {
+    "date": "2026-10-23",
+    "sqlite": {
+      "total": 128,
+      "passed": 123,
+      "skipped": 5,
+      "duration_seconds": 49.775,
+      "skip_reason": "PostgreSQL-only concurrency tests"
+    },
+    "analytics_tests": 19,
+    "postgresql_expanded_suite_rerun": false,
+    "analytics_browser": {
+      "passed": true,
+      "sections": 4,
+      "initialized_charts": 7,
+      "browser_errors": [],
+      "evidence": "analytics-browser-verification.json"
+    },
+    "tabs_browser_evidence": "tabs-browser-verification.json",
+    "workflow_browser_evidence": "browser-verification.json",
+    "system_check_passed": true,
+    "migration_drift_check_passed": true,
+    "javascript_syntax_checks_passed": true,
+    "note": "The original automated_tests and acceptance sections retain the 22 October evidence; they do not claim a 128-test PostgreSQL run."
+  },
+  "documentation": {
+    "updated": "2026-10-23",
+    "integration_expansion_guide": "../integrations/EXPANSION_GUIDE.txt",
+    "demo_guide_pages": 5,
+    "presentation_slides": 12,
+    "powerpoint_xml_and_relationships_verified": true,
+    "sample_archive_matches_updated_guide": true,
+    "source_pdfs_unchanged": 7,
+    "readme_links_verified": true,
+    "visual_checks": [
+      "analytics guide page",
+      "integration roadmap guide page",
+      "analytics slide",
+      "integration roadmap slide"
+    ],
+    "roadmap_status": "Native Office/cloud plugins, named vendor adapters, per-plugin credentials, setup catalog, per-destination mapping profiles and background retries remain proposed."
+  },
   "scope": "dedicated-office pilot prototype; synthetic local acceptance",
   "automated_tests": {
     "postgresql": {

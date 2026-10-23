@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "intakeCount": 36,
+  "sections": 4,
+  "initializedCharts": 7,
+  "keyboard": true,
+  "deepLinks": true,
+  "datePresets": true,
+  "workflowAndSourceDrilldowns": true,
+  "emptyAndInvalidFilters": true,
+  "liveDemoSeparation": true,
+  "csvScopeAndPrivacy": true,
+  "pagination": true,
+  "mobilePanels": 4,
+  "noJavaScriptTables": true,
+  "browserErrors": []
+}

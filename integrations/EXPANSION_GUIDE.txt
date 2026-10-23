@@ -1,0 +1,213 @@
+LEXFLOW PLUGINS AND DESTINATION INTEGRATIONS
+Updated 23 October 2026
+
+Purpose
+-------
+Expand the dedicated-office pilot through working source plugins and destination
+adapters. Start with Outlook intake and one office-selected destination, after
+adding the shared credential and configuration capabilities below. This guide is
+an implementation roadmap; proposed capabilities are not installed integrations.
+
+Current capabilities
+--------------------
+Implemented:
+- POST /api/v1/intake/: authenticated document/email intake and processing.
+- GET /api/v1/matters/<ref>/: office-scoped case status, blockers and field data.
+- tools/scanner_agent.py: remote folder and saved-.eml intake over the API.
+- XML, JSON and CSV export from a frozen approval, with download/folder delivery.
+- Authenticated HTTP JSON handoff with signed receipts and idempotent retries.
+- Connectors > Destinations / Transfer history; Security > Plugin access.
+- Analytics > Delivery and audit: connector outcomes, retries, pending receipts
+  and receipt timing for the selected intake cohort.
+
+Not implemented:
+- Native Outlook/Word add-ins, cloud-storage connectors or a named vendor adapter.
+- A self-service integration catalog, connection-test wizard or OAuth setup flow.
+- Separate plugin credentials, credential scopes, expiry or individual revocation.
+- Independent field-mapping profiles for each destination.
+- An automatic background send/retry queue or plugin-level analytics.
+
+The current connector page lists configured destinations and transfers. HTTP
+configuration is operator-managed. Labels such as "Official API" or "SDK" in a
+connector model do not provide the corresponding vendor implementation. The
+reference receiver accepts synthetic cases only; a real adapter must implement
+the chosen vendor's supported import/write interface and acceptance semantics.
+
+1. Select the first integrations
+--------------------------------
+Recommended sequence:
+1. Build the shared configuration and credential foundation.
+2. Build an Outlook add-in that submits selected mail/attachments and shows the
+   resulting case status. Keep review and approval in the existing workflow.
+3. Implement one named notary/DMS destination against its documented API or
+   supported import format. Verify durable vendor acceptance and record its
+   destination case/receipt reference.
+4. Add Word template filling with approved case values and a versioned template.
+5. Add cloud document intake for the storage service the office actually uses.
+
+Before choosing a vendor adapter, record the product name/version, deployment
+type, supported interface and schema, authentication, sandbox access, required
+fields, duplicate-handling rules, acceptance/error behavior and vendor contact.
+For Outlook, record the mailbox type, client versions and supported Office API
+requirement sets. For Word, agree the template and approved-data access contract.
+There is no vendor connection to configure until its adapter has been built.
+
+2. Use the existing plugin API
+------------------------------
+Authentication is Authorization: Bearer <office API token>. An administrator
+issues the token in Security > Plugin access. The current token allows both
+intake and reading cases within the owning office. It cannot approve a matter.
+There is ONE active token per office: generating a replacement invalidates the
+previous token for every client using it. There is no per-client expiry/scope.
+
+POST /api/v1/intake/ takes multipart/form-data:
+  subject       Required nonempty subject.
+  body          Optional plain-text email body.
+  sender_name   Optional sender display name.
+  sender_email  Optional sender address.
+  files         Repeated file parts; shared upload validation applies.
+  external_id   Optional stable deduplication ID, at most 120 characters.
+
+API submissions are recorded under the Plugin API source. They are not currently
+attributed to individual plugins. Demo/live classification comes from the server
+configuration, not a submitted plugin flag.
+
+Responses:
+  201  Processed intake: message reference and matter object.
+  202  Intake retained but processing failed: message reference, status and error.
+  400  Missing/invalid intake or upload.
+  401  Missing/invalid office token.
+
+Reuse an external_id only for the same logical submission. Repeated IDs return
+the existing office intake rather than creating another one; do not reuse an ID
+with changed documents. A processing failure needs investigation/retry in
+LexFlow, not a new ID to bypass deduplication. Keep originals until confirmed.
+
+GET /api/v1/matters/<ref>/ returns the case's status, fields, review blockers,
+approval hash, ready_for_approval and can_export flags. Unknown/other-office case
+references return 404; invalid credentials return 401. These flags describe
+readiness, not permission for a plugin to approve or send an export. This endpoint
+returns current field data; a Word approved-data endpoint bound to the frozen
+snapshot is still proposed work.
+
+Run the existing remote client using a private token file (mode 0600):
+
+  python3 tools/scanner_agent.py --folder /office/scans \
+    --office https://pilot.example.invalid --token-file /private/intake-token \
+    --state /private/scanner-state.json
+
+The client requires Python 3 and HTTPS access, without Django/database/vault keys.
+Schedule its one-shot runs without overlap. See deployment/OPERATIONS.txt for
+file staging, retained originals, failure recovery and local --dry-run behavior.
+
+3. Add the shared plugin foundation (proposed)
+---------------------------------------------
+Introduce an office-owned plugin registration with a stable identifier, display
+name, adapter/version, enabled state and last successful interaction. Replace the
+shared token with individually revocable, scoped credentials and an expiry/rotation
+policy. Migrate the existing scanner client explicitly; avoid silently invalidating
+all office clients. For browser/Office add-ins, design a user-authenticated flow
+with short-lived access rather than embedding the shared permanent office token.
+
+Create an administrator integration page for setup, connection tests, permissions,
+status and errors. Connection tests should use a read-only check or the vendor's
+sandbox. Record configuration changes in the audit trail. Keep endpoint selection
+operator-controlled; case/document content must never select a destination URL.
+
+4. Implement destination adapters
+---------------------------------
+The current transport and receipt contract is integrations/HANDOFF_V1.txt.
+Keep that v1 contract unchanged for existing receivers. A vendor adapter can sit
+between LexFlow's signed handoff and the supported vendor API/import mechanism.
+
+Proposed common adapter operations (not existing callable APIs):
+  test_connection   Validate credentials and reachable sandbox/service.
+  validate          Check required fields and destination schema.
+  map_fields        Translate approved values using a versioned mapping profile.
+  send              Submit with an approval-bound idempotency key.
+  verify_receipt    Bind acceptance to the exact payload, approval and transfer.
+
+Currently, each workflow field has one destination_path, frozen at approval.
+Independent per-destination mapping profiles require model/service work. Bind
+future mapping/schema versions to the approval/export so configuration changes
+cannot change approved or retried bytes. Do not read mutable case fields when
+resending a frozen transfer. Version connectors that already have exports.
+
+An existing-contract HTTP destination is configured in the dedicated deployment:
+
+  LEXFLOW_WEBHOOK_ENDPOINTS={"office-import":"https://receiver.example.invalid/v1/handoffs"}
+
+Then, with the office's configured Django environment and a private shared-secret
+file (mode 0600), run:
+
+  .venv/bin/python manage.py configure_http_connector --name "Office import v1" \
+    --endpoint-key office-import --destination "Approved office destination" \
+    --secret-file /run/secrets/handoff-key
+
+The example hostname is a placeholder. The receiver must implement the signed
+request/receipt contract; pointing this command at an arbitrary vendor REST URL
+does not translate schemas or authentication. A vendor adapter returns acceptance
+only after actual durable vendor acceptance, not after placing data on a queue.
+
+File destinations likewise need the vendor's exact supported schema and a verified
+receipt procedure. The supplied XML/JSON formats are LexFlow formats; generic
+format support alone does not establish compatibility with a particular vendor.
+
+5. Add queued delivery and monitoring (proposed)
+-----------------------------------------------
+The current HTTP send is explicitly triggered by an approver. Uncertain outcomes
+stay pending; an approver retries using the same stored bytes/idempotency key.
+No automatic background retry scheduler exists.
+
+A future worker should send only authorized frozen exports, recheck approval
+validity before sending, use bounded retries/backoff and expose exhausted failures
+for investigation. Preserve the existing checksum, receipt, audit and retention
+gates. Reopening or superseding an approval must stop its queued sends. Reconcile
+destination receipts after restore before resending recovered work.
+
+Reuse current connector analytics for outcomes and receipt latency. Add plugin
+identity and operational delivery timestamps before claiming per-plugin metrics
+or sends-during-period reporting. Current analytics selects intake receipt dates
+and includes their later outcomes; it is not a delivery-event date report.
+
+6. Accept each integration
+--------------------------
+Use synthetic/sanitized fixtures and the vendor sandbox to verify:
+- Credentials and office boundaries; intake-only clients cannot approve/send.
+- Required fields, encoding, mapping versions and frozen approval/export bytes.
+- Expired/revoked credentials, invalid schema and explicit actionable errors.
+- Duplicate submission, timeout after remote commit and retry without duplication.
+- Reopen/superseded approval, mismatched receipt and receipt-to-transfer binding.
+- Recovery reconciliation, operator-visible pending/failed work and audit events.
+
+Record the exact vendor/version, sample, expected result, actual destination
+reference and receipt evidence. Existing reference-receiver tests prove LexFlow's
+contract; each real destination needs its own acceptance. Mark catalog entries
+as Planned, Sandbox validated or Office accepted according to that evidence.
+
+Implementation locations
+------------------------
+apps/intake/api.py                 Current intake and case-read endpoints.
+tools/scanner_agent.py             Existing thin-client example.
+apps/core/models.py                Current shared office-token lifecycle.
+apps/connectors/models.py          Connector/transfer records.
+apps/connectors/services.py        Frozen export rendering and delivery gates.
+apps/connectors/protocol.py        Endpoint, authentication and receipt contract.
+apps/studio/models.py              Current workflow field destination paths.
+apps/core/analytics.py             Intake-cohort and connector analytics.
+integrations/HANDOFF_V1.txt         Exact current wire contract.
+integrations/reference_receiver.py Independent synthetic contract fixture.
+apps/core/tests/test_handoff.py    HTTP transport/receipt regression coverage.
+
+Primary platform references
+---------------------------
+Outlook add-ins and attachment support (check target-client requirement sets):
+https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/outlook-add-ins-overview
+https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/get-attachments-of-an-outlook-item
+Word task panes, document APIs and client support:
+https://learn.microsoft.com/en-us/office/dev/add-ins/word/word-add-ins-programming-overview
+Google Drive change notifications, if selected as a future intake source:
+https://developers.google.com/workspace/drive/api/guides/push
+
+Platform references inform proposed adapters; they are not evidence that a LexFlow
+plugin has been implemented or accepted in an office.

@@ -8,6 +8,7 @@ from apps.intake import api
 urlpatterns = [
     path("", include(([
         path("", core.dashboard, name="dashboard"),
+        path("analytics/export/", core.analytics_export, name="analytics_export"),
         path("login/", core.LoginView.as_view(), name="login"),
         path("logout/", auth_views.LogoutView.as_view(), name="logout"),
         path("password-reset/", auth_views.PasswordResetView.as_view(

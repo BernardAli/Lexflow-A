@@ -30,7 +30,7 @@ const base = process.env.LEXFLOW_DEMO_URL || 'http://127.0.0.1:8010';
     for (const [url, name, count] of cases) {
       await page.goto(base + url);
       const group = page.locator('[data-tabs="' + name + '"]');
-      const tabs = group.getByRole('tab');
+      const tabs = group.locator(':scope > [data-tab-list]').getByRole('tab');
       assert.equal(await tabs.count(), count);
       for (let index = 0; index < count; index++) {
         const tab = tabs.nth(index);
@@ -38,7 +38,8 @@ const base = process.env.LEXFLOW_DEMO_URL || 'http://127.0.0.1:8010';
         assert.equal(await tab.getAttribute('aria-selected'), 'true');
         const panel = page.locator('#' + await tab.getAttribute('aria-controls'));
         assert(await panel.isVisible());
-        assert.equal(await group.locator('[role="tabpanel"]:visible').count(), 1);
+        assert.equal(await group.evaluate(element => Array.from(element.querySelectorAll('[role="tabpanel"]'))
+          .filter(panel => panel.closest('[data-tabs]') === element && !panel.hidden).length), 1);
         assert.equal(await panel.getAttribute('aria-labelledby'), await tab.getAttribute('id'));
       }
       await tabs.first().focus();
@@ -52,10 +53,14 @@ const base = process.env.LEXFLOW_DEMO_URL || 'http://127.0.0.1:8010';
       assert.equal(await tabs.first().getAttribute('aria-selected'), 'true');
       await tabs.last().click();
       await page.goto(base + url); // Return after a redirect without a fragment.
-      assert.equal(await page.locator('[data-tabs="' + name + '"]').getByRole('tab').last().getAttribute('aria-selected'), 'true');
+      assert.equal(await page.locator('[data-tabs="' + name + '"] > [data-tab-list]').getByRole('tab').last().getAttribute('aria-selected'), 'true');
     }
 
-    await page.goto(base + '/#overview-analytics');
+    await page.goto(base + '/#analytics-summary');
+    await page.waitForFunction(() => ['chart-daily', 'chart-conf'].every(id => {
+      const element = document.getElementById(id);
+      return element && echarts.getInstanceByDom(element)?.getWidth() > 200;
+    }));
     const charts = await page.evaluate(() => ['chart-daily', 'chart-conf'].map(id => {
       const chart = echarts.getInstanceByDom(document.getElementById(id));
       return chart && chart.getWidth();
@@ -118,7 +123,7 @@ const base = process.env.LEXFLOW_DEMO_URL || 'http://127.0.0.1:8010';
     await page.setViewportSize({ width: 390, height: 844 });
     for (const [url, name] of [...cases, [matterUrl, 'matter-details']]) {
       await page.goto(base + url);
-      const tabs = page.locator('[data-tabs="' + name + '"]').getByRole('tab');
+      const tabs = page.locator('[data-tabs="' + name + '"] > [data-tab-list]').getByRole('tab');
       for (let index = 0; index < await tabs.count(); index++) {
         await tabs.nth(index).click();
         const size = await page.evaluate(() => ({ width: innerWidth, content: document.documentElement.scrollWidth }));

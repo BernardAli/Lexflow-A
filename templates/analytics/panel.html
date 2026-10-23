@@ -1,0 +1,171 @@
+{% load humanize %}
+<div class="lf-analytics-head">
+  <div>
+    <h2 class="lf-h2 mb-1">Office analytics</h2>
+    <p class="lf-small lf-muted mb-0">Follow intake volume, extraction quality, review workload and confirmed delivery.</p>
+  </div>
+  {% if analytics %}<a class="btn btn-quiet btn-sm" href="{% url 'core:analytics_export' %}?{{ analytics.query }}"><i class="bi bi-download me-1" aria-hidden="true"></i>Download analytics CSV</a>{% endif %}
+</div>
+
+<form method="get" action="{% url 'core:dashboard' %}#overview-analytics" class="lf-panel lf-panel-pad lf-analytics-filter mb-3" data-analytics-filters data-report-today="{{ analytics_form.today|date:'Y-m-d' }}">
+  {% for field in analytics_form %}
+  <div>
+    <label class="form-label lf-small" for="{{ field.id_for_label }}">{{ field.label }}</label>
+    {{ field }}
+    {% if field.errors %}<div class="invalid-feedback d-block lf-small" id="{{ field.auto_id }}_error" role="alert">{{ field.errors }}</div>{% endif %}
+  </div>
+  {% endfor %}
+  <div class="lf-analytics-filter-actions">
+    <p class="lf-xs lf-muted mb-0">Dates select when intakes were received. Choose Custom dates to use a specific interval.</p>
+    <div class="d-flex gap-2 flex-shrink-0"><a class="btn btn-quiet btn-sm" href="{% url 'core:dashboard' %}#overview-analytics">Reset</a><button class="btn btn-primary btn-sm" type="submit">Apply filters</button></div>
+  </div>
+</form>
+
+{% if not analytics %}
+<div class="lf-well" role="alert">Correct the filters above to generate the report. No filtered results have been calculated.</div>
+{% else %}
+<div class="lf-analytics-scope mb-3">
+  <span class="lf-chip {% if analytics.scope.demo %}lf-chip--amber{% else %}lf-chip--moss{% endif %}">{% if analytics.scope.demo %}Synthetic demonstration{% else %}Live office data{% endif %}</span>
+  <strong>{{ analytics.scope.start|date:"j M Y" }} – {{ analytics.scope.end|date:"j M Y" }}</strong>
+  <span>{{ analytics.intake_count|intcomma }} intakes · {{ analytics.matter_count|intcomma }} cases</span>
+</div>
+<p class="lf-xs lf-muted mb-3">Current outcomes for the selected intake cohort, including later reviews and receipts. Generated {{ analytics.generated_at|date:"j M Y, H:i" }} ({{ analytics.timezone }}). Previous cohort: {{ analytics.previous_start|date:"j M" }}–{{ analytics.previous_end|date:"j M Y" }}. {% if analytics.scope.demo %}Values are illustrative; they are not measured customer results.{% endif %}</p>
+
+<div class="lf-analytics-kpis mb-4">
+  {% for card in analytics.cards %}
+  <article class="lf-panel lf-analytics-kpi" data-kpi="{{ card.key }}">
+    <h3>{{ card.label }}</h3>
+    <div class="lf-analytics-value">{{ card.display }}</div>
+    <p class="lf-xs lf-muted mb-0">{{ card.hint }}</p>
+  </article>
+  {% endfor %}
+</div>
+
+<div data-tabs="analytics-sections">
+  <nav class="lf-tabs" data-tab-list aria-label="Analytics sections">
+    <a href="#analytics-summary" data-tab>Summary</a>
+    <a href="#analytics-quality" data-tab>Extraction and review</a>
+    <a href="#analytics-workload" data-tab>Workload and timing</a>
+    <a href="#analytics-delivery" data-tab>Delivery and audit</a>
+  </nav>
+
+  <div id="analytics-summary" data-tab-panel>
+    {% if not analytics.intake_count %}<div class="lf-well mb-3">No intakes match these filters. Try a wider date range, another workflow or another data cohort.</div>{% endif %}
+    <div class="lf-analytics-signals mb-3">
+      <a href="#analytics-quality"><strong>{{ analytics.quality.conflicts }}</strong> open field conflicts</a>
+      <a href="#analytics-quality"><strong>{{ analytics.quality.scan_reviews }}</strong> source acknowledgements pending</a>
+      <a href="#analytics-workload"><strong>{{ analytics.open_count }}</strong> unfinished intakes</a>
+      <a href="#analytics-delivery"><strong>{{ analytics.transfer.actionable }}</strong> current exports awaiting receipt</a>
+    </div>
+    <div class="lf-split mb-4">
+      {% include "analytics/chart.html" with chart=analytics.charts.daily %}
+      {% include "analytics/chart.html" with chart=analytics.charts.conf %}
+    </div>
+    <section class="lf-panel mb-4">
+      <div class="lf-panel-head"><h3>Workflow performance</h3><span class="lf-xs lf-muted">Select a workflow to narrow the cohort</span></div>
+      <div class="lf-table-wrap">
+        <table class="lf-table">
+          <thead><tr><th scope="col">Workflow</th><th scope="col" class="text-end">Intakes</th><th scope="col" class="text-end">Open</th><th scope="col" class="text-end">Approved</th><th scope="col" class="text-end">With receipt</th><th scope="col" class="text-end">Median approval</th></tr></thead>
+          <tbody>{% for row in analytics.workflows %}<tr><th scope="row"><a href="{{ row.url }}">{{ row.label }}</a></th><td class="text-end num">{{ row.intakes }}</td><td class="text-end num">{{ row.open }}</td><td class="text-end num">{{ row.approved }}</td><td class="text-end num">{{ row.delivered }}</td><td class="text-end num">{{ row.median }}</td></tr>{% empty %}<tr><td colspan="6" class="lf-muted">No workflow observations in this cohort.</td></tr>{% endfor %}</tbody>
+        </table>
+      </div>
+    </section>
+    <section class="lf-panel lf-panel-pad">
+      <div class="d-flex justify-content-between align-items-baseline gap-2 flex-wrap"><h3 class="lf-h2">Pilot baseline context</h3><a class="lf-small" href="{% url 'core:security' %}#baseline">Edit baseline</a></div>
+      <p class="lf-small lf-muted">{% if analytics.baseline.illustrative %}Synthetic demonstration baselines are illustrative.{% elif analytics.baseline.available %}Office baseline recorded {{ analytics.baseline.recorded_at|date:"j M Y" }}.{% else %}Record a manual-process baseline before assessing the pilot.{% endif %} Elapsed approval time includes waiting. Staff handling time and manual re-keying errors are not measured by application timestamps or correction counts.</p>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Measure</th><th scope="col">Manual baseline</th><th scope="col">Selected cohort</th></tr></thead><tbody>
+        <tr><th scope="row">Staff handling time per matter</th><td>{% if analytics.baseline.minutes is not None %}{{ analytics.baseline.minutes|floatformat:"-1" }} min{% else %}Not recorded{% endif %}</td><td>Not instrumented</td></tr>
+        <tr><th scope="row">Manual re-keying error rate</th><td>{% if analytics.baseline.errors is not None %}{{ analytics.baseline.errors|floatformat:"-1" }}%{% else %}Not recorded{% endif %}</td><td>Requires a separate office measurement</td></tr>
+        <tr><th scope="row">Expected audit-event coverage</th><td>{% if analytics.baseline.audit is not None %}{{ analytics.baseline.audit|floatformat:"-1" }}%{% else %}Not recorded{% endif %}</td><td>{% if analytics.audit.coverage is not None %}{{ analytics.audit.coverage|floatformat:"-1" }}% · {{ analytics.audit.complete }}/{{ analytics.audit.approved }} approved cases{% else %}No approved cases{% endif %}</td></tr>
+      </tbody></table></div>
+    </section>
+  </div>
+
+  <div id="analytics-quality" data-tab-panel>
+    <div class="lf-analytics-stat-grid mb-3">
+      <div class="lf-well"><span>Initial fields extracted</span><strong>{{ analytics.quality.found|intcomma }} / {{ analytics.quality.expected|intcomma }}</strong></div>
+      <div class="lf-well"><span>Initial prefill rate</span><strong>{% if analytics.quality.prefilled is not None %}{{ analytics.quality.prefilled|floatformat:"-1" }}%{% else %}—{% endif %}</strong></div>
+      <div class="lf-well"><span>Initial exception rate</span><strong>{% if analytics.quality.exceptions is not None %}{{ analytics.quality.exceptions|floatformat:"-1" }}%{% else %}—{% endif %}</strong></div>
+      <div class="lf-well"><span>Current fields changed at least once</span><strong>{{ analytics.quality.changed }} / {{ analytics.quality.current_fields }}{% if analytics.quality.correction_rate is not None %} · {{ analytics.quality.correction_rate|floatformat:"-1" }}%{% endif %}</strong></div>
+    </div>
+    <p class="lf-small lf-muted">Initial coverage and prefill use the first stored extraction. Exception rate includes missing/conflicting values and low-confidence review, excluding policy-only checks. Changed fields count once per current field, including earlier review before re-extraction. {% if analytics.quality.legacy_cases %}{{ analytics.quality.legacy_cases }} legacy case(s) lack a first-extraction snapshot; current field presence is used for those cases.{% endif %}</p>
+    <div class="lf-split mb-4">
+      {% include "analytics/chart.html" with chart=analytics.charts.fields %}
+      <section class="lf-panel lf-panel-pad">
+        <h3 class="lf-h2">Documents and original-source review</h3>
+        <dl class="lf-kv mb-3"><dt>Source files</dt><dd>{{ analytics.documents.files }}</dd><dt>Known pages</dt><dd>{{ analytics.documents.pages }}{% if analytics.documents.unknown_pages %} · {{ analytics.documents.unknown_pages }} file(s) with unknown page count{% endif %}</dd><dt>Source file size</dt><dd>{{ analytics.documents.megabytes|floatformat:"-2" }} MiB</dd><dt>Scanned/unreadable sources</dt><dd>{{ analytics.quality.scan_documents }}</dd><dt>Acknowledgements pending</dt><dd>{{ analytics.quality.scan_reviews }}</dd></dl>
+        <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Reading method</th><th scope="col" class="text-end">Files</th></tr></thead><tbody>{% for row in analytics.documents.methods %}<tr><th scope="row">{{ row.label }}</th><td class="text-end num">{{ row.count }}</td></tr>{% empty %}<tr><td colspan="2" class="lf-muted">No source files in this cohort.</td></tr>{% endfor %}</tbody></table></div>
+      </section>
+    </div>
+    <section class="lf-panel">
+      <div class="lf-panel-head"><h3>Field quality and review priorities</h3></div>
+      <p class="lf-small lf-muted px-3 pt-3">Current field state, grouped by workflow and field. Coverage includes human-completed values; the initial extraction metric above remains unchanged.</p>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Field / workflow</th><th scope="col" class="text-end">Fields</th><th scope="col" class="text-end">Populated</th><th scope="col" class="text-end">Conflicts</th><th scope="col" class="text-end">Missing</th><th scope="col" class="text-end">Check needed</th><th scope="col" class="text-end">Changed</th><th scope="col" class="text-end">Coverage</th></tr></thead><tbody>
+        {% for row in analytics.field_rows %}<tr><th scope="row">{{ row.label }}<div class="lf-xs lf-muted fw-normal">{{ row.workflow }}</div></th><td class="text-end num">{{ row.total }}</td><td class="text-end num">{{ row.found }}</td><td class="text-end num">{{ row.conflicts }}</td><td class="text-end num">{{ row.missing }}</td><td class="text-end num">{{ row.review }}</td><td class="text-end num">{{ row.changed }}</td><td class="text-end num">{{ row.coverage|floatformat:"-1" }}%</td></tr>{% empty %}<tr><td colspan="8" class="lf-muted">No extracted fields in this cohort.</td></tr>{% endfor %}
+      </tbody></table></div>
+    </section>
+  </div>
+
+  <div id="analytics-workload" data-tab-panel>
+    <section class="lf-panel mb-4">
+      <div class="lf-panel-head"><h3>Processing and turnaround</h3></div>
+      <p class="lf-small lf-muted px-3 pt-3">Elapsed durations include queueing and waiting. Only valid completed timestamp pairs contribute; P90 describes the slower end of the observed sample.</p>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Stage</th><th scope="col" class="text-end">Samples</th><th scope="col" class="text-end">Median</th><th scope="col" class="text-end">90th percentile</th></tr></thead><tbody>{% for row in analytics.timings %}<tr><th scope="row">{{ row.label }}</th><td class="text-end num">{{ row.n }}</td><td class="text-end num">{{ row.median_display }}</td><td class="text-end num">{{ row.p90_display }}</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+    <div class="lf-split mb-4">
+      {% include "analytics/chart.html" with chart=analytics.charts.aging %}
+      {% include "analytics/chart.html" with chart=analytics.charts.states %}
+    </div>
+    <div class="lf-split mb-4">
+      {% include "analytics/chart.html" with chart=analytics.charts.sources %}
+      <section class="lf-panel">
+        <div class="lf-panel-head"><h3>Source breakdown</h3></div>
+        <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Source</th><th scope="col" class="text-end">Intakes</th><th scope="col" class="text-end">Share</th></tr></thead><tbody>{% for row in analytics.sources %}<tr><th scope="row"><a href="{{ row.url }}">{{ row.label }}</a></th><td class="text-end num">{{ row.count }}</td><td class="text-end num">{% if row.share is not None %}{{ row.share|floatformat:"-1" }}%{% else %}—{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+      </section>
+    </div>
+    <section class="lf-panel mb-4">
+      <div class="lf-panel-head"><h3>Cases behind the numbers</h3><span class="lf-xs lf-muted">{{ analytics.open_count }} unfinished · {{ analytics.intake_count }} total intakes</span></div>
+      <p class="lf-small lf-muted px-3 pt-3">Unfinished intakes first, oldest receipt first. Open a reference to review the original case or process its intake.</p>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Reference</th><th scope="col">Workflow / source</th><th scope="col">Current state</th><th scope="col" class="text-end">Open fields</th><th scope="col" class="text-end">Sources to review</th><th scope="col">Received</th><th scope="col" class="text-end">Since receipt</th></tr></thead><tbody>
+        {% for row in case_page %}<tr><th scope="row"><a class="lf-ref" href="{{ row.url }}">{{ row.ref }}</a></th><td>{{ row.workflow }}<div class="lf-xs lf-muted">{{ row.source }}</div></td><td>{{ row.status_label }}</td><td class="text-end num">{{ row.open_fields }}</td><td class="text-end num">{{ row.scan_reviews }}</td><td class="lf-small text-nowrap">{{ row.received_at|date:"j M Y, H:i" }}</td><td class="text-end num text-nowrap">{{ row.age_display }}</td></tr>{% empty %}<tr><td colspan="7" class="lf-muted">No intakes match these filters.</td></tr>{% endfor %}
+      </tbody></table></div>
+      {% if case_page.has_other_pages %}<nav class="lf-analytics-pagination p-3" aria-label="Analytics case pages"><span class="lf-small lf-muted">Page {{ case_page.number }} of {{ case_page.paginator.num_pages }}</span><div class="d-flex gap-2">{% if case_page.has_previous %}<a class="btn btn-quiet btn-sm" href="?{{ analytics.query }}&case_page={{ case_page.previous_page_number }}#analytics-workload">Previous</a>{% endif %}{% if case_page.has_next %}<a class="btn btn-quiet btn-sm" href="?{{ analytics.query }}&case_page={{ case_page.next_page_number }}#analytics-workload">Next</a>{% endif %}</div></nav>{% endif %}
+    </section>
+    <section class="lf-panel">
+      <div class="lf-panel-head"><h3>Recorded review activity</h3></div>
+      <p class="lf-small lf-muted px-3 pt-3">Audit events on selected cases, including earlier review before re-extraction. Repeated actions count separately.</p>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Reviewer</th><th scope="col" class="text-end">Confirmations</th><th scope="col" class="text-end">Corrections</th><th scope="col" class="text-end">Conflict resolutions</th><th scope="col" class="text-end">Total actions</th></tr></thead><tbody>{% for row in analytics.reviewers %}<tr><th scope="row">{{ row.name }}</th><td class="text-end num">{{ row.confirmed }}</td><td class="text-end num">{{ row.corrected }}</td><td class="text-end num">{{ row.conflicts }}</td><td class="text-end num">{{ row.total }}</td></tr>{% empty %}<tr><td colspan="5" class="lf-muted">No recorded review actions on these cases.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+  </div>
+
+  <div id="analytics-delivery" data-tab-panel>
+    <div class="lf-analytics-stat-grid mb-3">
+      <div class="lf-well"><span>Exports with verified receipts</span><strong>{{ analytics.transfer.delivered }} / {{ analytics.transfer.total }}{% if analytics.transfer.receipt_rate is not None %} · {{ analytics.transfer.receipt_rate|floatformat:"-1" }}%{% endif %}</strong></div>
+      <div class="lf-well"><span>Delivered among closed exports</span><strong>{% if analytics.transfer.closed_rate is not None %}{{ analytics.transfer.closed_rate|floatformat:"-1" }}%{% else %}—{% endif %} <small>({{ analytics.transfer.closed }} closed)</small></strong></div>
+      <div class="lf-well"><span>Failed exports</span><strong>{{ analytics.transfer.failed }}</strong></div>
+      <div class="lf-well"><span>HTTP attempts / retries</span><strong>{{ analytics.transfer.attempts }} / {{ analytics.transfer.retries }}</strong></div>
+    </div>
+    <p class="lf-small lf-muted">Receipt rate uses all export records. The closed-export rate uses delivered + failed records and excludes pending receipts. Attempts and retries count authenticated HTTP sends; file exports have no HTTP attempts.</p>
+    <div class="lf-split mb-4">
+      {% include "analytics/chart.html" with chart=analytics.charts.deliveries %}
+      <section class="lf-panel lf-panel-pad">
+        <h3 class="lf-h2">Audit coverage and integrity</h3>
+        <p><span class="lf-chip {% if analytics.audit.ok %}lf-chip--moss{% else %}lf-chip--seal{% endif %}">{% if analytics.audit.ok %}Office audit chain verified{% else %}Office audit integrity check failed{% endif %}</span></p>
+        <dl class="lf-kv mb-3"><dt>Office-wide events checked</dt><dd>{{ analytics.audit.checked|intcomma }}</dd><dt>Approved cohort cases</dt><dd>{{ analytics.audit.approved }}</dd><dt>Expected events present</dt><dd>{{ analytics.audit.complete }}{% if analytics.audit.coverage is not None %} · {{ analytics.audit.coverage|floatformat:"-1" }}%{% endif %}</dd></dl>
+        <p class="lf-small lf-muted">Coverage checks for a frozen approval hash and classification, extraction and approval events; transferred cases also require a transfer event. A failed office-chain check prevents a positive coverage result.</p>
+        <a class="lf-small" href="{% url 'audit:index' %}">Open audit trail</a>
+      </section>
+    </div>
+    <section class="lf-panel mb-4">
+      <div class="lf-panel-head"><h3>Connector reliability</h3></div>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Connector</th><th scope="col" class="text-end">Exports</th><th scope="col" class="text-end">Delivered</th><th scope="col" class="text-end">Pending</th><th scope="col" class="text-end">Failed</th><th scope="col" class="text-end">Receipt rate</th><th scope="col" class="text-end">Retries</th><th scope="col" class="text-end">Median receipt</th></tr></thead><tbody>{% for row in analytics.connectors %}<tr><th scope="row">{{ row.label }}</th><td class="text-end num">{{ row.total }}</td><td class="text-end num">{{ row.delivered }}</td><td class="text-end num">{{ row.pending }}</td><td class="text-end num">{{ row.failed }}</td><td class="text-end num">{{ row.receipt_rate|floatformat:"-1" }}%</td><td class="text-end num">{{ row.retries }}</td><td class="text-end num">{{ row.median }}</td></tr>{% empty %}<tr><td colspan="8" class="lf-muted">No exports for this cohort.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+    <section class="lf-panel">
+      <div class="lf-panel-head"><h3>Receipts needing attention</h3></div>
+      <p class="lf-small lf-muted px-3 pt-3">Pending exports for current approvals, oldest first. {{ analytics.transfer.superseded }} superseded pending export(s) remain in historical totals and are excluded from this action list.</p>
+      <div class="lf-table-wrap"><table class="lf-table"><thead><tr><th scope="col">Transfer</th><th scope="col">Case</th><th scope="col">Connector</th><th scope="col" class="text-end">Waiting since export</th></tr></thead><tbody>{% for row in analytics.pending_transfers %}<tr><th scope="row"><a class="lf-ref" href="{{ row.url }}">{{ row.ref }}</a></th><td>{{ row.matter }}</td><td>{{ row.connector }}</td><td class="text-end num">{{ row.age_display }}</td></tr>{% empty %}<tr><td colspan="4" class="lf-muted">No current exports awaiting a receipt.</td></tr>{% endfor %}</tbody></table></div>
+    </section>
+  </div>
+</div>
+{{ analytics.charts|json_script:"analytics-chart-data" }}
+{% endif %}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Build synthetic upload PDFs and a printable LexFlow demonstration guide."""
+import argparse
 import io
 import json
 from pathlib import Path
@@ -217,6 +218,51 @@ def build_guide():
     p("Source-linked values → resolved review requirements → frozen approval → approved export → verified destination receipt → audit history.")
     p("All sample PDFs are visibly marked as synthetic. The register extract and contract draft are demonstration fixtures, with fictional persons, addresses and entries.", small)
 
+    story.append(PageBreak())
+    p("OFFICE ANALYTICS / FILTERS AND REVIEW", small)
+    p("Read the pilot report", title)
+    p('Open <b>Overview → Pilot analytics</b>, or <link href="http://127.0.0.1:8010/#analytics-summary" color="#1E5250">http://127.0.0.1:8010/#analytics-summary</link>. The six summary cards and all report sections use the same filters.')
+    heading("Select the cohort")
+    p("Choose a receipt period: 7, 14, 30 or 90 days, or <b>Custom dates</b> up to 366 days. Narrow by workflow and intake source, choose the data cohort, then select <b>Apply filters</b>. The demonstration defaults to <b>Synthetic demonstration</b>; live-office data is separate.")
+    p("Dates use the configured reporting timezone and select when intakes were received. Current outcomes include their later reviews and receipts. Prior-period comparisons use the preceding interval of equal length with the same filters.")
+    table([
+        ["Analytics tab", "What to demonstrate"],
+        ["Summary", "Intake volume, initial coverage, review/approval backlog, median approval time, cases with receipts, current pending exports, daily trends and workflow links."],
+        ["Extraction and review", "First-extraction coverage/prefill, current field states, changed fields, source files, OCR acknowledgements and field review priorities."],
+        ["Workload and timing", "Median/P90 elapsed durations and sample counts, unfinished-case aging, source breakdown, paginated case links and recorded reviewer actions."],
+        ["Delivery and audit", "Verified receipts, pending/failed exports, HTTP retries, connector reliability, current receipts needing attention and audit coverage/integrity."],
+    ], [135, 360])
+    heading("Explore and export")
+    p("Workflow and source links narrow the report. Open a case reference to inspect the underlying record. Every chart includes <b>View chart data</b> for exact values. <b>Download analytics CSV</b> exports aggregate metadata for the applied filters, without source text or extracted case values.")
+    heading("Explain the measurements")
+    p("Confidence scores are heuristic. First-extraction coverage stays distinct from fields completed by people. Elapsed approval time includes waiting; staff handling time and manual re-keying errors need separate office measurements. Baselines are context, with no inferred savings. Empty samples show no rate/duration.")
+    p("Receipt rate includes all selected exports; the closed-export rate uses delivered + failed records. Pending exports from superseded approvals remain in historical totals and are excluded from the current action list. A created export alone is not delivered.", small)
+    heading("Navigation and account recovery")
+    p("Arrow keys, Home and End switch section tabs. Section/field links reveal the relevant panel. Tabs preserve unsaved form values, and all sections remain readable without JavaScript. The sign-in eye button toggles password visibility. <b>Forgot password?</b> starts a single-use reset link valid for one hour; the local demo prints the email in the server terminal. Deployed offices must configure SMTP delivery.", small)
+
+    story.append(PageBreak())
+    p("PLUGINS AND DESTINATIONS / EXPANSION ROADMAP", small)
+    p("Connect the next systems", title)
+    p("Extend the existing intake and approved-handoff contracts. The entries below distinguish implemented capabilities from proposed integrations.")
+    table([
+        ["Capability", "Status in this build"],
+        ["Remote scanner / saved email", "Implemented token-authenticated API client; retains originals and deduplicates repeated submissions."],
+        ["XML / JSON / CSV exports", "Implemented LexFlow formats. A vendor's exact import schema needs separate mapping and acceptance."],
+        ["Authenticated HTTP destination", "Implemented signed handoff/receipt contract with an independent synthetic reference receiver. No named vendor connection is supplied."],
+        ["Outlook / Word / cloud intake", "Proposed native integrations. They require their own client/adapter, authentication and target-system validation."],
+    ], [160, 335])
+    heading("Recommended implementation order")
+    p("<b>1. Shared foundation.</b> Add an integration setup/status page, connection tests, separate scoped plugin credentials, versioned destination mappings and reliable queued delivery. These are proposed capabilities.")
+    p("<b>2. Outlook intake.</b> Submit selected mail/attachments and show the case status. Keep case review and approval in the existing workflow.")
+    p("<b>3. One real destination.</b> Agree the office's vendor and product version, documented API/import format, credentials, required fields, sandbox and durable acceptance/receipt behavior. Build and test that adapter.")
+    p("<b>4. Word and cloud sources.</b> Fill agreed Word templates from approved data, then add the office's chosen cloud document source.")
+    heading("Current configuration boundaries")
+    p("Security → Plugin access issues one active office token, allowing intake and case reads. Rotating it replaces the token for every client. Individual credentials/scopes and expiry are not implemented. The Connectors page lists destinations and transfers; HTTP setup is operator-managed. A background retry scheduler and separate per-destination mapping profiles remain planned.")
+    p("An adapter must preserve frozen approval/export bytes and duplicate protection. Record delivery only after verified destination acceptance. The reference receiver proves the LexFlow contract; each real vendor needs its own acceptance evidence.")
+    heading("Developer and operator handoff")
+    p("Read <b>integrations/EXPANSION_GUIDE.txt</b> for API requests/responses, current limits, proposed adapter operations and acceptance cases; <b>integrations/HANDOFF_V1.txt</b> for the exact signed wire contract; and <b>deployment/OPERATIONS.txt</b> for credentials, configuration and recovery.", small)
+    p('Platform references: <link href="https://learn.microsoft.com/en-us/office/dev/add-ins/outlook/outlook-add-ins-overview" color="#1E5250">Microsoft Outlook add-ins</link> and <link href="https://learn.microsoft.com/en-us/office/dev/add-ins/word/word-add-ins-programming-overview" color="#1E5250">Microsoft Word add-ins</link>. These describe implementation options; they do not establish an installed LexFlow integration.', small)
+
     def page_frame(c, doc):
         width, height = A4
         c.setFillColor(GREEN)
@@ -234,7 +280,19 @@ def build_guide():
 
 
 def main():
-    groups = build_sources()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--guide-only", action="store_true", help="Rebuild the guide/archive using existing source PDFs")
+    args = parser.parse_args()
+    if args.guide_only:
+        manifest_path = DOCUMENTS / "manifest.json"
+        if not manifest_path.is_file():
+            parser.error("Build the sample documents first before using --guide-only.")
+        manifest = json.loads(manifest_path.read_text())
+        groups = {name: [DOCUMENTS / relative for relative in paths] for name, paths in manifest["scenarios"].items()}
+        if any(not path.is_file() for paths in groups.values() for path in paths):
+            parser.error("A sample PDF is missing; rebuild the sample documents first.")
+    else:
+        groups = build_sources()
     build_guide()
     manifest = {
         "data_class": "synthetic", "guide": GUIDE.name,

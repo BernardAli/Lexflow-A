@@ -1,18 +1,21 @@
-import json
+import csv
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, HttpResponse
+from django.core.paginator import Paginator
+from django.db.models import Count, Q
 from django.contrib.auth import views as auth_views
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
 
 from apps.audit.services import record, verify_chain
 from apps.matters.models import Matter
 
-from . import metrics
+from . import analytics, metrics
 from .decorators import ADMINS, tenant_view
 from .models import Membership, Tenant
 
@@ -41,27 +44,46 @@ def switch_tenant(request):
     return redirect("core:dashboard")
 
 
+@never_cache
 @tenant_view()
 def dashboard(request):
     t = request.tenant
     waiting = (
         Matter.objects.filter(tenant=t, status__in=[Matter.Status.NEEDS_REVIEW, Matter.Status.UNCLASSIFIED,
                                                     Matter.Status.READY, Matter.Status.APPROVED])
-        .select_related("matter_type", "message").order_by("created_at")[:8]
+        .select_related("matter_type", "message").annotate(
+            conflict_count=Count("fields", filter=Q(fields__status="conflict")),
+            open_count=Count("fields", filter=Q(fields__status__in=["review", "missing"])),
+        ).order_by("created_at")[:8]
     )
-    for m in waiting:
-        m.conflict_count = m.fields.filter(status="conflict").count()
-        m.open_count = m.fields.filter(status__in=["review", "missing"]).count()
+    chain = verify_chain(t)
+    analytics_form = analytics.AnalyticsFilterForm(request.GET, tenant=t)
+    report = analytics.build_report(t, analytics_form.scope(), now=analytics_form.now, chain=chain) if analytics_form.is_valid() else None
+    case_page = Paginator(report["work_items"], 25).get_page(request.GET.get("case_page")) if report else None
     return render(request, "core/dashboard.html", {
         "pipeline": metrics.pipeline_counts(t),
         "waiting": waiting,
-        "pilot": metrics.pilot_metrics(t, demo=settings.LEXFLOW_DEMO_MODE),
-        "metrics_demo": settings.LEXFLOW_DEMO_MODE,
-        "chart_daily": json.dumps(metrics.daily_series(t)),
-        "chart_conf": json.dumps(metrics.confidence_histogram(t)),
-        "chain": verify_chain(t),
+        "analytics_form": analytics_form, "analytics": report, "case_page": case_page,
+        "chain": chain,
         "nav": "overview",
     })
+
+
+@never_cache
+@tenant_view()
+def analytics_export(request):
+    form = analytics.AnalyticsFilterForm(request.GET, tenant=request.tenant)
+    if not form.is_valid():
+        return HttpResponse("Invalid analytics filters. Check the dates, workflow, source and cohort.", status=400, content_type="text/plain")
+    scope = form.scope()
+    report = analytics.build_report(request.tenant, scope, now=form.now)
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="lexflow-analytics-{scope.start}-{scope.end}.csv"'
+    response.write("\ufeff")
+    writer = csv.writer(response)
+    for row in analytics.csv_rows(report):
+        writer.writerow([analytics.safe_csv_cell(value) for value in row])
+    return response
 
 
 @tenant_view()

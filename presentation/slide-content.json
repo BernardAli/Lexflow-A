@@ -125,12 +125,12 @@
     "Demonstration history is clearly labelled and excluded from live-pilot measurements.",
     [
       [
-        "What to measure",
-        "The synthetic corpus passed 64 checks across 12 cases, including scans, missing values and conflicts. Office metrics cover corrections, review time, confirmed handoffs and audit completeness."
+        "Four analytics tabs",
+        "Filter by intake receipt period, workflow, source and demo/live cohort. Inspect extraction and review, workload and median/P90 timing, delivery and audit. Charts have exact-value tables, case links and aggregate CSV export."
       ],
       [
-        "How to compare",
-        "Synthetic pass rates are regression evidence, not office accuracy. Record a manual baseline and a separate sanitized cohort. Measure handling time separately from elapsed approval time."
+        "Compare the right measures",
+        "First-extraction coverage differs from human-completed fields. Elapsed approval time includes waiting; staff handling time and re-keying errors need separate office measurements. Synthetic checks do not establish customer accuracy or savings."
       ]
     ]
   ],
@@ -151,16 +151,16 @@
   ],
   [
     "10 / WHAT IS NEXT",
-    "A precise client pilot agreement",
-    "Keep the first real integration as narrow as the demonstrated workflow.",
+    "Expand plugins and destinations",
+    "Build the shared foundation, then validate Outlook intake and one actual destination.",
     [
       [
-        "Decide with the office",
-        "Confirm the property-purchase schema, required approvals, dedicated hosting boundary, retention policy, representative sanitized documents and exact destination interface."
+        "Shared foundation — proposed",
+        "Separate scoped plugin credentials, integration setup and connection tests, versioned destination mappings, and queued delivery. Preserve the existing approval, idempotency and verified-receipt controls."
       ],
       [
-        "Validate before live use",
-        "Validate the actual vendor import and receipt, client deployment and restore procedures. Evaluate sanitized office samples against agreed limits. Native Office plugins and SSO remain roadmap items."
+        "First integrations — proposed",
+        "Build Outlook intake and one office-selected vendor adapter against documented APIs/imports. Validate the exact product/version and durable receipt. Word template filling and cloud intake follow. Native plugins remain unimplemented."
       ]
     ]
   ],

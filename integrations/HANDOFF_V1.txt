@@ -7,6 +7,11 @@ vendor or BNotK interface. A chosen vendor's supported schema and write mechanis
 must be implemented and accepted separately. The supplied reference_receiver.py
 is an independent, synthetic-only contract fixture with its own durable database.
 
+For plugin APIs, expansion priorities, proposed vendor adapters and acceptance
+steps, see integrations/EXPANSION_GUIDE.txt. That roadmap adds no fields or
+behaviors to this v1 contract. Native Office plugins, per-plugin credentials,
+per-destination mapping profiles and a background retry scheduler remain proposed.
+
 Sender configuration
 --------------------
 The deployment operator maps an endpoint key to one exact HTTPS URL:
