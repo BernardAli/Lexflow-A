@@ -1,0 +1,182 @@
+[
+  [
+    "LEXFLOW AI / PILOT DEMONSTRATION",
+    "From documents to an approved handoff",
+    "Secure workflow automation for a dedicated notary office",
+    [
+      [
+        "The workflow",
+        "Receive documents. Extract structured values. Resolve uncertainty. Approve a frozen export. Confirm its receipt."
+      ],
+      [
+        "The demonstration",
+        "One office, synthetic property-purchase documents and an independent reference HTTP destination."
+      ]
+    ]
+  ],
+  [
+    "01 / A CONTAINED FIRST USE CASE",
+    "Property purchase intake",
+    "Prove a complete, reviewable workflow before expanding integrations.",
+    [
+      [
+        "Inputs and output",
+        "Digital PDFs, scanned PDFs/images and saved email produce a structured property-purchase case and an approved XML, JSON or CSV handoff."
+      ],
+      [
+        "Scope boundary",
+        "A dedicated-office prototype has PostgreSQL concurrency, HTTP, scanner and restore evidence. Vendor acceptance, client hosting and office measurements remain."
+      ]
+    ]
+  ],
+  [
+    "02 / THE EMPLOYEE WORKFLOW",
+    "Seven visible stages",
+    "Every consequential decision stays visible to the office.",
+    [
+      [
+        "Receive > Classify > Extract",
+        "Keep incoming evidence with the case. Identify the workflow and propose values with their source locations."
+      ],
+      [
+        "Validate > Review > Export > Audit",
+        "Flag conflict and missing information. Require human approval. Record the export and a separate verified receipt."
+      ]
+    ]
+  ],
+  [
+    "03 / THE FLAGSHIP EXAMPLE",
+    "A disagreement the office must resolve",
+    "Synthetic purchase documents intentionally disagree on the land-register sheet.",
+    [
+      [
+        "Agreed case data",
+        "Buyer: Anna Schmidt\nSeller: Peter Müller\nPurchase price: EUR 850,000\nQuestionnaire and register: München Blatt 812"
+      ],
+      [
+        "A meaningful exception",
+        "The draft contract states Blatt 872. The conflict blocks approval until a reviewer chooses or corrects the value. The price also needs explicit confirmation."
+      ]
+    ]
+  ],
+  [
+    "04 / HUMAN CONTROL",
+    "Review first. Freeze the decision.",
+    "Confidence supports review; it does not authorize a destination write.",
+    [
+      [
+        "The clerk",
+        "Compare sources, correct values and confirm required policy fields. Source selections update case data. Reusable labels and mappings are edited separately by an administrator."
+      ],
+      [
+        "The approver",
+        "Approve only after all blockers are resolved. The snapshot freezes values, mappings and approval identity. Stale edits cannot undo that approval."
+      ]
+    ]
+  ],
+  [
+    "05 / A TRUTHFUL HANDOFF",
+    "A signed receipt proves the handoff",
+    "Actual HTTP transport to an independent reference destination; vendor acceptance remains separate.",
+    [
+      [
+        "Create the approved export",
+        "Generate a checksummed payload from the frozen approval. Export a file or send authenticated JSON. Repeated requests reuse the same approval-bound idempotency key."
+      ],
+      [
+        "Confirm the destination",
+        "The HTTP receiver commits the payload before returning a signed receipt. Wrong keys or receipts keep delivery pending. A lost-response retry retrieves the original receipt without a duplicate import."
+      ]
+    ]
+  ],
+  [
+    "06 / PROTECTION IN THE BUILD",
+    "Controls that can be demonstrated",
+    "Show the controls and their practical limits.",
+    [
+      [
+        "Confidentiality and approval",
+        "Per-office encryption covers source files, source text, structured case values, revisions and audit metadata. Production refuses development secrets. Review and approval share a locking protocol."
+      ],
+      [
+        "Traceability and retention",
+        "Audit events have a signed hash chain. Separately held checkpoints detect an older database replay. Encrypted backups restore sources, private fields, approvals and export evidence."
+      ]
+    ]
+  ],
+  [
+    "07 / ONE OFFICE, ONE DEPLOYMENT",
+    "A dedicated pilot boundary",
+    "Prepare separate database, storage and keys for each office.",
+    [
+      [
+        "Presentation environment",
+        "The launcher creates one office, a separate database, vault and keys. Local OCR reads scans; original-source review remains mandatory. A remote scanner/email client uses only the intake API."
+      ],
+      [
+        "Deployment package",
+        "Concurrency and complete encrypted restore passed on local PostgreSQL. A dedicated HTTPS stack is supplied. Its container build, client hosting, TLS and operational recovery still need validation."
+      ]
+    ]
+  ],
+  [
+    "08 / PILOT EVIDENCE",
+    "Measure results without mixing demo data",
+    "Demonstration history is clearly labelled and excluded from live-pilot measurements.",
+    [
+      [
+        "What to measure",
+        "The synthetic corpus passed 64 checks across 12 cases, including scans, missing values and conflicts. Office metrics cover corrections, review time, confirmed handoffs and audit completeness."
+      ],
+      [
+        "How to compare",
+        "Synthetic pass rates are regression evidence, not office accuracy. Record a manual baseline and a separate sanitized cohort. Measure handling time separately from elapsed approval time."
+      ]
+    ]
+  ],
+  [
+    "09 / LIVE DEMONSTRATION",
+    "A seven-minute walkthrough",
+    "Use /presentation/ as your presenter guide.",
+    [
+      [
+        "Minutes 1–4",
+        "Open the unprocessed intake. Process the documents. Show the Blatt 812 / 872 conflict. Resolve the source choice and confirm the price as the clerk."
+      ],
+      [
+        "Minutes 5–7",
+        "Sign in as the notary. Approve, create the HTTP export and send it. Show its verified receipt and audit trail. Optionally demonstrate scanned intake and mandatory source review."
+      ]
+    ]
+  ],
+  [
+    "10 / WHAT IS NEXT",
+    "A precise client pilot agreement",
+    "Keep the first real integration as narrow as the demonstrated workflow.",
+    [
+      [
+        "Decide with the office",
+        "Confirm the property-purchase schema, required approvals, dedicated hosting boundary, retention policy, representative sanitized documents and exact destination interface."
+      ],
+      [
+        "Validate before live use",
+        "Validate the actual vendor import and receipt, client deployment and restore procedures. Evaluate sanitized office samples against agreed limits. Native Office plugins and SSO remain roadmap items."
+      ]
+    ]
+  ],
+  [
+    "LEXFLOW AI / THE NEXT STEP",
+    "Select one destination. Validate one workflow.",
+    "A controlled, demonstrable foundation for the first office pilot.",
+    [
+      [
+        "What you can present today",
+        "A working case from PDF or scan to reviewed data, frozen approval, authenticated HTTP handoff and signed receipt, with PostgreSQL, recovery and extraction evidence."
+      ],
+      [
+        "What the client supplies next",
+        "A supported destination interface and test environment, sanitized examples, an accepted deployment boundary and agreed success criteria."
+      ]
+    ]
+  ]
+]

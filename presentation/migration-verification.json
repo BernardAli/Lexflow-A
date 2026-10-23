@@ -1,0 +1,18 @@
+{
+  "existing_matters_preserved": 38,
+  "legacy_exports_preserved": 31,
+  "nonempty_private_columns_without_ciphertext": 0,
+  "audit_chains": [
+    {
+      "office": "keller",
+      "verified": true,
+      "events": 221
+    },
+    {
+      "office": "hoffmann",
+      "verified": true,
+      "events": 23
+    }
+  ],
+  "sqlite_compacted": true
+}

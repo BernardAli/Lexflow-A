@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Workflow studio{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <h1 class="lf-title">Workflow studio</h1>
+    <p class="lf-sub">Teach LexFlow the workflow, not the client's secrets. Each workflow defines which fields to find, which labels precede them, and where approved values are written.</p>
+  </div>
+</div>
+<div class="lf-split">
+  <section class="lf-panel">
+    <div class="lf-panel-head"><h2>Workflows</h2><span class="lf-small lf-muted">{{ types|length }} configured</span></div>
+    {% for t in types %}
+    <a class="lf-wf" href="{% url 'studio:matter_type' t.key %}">
+      <div>
+        <h3>{{ t.name }}<span>{{ t.german_name }}</span></h3>
+        <div class="lf-small lf-muted mt-1">{{ t.description }}</div>
+      </div>
+      <div class="d-grid justify-items-end gap-2 text-end">
+        {% if t.is_active %}<span class="lf-chip lf-chip--moss">Active</span>{% else %}<span class="lf-chip lf-chip--muted">Paused</span>{% endif %}
+      </div>
+      <div class="stats"><span><b>{{ t.n_fields }}</b> fields</span><span><b>{{ t.n_docs }}</b> document types</span><span><b>{{ t.n_matters }}</b> matters</span></div>
+    </a>
+    {% endfor %}
+  </section>
+  <section>
+    <div class="lf-panel lf-panel-pad mb-3">
+      <h2 class="lf-h2">How learning works</h2>
+      <div class="lf-flow mb-3">
+        <div class="lf-flow-step"><b>Reviewer selects</b><span style="font-family:var(--lf-serif)">Erwerber: <mark style="background:var(--lf-marker)">Anna Beispiel</mark></span></div>
+        <div class="lf-flow-arrow"><i aria-hidden="true" class="bi bi-arrow-right"></i></div>
+        <div class="lf-flow-step"><b>Field</b>Buyer</div>
+        <div class="lf-flow-arrow"><i aria-hidden="true" class="bi bi-arrow-right"></i></div>
+        <div class="lf-flow-step"><b>Admin configures</b>label “Erwerber”</div>
+      </div>
+      <p class="lf-small lf-muted mb-0">Selecting source text fills an encrypted case field. An administrator separately maintains reusable labels, mappings and validation rules. Client values are never automatically copied into those rules.</p>
+    </div>
+    <div class="lf-panel">
+      <div class="lf-panel-head"><h2>Earlier label-learning events</h2></div>
+      {% if learned %}
+      <ul class="lf-queue">
+        {% for e in learned %}
+        <li><a href="{% url 'audit:index' %}?q={{ e.object_ref }}"><span class="t">{{ e.summary }}</span><span class="m"><span>{{ e.actor_label }}</span><span>{{ e.created_at|naturaltime }}</span></span></a></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="lf-empty lf-small"><i aria-hidden="true" class="bi bi-highlighter"></i>Configure reusable schema labels above. Source selections only update case data.</div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

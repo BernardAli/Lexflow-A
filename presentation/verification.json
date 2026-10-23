@@ -1,0 +1,240 @@
+{
+  "date": "2026-10-22",
+  "scope": "dedicated-office pilot prototype; synthetic local acceptance",
+  "automated_tests": {
+    "postgresql": {
+      "total": 100,
+      "passed": 100,
+      "skipped": 0,
+      "duration_seconds": 64.433
+    },
+    "sqlite": {
+      "total": 100,
+      "passed": 95,
+      "skipped": 5,
+      "duration_seconds": 48.67
+    }
+  },
+  "browser": {
+    "passed": true,
+    "workflow": [
+      "login",
+      "source highlighting",
+      "blocked conflict",
+      "clerk review",
+      "role restriction",
+      "notary approval",
+      "frozen UI",
+      "file export awaiting receipt",
+      "checked demo receipt",
+      "verified audit",
+      "readable activity layout",
+      "mobile guide"
+    ],
+    "browserErrors": [],
+    "mobile": {
+      "width": 390,
+      "content": 390
+    },
+    "extended": {
+      "httpReceipt": true,
+      "scanReview": true
+    },
+    "syntheticDataOnly": true
+  },
+  "acceptance": {
+    "postgresql": {
+      "passed": true,
+      "actual_http": true,
+      "remote_records": 1,
+      "scanner_agent": {
+        "first_run": {
+          "accepted": 1,
+          "already_sent": 0,
+          "failed": 0,
+          "dry_run": false
+        },
+        "repeat": {
+          "accepted": 0,
+          "already_sent": 1,
+          "failed": 0,
+          "dry_run": false
+        },
+        "lost_state_retry": {
+          "accepted": 1,
+          "already_sent": 0,
+          "failed": 0,
+          "dry_run": false
+        },
+        "intakes": 2,
+        "audit_verified": true
+      },
+      "recovery": {
+        "restored": true,
+        "office": "122ba6d7-3500-4900-badc-4d13dec393fa",
+        "source_blobs_verified": 4,
+        "audit_seq": 12,
+        "audit_verified": true,
+        "exports_verified": 1,
+        "encrypted_records_verified": 68,
+        "elapsed_seconds": 0.759,
+        "external_checkpoint": {
+          "verified": true,
+          "checkpoint_seq": 12,
+          "current_seq": 12
+        }
+      }
+    },
+    "sqlite": {
+      "passed": true,
+      "actual_http": true,
+      "remote_records": 1,
+      "scanner_agent": {
+        "first_run": {
+          "accepted": 1,
+          "already_sent": 0,
+          "failed": 0,
+          "dry_run": false
+        },
+        "repeat": {
+          "accepted": 0,
+          "already_sent": 1,
+          "failed": 0,
+          "dry_run": false
+        },
+        "lost_state_retry": {
+          "accepted": 1,
+          "already_sent": 0,
+          "failed": 0,
+          "dry_run": false
+        },
+        "intakes": 2,
+        "audit_verified": true
+      },
+      "recovery": {
+        "restored": true,
+        "office": "3a5176f6-446a-446c-9274-28fc4170172f",
+        "source_blobs_verified": 4,
+        "audit_seq": 12,
+        "audit_verified": true,
+        "exports_verified": 1,
+        "encrypted_records_verified": 68,
+        "elapsed_seconds": 0.505,
+        "external_checkpoint": {
+          "verified": true,
+          "checkpoint_seq": 12,
+          "current_seq": 12
+        }
+      }
+    }
+  },
+  "extraction": {
+    "data_class": "synthetic",
+    "cases": 12,
+    "assertions": 64,
+    "passed": 64,
+    "pass_rate": 1.0,
+    "conflicts": {
+      "expected": 2,
+      "detected": 2
+    },
+    "absent_values": {
+      "expected": 10,
+      "correctly_empty": 10
+    },
+    "limits": "Synthetic results are regression evidence, not measured real-office accuracy or calibrated confidence."
+  },
+  "migration": {
+    "matters": 38,
+    "exports": 31,
+    "offices": 2,
+    "audit_chains": [
+      {
+        "office": "keller",
+        "verified": true,
+        "events": 226
+      },
+      {
+        "office": "hoffmann",
+        "verified": true,
+        "events": 23
+      }
+    ],
+    "migration": "connectors.0003_authenticated_http_handoff",
+    "pre_migration_snapshot": "/tmp/lexflow-before-http-migration-9cdgyp8w/db.sqlite3"
+  },
+  "earlier_encryption_migration": {
+    "existing_matters_preserved": 38,
+    "legacy_exports_preserved": 31,
+    "nonempty_private_columns_without_ciphertext": 0,
+    "audit_chains": [
+      {
+        "office": "keller",
+        "verified": true,
+        "events": 221
+      },
+      {
+        "office": "hoffmann",
+        "verified": true,
+        "events": 23
+      }
+    ],
+    "sqlite_compacted": true
+  },
+  "demo_readiness": {
+    "mode": "presentation_demo",
+    "ready": true,
+    "errors": [],
+    "office_count": 1,
+    "scope": "Property purchase; digital PDF/text and optional local OCR; approved file/HTTP handoff with receipt",
+    "local_ocr_enabled": true,
+    "external_acceptance": "Vendor schema, hosting/operations and client acceptance must be validated separately."
+  },
+  "live_readiness": {
+    "mode": "live_pilot",
+    "ready": false,
+    "errors": [
+      "An active HTTP connector lacks a valid HTTPS endpoint or signing secret.",
+      "Disable development/debug and demonstration modes.",
+      "Use the dedicated PostgreSQL deployment for the live pilot's locking guarantees.",
+      "Use a clean live database without seeded demonstration intakes.",
+      "Record an agreed office baseline before measuring the pilot.",
+      "Record a validated destination receipt for a sanitized live-pilot acceptance case."
+    ],
+    "office_count": 1,
+    "scope": "Property purchase; digital PDF/text and optional local OCR; approved file/HTTP handoff with receipt",
+    "local_ocr_enabled": true,
+    "external_acceptance": "Vendor schema, hosting/operations and client acceptance must be validated separately."
+  },
+  "presentation": {
+    "slides": 12,
+    "powerpoint_xml_and_relationships_verified": true,
+    "pdf_pages": 12,
+    "visual_checks": [
+      "handoff slide",
+      "deployment slide",
+      "scan-review browser screenshot"
+    ],
+    "desktop_powerpoint_rendering_tested": false
+  },
+  "deployment": {
+    "container_build_tested": false,
+    "hosted_tls_tested": false,
+    "postgres_concurrency_tested": true,
+    "postgres_recovery_tested": true,
+    "sqlite_recovery_tested": true,
+    "vendor_integration_connected": false,
+    "external_worm_storage_provisioned": false,
+    "django_advisories": [
+      "security.W021"
+    ]
+  },
+  "limits": [
+    "Reference receiver is not a vendor system",
+    "Local tests do not validate client hosting or operations",
+    "Synthetic extraction results do not establish real-office accuracy or savings",
+    "Native Office plugins and SSO remain roadmap scope"
+  ],
+  "demo_rehearsal_reset": true,
+  "http_configuration_command_smoke_passed": true
+}

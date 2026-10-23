@@ -1,0 +1,128 @@
+DEDICATED-OFFICE PILOT OPERATIONS
+
+The local PostgreSQL/SQLite acceptance drills validate application behavior.
+They do not validate a client's containers, TLS, hosting region, vendor system,
+monitoring, service levels or organizational procedures. Complete those checks
+in the chosen environment before admitting client data.
+
+Provisioning and secrets
+-----------------------
+Use one compose project, database, volume set and master key per office. Keep
+deployment/pilot.env private (0600) and out of images/source control. Provide the
+database secret to Compose through the operator environment. Do not seed demo
+data. Run migrate and collectstatic, then provision_office and create named
+reviewer/notary accounts. Confirm the proxy is the only public app entry point.
+The supported production stack uses PostgreSQL for row locking and HTTPS.
+
+The container definition installs Tesseract German/English OCR and Poppler. Set
+LEXFLOW_OCR_ENABLED=1; startup/readiness must find both binaries and language packs.
+OCR temporary documents use private temporary directories and are removed after
+processing. Put the temporary directory on an encrypted ephemeral volume or
+tmpfs under the office's policy. Do not enable cross-office/external AI by default.
+
+Configure the HTTP handoff using integrations/HANDOFF_V1.txt, or validate a supported
+file import and receipt procedure. An HTTP reference-receiver receipt is not
+evidence of a real vendor's acceptance. Reject mismatched receipts; retry uncertain
+network outcomes with the same idempotency key. Investigate pending transfers.
+
+Remote scanner / saved email intake
+-----------------------------------
+Create an office intake token in Security and put it in a private regular file
+(0600) on the office agent host. That host needs only Python 3 and network access
+to the office HTTPS origin; no Django database, vault, master key or approver
+credentials. Example scheduled one-shot run:
+
+  python3 tools/scanner_agent.py --folder /office/scans \
+    --office https://pilot.example.invalid --token-file /private/intake-token \
+    --state /private/scanner-state.json
+
+It skips recent files (10 seconds by default), retains originals, supports PDF,
+text/images and saved .eml with decoded plain body and attachments, and records
+only confirmed processed intakes in its private state. Identical source bytes
+reuse a content-derived external ID even if local state is lost. The scheduler
+must prevent overlapping agent runs. Stage completed scanner files by atomic
+rename into the watched directory. Failed processing is not acknowledged: inspect
+and retry the retained intake in LexFlow, then rerun the agent. Add --dry-run for
+local validation. Native Outlook/Word plugins are separate scope.
+
+Backup and independent audit custody
+-------------------------------------
+Choose office-specific recovery objectives and test them with representative
+volume. The supplied encrypted snapshot command is bounded to 256 MiB of source
+database/files; larger deployments need an operator-managed backup system.
+
+1. Drain/stop the app and every writer/scheduler (including folder intake and
+   retention). The maintenance flag alone does not stop existing processes that
+   were started with another environment. Avoid schema changes during snapshots.
+2. Escrow the APPLICATION MASTER KEY separately from the backup. Generate and
+   escrow a DIFFERENT Fernet backup key; provide it only to maintenance commands
+   as LEXFLOW_BACKUP_KEY. Do not add the backup key to the online app environment.
+3. With matching database/vault/export settings and LEXFLOW_MAINTENANCE=1, run:
+
+   python manage.py lexflow_audit_checkpoint --output /backup/checkpoint-001.json
+   python manage.py lexflow_backup --output /backup/office-001.lfxbackup
+
+   In Compose, stop app first, then use a one-off app container with the same
+   configuration, maintenance/key environment and private backup mount. Ensure
+   UID 10001 can write the mount. Restart only after successful checks.
+4. Copy the encrypted snapshot and checkpoint to independently controlled,
+   versioned/immutable office storage. The application does not provision WORM
+   storage or enforce retention on an operator's filesystem. Keep the newest
+   trusted checkpoint outside database/vault writer access. Never replace it
+   with an older file merely to make verification pass.
+5. Resume service; check audit, queue/backlog, storage capacity and errors.
+
+Snapshots include a database-consistent dump plus encrypted sources, exports,
+manifest hashes, a signed audit head and a wrapped master-key verification marker.
+The entire archive is authenticated and encrypted with the separate backup key.
+It contains no raw application master key. PostgreSQL requires compatible
+pg_dump/pg_restore clients. A backup is not accepted solely because it was created:
+run the restore drill and keep the evidence.
+
+Restore drill / recovery
+------------------------
+Use a NEW, empty database and NEW, empty vault/export directories in an offline
+recovery deployment. Do not run migrate first: the snapshot carries its schema.
+Use the same office slug, application master key and separate backup key. Restoring
+to an existing database or nonempty storage is refused. Run with maintenance on:
+
+  python manage.py lexflow_restore --input /backup/office-001.lfxbackup
+  python manage.py lexflow_audit_checkpoint --verify-against /trusted/checkpoint-001.json
+
+Restore validates authentication, every manifest hash, office/master binding,
+database engine, source decryption/checksums, structured private fields, approval
+snapshots, export bindings and signed audit state. PostgreSQL database import is
+one transaction. Database and filesystem restoration are not a distributed atomic
+operation: any failure leaves the recovery deployment OFFLINE for investigation.
+Never point production traffic at it until the entire command and acceptance
+checks pass. Reconcile the restored recovery point against independent destination
+receipts before resending any transfers. A receiver's durable idempotency ledger
+is essential after disaster recovery.
+
+An independent checkpoint detects an older or divergent database relative to that
+trusted checkpoint. An older valid backup may legitimately predate it; investigate
+and record the data-loss/reconciliation decision. Local files alone are not a WORM
+service and cannot detect a coordinated replay of both database and trusted anchor.
+
+Acceptance before client launch
+-------------------------------
+Run lexflow_pilot_check --json and check --deploy with the actual configuration.
+Complete HTTPS/hostname/cookie/proxy checks, representative load/concurrency,
+backup/key-loss recovery, retention and monitoring tests in that environment.
+Record the supported destination's real import and receipt and its error/retry
+behavior. Agree field-level expected results, critical-error limits and review
+policy using sanitized office samples. Measure staff handling time separately
+from elapsed approval time; record the manual baseline before the pilot.
+Obtain the office's acceptance of scope, procedures and specialist compliance
+review. This package does not assert legal certification or customer savings.
+
+Local reproducible evidence
+----------------------------
+  .venv/bin/python manage.py test apps
+  .venv/bin/python tools/verify_pilot_acceptance.py --output /tmp/sqlite-drill.json
+
+Set USE_POSTGRES=1 and POSTGRES_HOST/PORT/USER/PASSWORD for an isolated TEST server,
+then run the test suite and the same drill with --postgres. The drill creates two
+new random databases and never drops existing databases. OCR must be installed and
+LEXFLOW_OCR_ENABLED=1 for the scan corpus. Results and limits are recorded in
+presentation/postgres-acceptance.json and presentation/sqlite-acceptance.json.

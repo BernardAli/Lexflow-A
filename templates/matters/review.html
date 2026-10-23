@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+{% load lexflow humanize %}
+{% block title %}{{ matter.ref }}{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div style="min-width:0">
+    <div class="d-flex align-items-center gap-2 mb-2 lf-small">
+      <a href="{% url 'matters:list' %}" class="lf-muted text-decoration-none"><i aria-hidden="true" class="bi bi-arrow-left"></i> Matters</a>
+      <span class="lf-faint">/</span>
+      <span class="fw-semibold num">{{ matter.ref }}</span>
+      <span class="lf-chip lf-chip--{{ matter.status|matter_tone }} ms-1">{{ matter.get_status_display }}</span>
+    </div>
+    <h1 class="lf-title">{{ matter.title }}</h1>
+    <p class="lf-sub">
+      {% if matter.matter_type %}{{ matter.matter_type.name }} <span class="lf-faint">({{ matter.matter_type.german_name }}, {{ matter.type_pct }}% confident)</span>{% else %}Matter type not recognised{% endif %}.
+      From {{ matter.message.sender_name|default:"unknown sender" }}, received {{ matter.created_at|naturaltime }}.
+    </p>
+  </div>
+  <ol class="lf-progress" style="width:min(440px,100%)" aria-label="Progress">
+    {% for s in stages %}<li class="{{ forloop.counter|stage_state:matter }}"><span class="bar"></span><span class="lbl">{{ s }}</span></li>{% endfor %}
+  </ol>
+</div>
+
+<div class="lf-review">
+  <!-- ======================= documents ======================= -->
+  <section aria-label="Documents">
+    <div class="lf-docbar" role="tablist">
+      {% for d in docs %}
+      <button type="button" role="tab" data-doc-tab="{{ d.att.pk }}" aria-selected="{% if d.att.pk == active_doc %}true{% else %}false{% endif %}">
+        <i aria-hidden="true" class="bi {{ d.att|doc_icon }}"></i>{{ d.att.display_name }}
+        {% if d.att.doc_type %}<span class="dt">{{ d.att.doc_type.key }}</span>{% endif %}
+      </button>
+      {% endfor %}
+    </div>
+    <div class="lf-desk" id="desk">
+      {% for d in docs %}
+      <article class="lf-sheet" data-doc="{{ d.att.pk }}" {% if d.att.pk != active_doc %}hidden{% endif %}>
+        <div class="lf-sheet-meta">
+          <span>{{ d.att.display_name }}{% if d.att.page_count > 1 %}, {{ d.att.page_count }} pages{% endif %}</span>
+          <span>
+            {% if d.att.doc_type %}{{ d.att.doc_type.name }}{% else %}Unrecognised document{% endif %}
+            {% if d.att.kind == 'file' %}<a class="ms-2" href="{% url 'intake:download' d.att.pk %}{% if d.att.filename|lower|slice:'-4:' == '.pdf' %}?inline=1{% endif %}" target="_blank" rel="noopener">Original</a>{% endif %}
+          </span>
+        </div>
+        {% if d.att.text %}
+        <div class="lf-sheet-text" data-attachment="{{ d.att.pk }}">{{ d.html }}</div>
+        {% else %}
+        <div class="lf-sheet-empty">{% if d.att.text_method == 'needs_ocr' or d.att.text_method == 'ocr_partial' %}Some source content could not be read automatically. Read the original, enter any missing values and acknowledge your review below.{% elif d.att.text_method == 'purged' %}The contents were deleted under the office's retention policy.{% else %}No readable text in this file.{% endif %}</div>
+        {% endif %}
+        {% if d.att.text_method == 'needs_ocr' or d.att.text_method == 'ocr' or d.att.text_method == 'pdf_ocr' or d.att.text_method == 'ocr_partial' %}
+        <p class="lf-small lf-muted">Scan reading can misread names, dates and numbers. Compare every page with the original before acknowledging it.</p>
+        {% if not matter.is_locked %}
+          {% if d.att.reviewed_at %}<p class="lf-small">Original reviewed by {{ d.att.reviewed_by.get_full_name }}.</p>
+          {% else %}<form method="post" action="{% url 'matters:acknowledge_source' matter.ref d.att.pk %}" class="lf-well mt-2">
+            {% csrf_token %}<label class="lf-small"><input type="checkbox" name="reviewed" value="yes" required> I read the original and checked its values against the matter.</label>
+            <button class="btn btn-quiet btn-sm mt-2">Record source review</button>
+          </form>{% endif %}
+        {% endif %}{% endif %}
+      </article>
+      {% empty %}
+      <div class="lf-sheet"><div class="lf-sheet-empty">This intake has no documents.</div></div>
+      {% endfor %}
+      <div class="lf-legend">
+        <span><i aria-hidden="true" style="background:var(--lf-moss-tint);box-shadow:inset 0 -2px 0 rgba(46,118,86,.55)"></i>Prefilled</span>
+        <span><i aria-hidden="true" style="background:var(--lf-amber-tint);box-shadow:inset 0 -2px 0 rgba(168,106,12,.6)"></i>Check needed</span>
+        <span><i aria-hidden="true" style="background:var(--lf-seal-tint);border-bottom:2px dotted var(--lf-seal)"></i>Documents disagree</span>
+        <span><i aria-hidden="true" style="background:var(--lf-petrol-tint);box-shadow:inset 0 -2px 0 rgba(30,82,80,.55)"></i>Confirmed by a person</span>
+      </div>
+      {% if not matter.is_locked and matter.matter_type %}
+      <p class="text-center lf-xs lf-muted mt-2 mb-0"><i aria-hidden="true" class="bi bi-cursor-text"></i> Select text in a document to fill a field. Only the case field changes. Reusable document labels are configured separately in the Workflow studio.</p>
+      {% endif %}
+    </div>
+
+    {% if not matter.is_locked and matter.matter_type %}
+    <form class="lf-teach" id="teach" method="post" action="{% url 'matters:teach' matter.ref %}">
+      {% csrf_token %}
+      <input type="hidden" name="attachment"><input type="hidden" name="start"><input type="hidden" name="end">
+      <label>Selected text</label>
+      <div class="sel" id="teach-sel"></div>
+      <label for="teach-field">Use it for</label>
+      <select class="form-select form-select-sm mb-2" name="field" id="teach-field">
+        {% for f in fields %}<option value="{{ f.definition.key }}" {% if f.is_open %}data-open="1"{% endif %}>{{ f.definition.label }}{% if f.is_open %} (needs value){% endif %}</option>{% endfor %}
+      </select>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-light flex-grow-1 fw-semibold">Fill field</button>
+        <button type="button" class="btn btn-sm btn-outline-light" id="teach-cancel">Cancel</button>
+      </div>
+    </form>
+    {% endif %}
+  </section>
+
+  <!-- ======================= decision + fields ======================= -->
+  <section aria-label="Extracted data">
+    {% if not matter.matter_type %}
+    <div class="lf-decision blocked">
+      <h2><i aria-hidden="true" class="bi bi-question-octagon" style="color:var(--lf-seal)"></i>Which workflow is this?</h2>
+      <p class="lf-small lf-muted mb-3">LexFlow could not match the documents to a workflow with enough confidence, so nothing was extracted.</p>
+      <form method="post" action="{% url 'matters:set_type' matter.ref %}" class="d-flex gap-2">
+        {% csrf_token %}
+        <select class="form-select" name="matter_type" aria-label="Matter type">{% for mt in matter_types %}<option value="{{ mt.pk }}">{{ mt.name }}</option>{% endfor %}</select>
+        <button class="btn btn-primary text-nowrap">Extract</button>
+      </form>
+    </div>
+    {% elif matter.status == 'transferred' or matter.status == 'approved' %}
+    <div class="lf-decision" id="transfer">
+      <h2><i aria-hidden="true" class="bi bi-patch-check-fill" style="color:var(--lf-moss)"></i>Approved by {{ matter.approved_by.get_full_name|default:"a notary" }}</h2>
+      <p class="lf-small lf-muted mb-3">{{ matter.approved_at|date:"j M Y, H:i" }}. The values and destination mappings are frozen in this approval. Delivery requires a confirmed receipt.</p>
+      {% if not matter.approval_hash %}<p class="lf-alert-seal">This earlier approval must be reviewed again before a new export can be created.</p>{% endif %}
+      {% if membership.can_approve and matter.status != 'transferred' %}
+      <form method="post" action="{% url 'matters:reopen' matter.ref %}">{% csrf_token %}<button class="btn btn-quiet btn-sm mb-3">Reopen for a new approval</button></form>
+      {% endif %}
+      {% for t in transfers %}
+      <div class="lf-well d-flex justify-content-between align-items-center mb-2 lf-small">
+        <span><span class="fw-semibold">{{ t.connector.name }}</span><br><span class="lf-muted">{{ t.ref }}, {{ t.field_count }} fields, {{ t.created_at|naturaltime }}</span></span>
+        <a class="btn btn-quiet btn-sm" href="{% url 'connectors:download' t.ref %}"><i aria-hidden="true" class="bi bi-download me-1"></i>{{ t.filename|slice:"-4:"|upper|cut:"." }}</a>
+      </div>
+      <p class="lf-small"><strong>{{ t.get_status_display }}</strong>{% if t.acknowledged_at %} · {{ t.receipt_reference }}{% endif %}{% if t.error %} · {{ t.error }}{% endif %}</p>
+      {% if membership.can_approve and matter.approval_hash and t.status != 'delivered' and t.status != 'failed' and t.approval_hash == matter.approval_hash %}
+      {% if t.connector.delivery == 'webhook' %}
+      <form method="post" action="{% url 'connectors:deliver' t.ref %}" class="mb-3">{% csrf_token %}<button class="btn btn-primary btn-sm">{% if t.delivery_attempts %}Retry authenticated handoff{% else %}Send to HTTP destination{% endif %}</button><div class="form-text">Delivery requires a signed receipt matching this approval. Attempts: {{ t.delivery_attempts }}.</div></form>
+      {% elif demo_mode and matter.is_demo and t.connector.delivery == 'folder' %}
+      <form method="post" action="{% url 'connectors:demo_receive' t.ref %}" class="mb-3">{% csrf_token %}<button class="btn btn-primary btn-sm">Run demo receiver and verify receipt</button><div class="form-text">Synthetic destination using the exported file; vendor integration remains a pilot milestone.</div></form>
+      {% else %}
+      <form method="post" action="{% url 'connectors:acknowledge' t.ref %}" class="lf-well mb-3">{% csrf_token %}
+        <label class="form-label">Destination receipt / case reference<input class="form-control form-control-sm" name="receipt_reference" required maxlength="200"></label>
+        <label class="form-label d-block">SHA-256 received by the destination<input class="form-control form-control-sm" name="checksum" required minlength="64" maxlength="64"></label>
+        <button class="btn btn-primary btn-sm">Confirm destination receipt</button>
+      </form>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+      {% if membership.can_approve and matter.approval_hash %}
+      <form method="post" action="{% url 'connectors:send' matter.ref %}" class="d-flex gap-2 mt-3">
+        {% csrf_token %}
+        <select class="form-select" name="connector" id="connector" aria-label="Connector">{% for c in connectors %}<option value="{{ c.pk }}">{{ c.name }}</option>{% endfor %}</select>
+        <button class="btn btn-primary text-nowrap">{% if transfers %}Get approved export{% else %}Create approved export{% endif %}</button>
+      </form>
+      <a class="lf-small d-inline-block mt-2" href="#" id="preview-link" target="_blank" rel="noopener">Preview the payload</a>
+      {% else %}
+      <p class="lf-small lf-muted mb-0">An approver creates the export and confirms its destination receipt.</p>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="lf-decision {% if blockers %}blocked{% endif %}" id="transfer">
+      {% if blockers %}
+      <h2><i aria-hidden="true" class="bi bi-sign-stop" style="color:var(--lf-seal)"></i>Transfer blocked</h2>
+      <p class="lf-small lf-muted mb-0">Nothing leaves LexFlow until these are done:</p>
+      <ul>{% for b in blockers %}<li>{{ b }}</li>{% endfor %}</ul>
+      {% else %}
+      <h2><i aria-hidden="true" class="bi bi-check2-circle" style="color:var(--lf-moss)"></i>Ready for approval</h2>
+      <p class="lf-small lf-muted">Every field is prefilled with high confidence or checked by a person.</p>
+      {% endif %}
+      {% if membership.can_approve %}
+      <form method="post" action="{% url 'matters:approve' matter.ref %}">{% csrf_token %}
+        <button class="btn btn-primary w-100" {% if blockers %}disabled{% endif %}>Approve for transfer</button>
+      </form>
+      {% else %}
+      <p class="lf-small mb-0 lf-well">{% if blockers %}When the list is clear, a notary approves the transfer.{% else %}A notary now approves the transfer. You can still adjust any field.{% endif %}</p>
+      {% endif %}
+      <div class="lf-policy-list">
+        <span><i aria-hidden="true" class="bi bi-dot"></i>High confidence is prefilled, never silently written</span>
+        <span><i aria-hidden="true" class="bi bi-dot"></i>A conflict between documents blocks transfer</span>
+        <span><i aria-hidden="true" class="bi bi-dot"></i>Every correction is an audit event</span>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if fields %}
+    <div class="lf-ledger">
+      <div class="lf-ledger-head">
+        <div>
+          <h2 class="lf-h2 mb-0">Extracted data</h2>
+          <span class="lf-xs lf-muted">{{ matter.provider|default:"LexFlow rules engine" }}</span>
+        </div>
+        {% if not matter.is_locked %}
+        <form method="post" action="{% url 'matters:reprocess' matter.ref %}">{% csrf_token %}<button class="btn btn-quiet btn-sm" title="Run extraction again with the current studio rules"><i aria-hidden="true" class="bi bi-arrow-repeat me-1"></i>Extract again</button></form>
+        {% endif %}
+      </div>
+      {% for f in fields %}
+      <div class="lf-field {% if f.status == 'conflict' %}lf-field--seal{% elif f.status == 'missing' %}lf-field--missing{% elif f.status == 'review' %}lf-field--amber{% endif %}" id="field-{{ f.definition.key }}" data-field="{{ f.definition.key }}" data-doc="{{ f.source_id|default:'' }}">
+        <div class="lf-field-top">
+          <span class="lf-field-label">{{ f.definition.label }}{% if f.definition.always_review %}<span class="policy" title="Office policy: always confirmed by a person"><i aria-hidden="true" class="bi bi-person-check"></i></span>{% endif %}</span>
+          <span class="lf-chip lf-chip--{{ f.tone }}">{{ f.get_status_display }}</span>
+        </div>
+        {% if f.display_value %}
+        <div class="lf-field-value" tabindex="0" role="button" aria-label="Show {{ f.definition.label }} in the document">{{ f.display_value }}</div>
+        {% else %}
+        <div class="lf-field-value empty">{% if f.definition.required %}Not found in any document{% else %}Not provided{% endif %}</div>
+        {% endif %}
+        <div class="lf-field-meta">
+          {% if f.display_value %}
+          <span class="lf-meter lf-meter--{{ f|meter_tone }}"><span class="lf-meter-track"><span class="lf-meter-fill" style="width:{{ f.confidence_pct }}%"></span></span>{{ f.confidence_pct }}%</span>
+          {% if f.source %}<span><i aria-hidden="true" class="bi bi-file-earmark-text"></i> {{ f.source.display_name }}</span>{% endif %}
+          {% endif %}
+          <span class="lf-field-dest" title="Destination field">→ {{ f.definition.destination_path }}</span>
+        </div>
+        {% if f.note %}<div class="lf-xs mt-1 {% if f.status == 'conflict' %}fw-semibold{% else %}lf-muted{% endif %}" {% if f.status == 'conflict' %}style="color:var(--lf-seal)"{% endif %}>{{ f.note }}</div>{% endif %}
+
+        {% if f.status == 'conflict' and not matter.is_locked %}
+        <div class="lf-candidates">
+          {% for c in f.candidates.all %}
+          <div class="lf-candidate">
+            <span class="cv">{{ c.display_value }}</span>
+            <span class="cs">{{ c.source.display_name }}, {{ c.confidence_pct }}%{% if c.anchor %}, after “{{ c.anchor }}”{% endif %}</span>
+            <form method="post" action="{% url 'matters:field_action' matter.ref f.pk %}">{% csrf_token %}
+              <input type="hidden" name="action" value="choose"><input type="hidden" name="candidate" value="{{ c.pk }}">
+              <button class="btn btn-quiet btn-sm">Use this</button>
+            </form>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if not matter.is_locked %}
+        <div class="lf-field-actions">
+          {% if f.status == 'review' and f.display_value %}
+          <form method="post" action="{% url 'matters:field_action' matter.ref f.pk %}">{% csrf_token %}<input type="hidden" name="action" value="confirm"><button class="btn btn-primary btn-sm"><i aria-hidden="true" class="bi bi-check2 me-1"></i>Confirm</button></form>
+          {% endif %}
+          <button type="button" class="btn btn-link btn-sm" data-edit="{{ f.definition.key }}">{% if f.display_value %}Edit value{% else %}Enter value{% endif %}</button>
+        </div>
+        <form class="lf-edit {% if f.status == 'missing' %}open{% endif %}" id="edit-{{ f.definition.key }}" method="post" action="{% url 'matters:field_action' matter.ref f.pk %}">
+          {% csrf_token %}<input type="hidden" name="action" value="correct">
+          <input class="form-control form-control-sm" name="value" value="{{ f.display_value }}" aria-label="New value for {{ f.definition.label }}" placeholder="{% if f.definition.data_type == 'money' %}850.000,00 EUR{% elif f.definition.data_type == 'date' %}01.12.2026{% elif f.definition.data_type == 'grundbuch' %}München Blatt 812{% endif %}">
+          <button class="btn btn-primary btn-sm">Save</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="lf-panel lf-panel-pad mt-3">
+      <div class="d-flex justify-content-between align-items-baseline">
+        <h2 class="lf-h2">Activity</h2>
+        <a class="lf-small" href="{% url 'audit:index' %}?q={{ matter.ref }}">Full audit trail</a>
+      </div>
+      <ol class="lf-timeline">
+        {% for e in events %}
+        <li class="{{ e|audit_tone }}"><span>{{ e.summary }}<time datetime="{{ e.created_at|date:'c' }}">{{ e.actor_label }}, {{ e.created_at|date:"j M, H:i:s" }}, event #{{ e.seq }}</time></span></li>
+        {% endfor %}
+      </ol>
+    </section>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var desk = document.getElementById('desk');
+  function showDoc(id) {
+    document.querySelectorAll('[data-doc-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.docTab === String(id) ? 'true' : 'false'); });
+    document.querySelectorAll('.lf-sheet[data-doc]').forEach(function (s) { s.hidden = s.dataset.doc !== String(id); });
+  }
+  document.querySelectorAll('[data-doc-tab]').forEach(function (b) { b.addEventListener('click', function () { showDoc(b.dataset.docTab); }); });
+
+  function focusMark(key, docId) {
+    var sheet = docId ? document.querySelector('.lf-sheet[data-doc="' + docId + '"]') : null;
+    var mark = sheet ? sheet.querySelector('mark[data-field="' + key + '"]') : document.querySelector('mark[data-field="' + key + '"]');
+    if (!mark) return;
+    var owner = mark.closest('.lf-sheet'); showDoc(owner.dataset.doc);
+    document.querySelectorAll('mark.is-focus').forEach(function (m) { m.classList.remove('is-focus'); });
+    void mark.offsetWidth; mark.classList.add('is-focus');
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (desk.scrollHeight > desk.clientHeight + 4 && getComputedStyle(desk).position === 'sticky') {
+      var dr = desk.getBoundingClientRect(), mr = mark.getBoundingClientRect();
+      desk.scrollBy({ top: mr.top - dr.top - desk.clientHeight / 2, behavior: reduce ? 'auto' : 'smooth' });
+    } else {
+      mark.scrollIntoView({ block: 'center', behavior: reduce ? 'auto' : 'smooth' });
+    }
+  }
+  function focusField(key) {
+    var row = document.getElementById('field-' + key); if (!row) return;
+    document.querySelectorAll('.lf-field.is-focus').forEach(function (r) { r.classList.remove('is-focus'); });
+    row.classList.add('is-focus');
+    row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  document.querySelectorAll('.lf-field-value:not(.empty)').forEach(function (v) {
+    var row = v.closest('.lf-field');
+    function go() { focusField(row.dataset.field); focusMark(row.dataset.field, row.dataset.doc); }
+    v.addEventListener('click', go);
+    v.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  document.querySelectorAll('mark[data-field]').forEach(function (m) {
+    m.addEventListener('click', function () { focusField(m.dataset.field); });
+  });
+  document.querySelectorAll('[data-edit]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var f = document.getElementById('edit-' + b.dataset.edit); f.classList.toggle('open');
+      if (f.classList.contains('open')) f.querySelector('input[name=value]').focus();
+    });
+  });
+  var hash = location.hash.replace('#field-', '');
+  if (hash && document.getElementById('field-' + hash)) { focusField(hash); }
+
+  // Highlight-to-teach
+  var teach = document.getElementById('teach');
+  if (teach) {
+    var section = teach.parentElement; section.style.position = 'relative';
+    function offsetIn(container, node, off) { var r = document.createRange(); r.selectNodeContents(container); r.setEnd(node, off); return r.toString().length; }
+    document.addEventListener('mouseup', function (e) {
+      if (teach.contains(e.target)) return;
+      var sel = window.getSelection(); if (!sel || sel.isCollapsed || !sel.rangeCount) { return; }
+      var range = sel.getRangeAt(0);
+      var text = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+      var holder = text.closest('.lf-sheet-text'); if (!holder) return;
+      var s = offsetIn(holder, range.startContainer, range.startOffset), en = offsetIn(holder, range.endContainer, range.endOffset);
+      var picked = sel.toString(); if (!picked.trim() || picked.length > 300) return;
+      var lead = picked.length - picked.replace(/^\s+/, '').length, trail = picked.length - picked.replace(/\s+$/, '').length;
+      teach.attachment.value = holder.dataset.attachment; teach.start.value = s + lead; teach.end.value = en - trail;
+      document.getElementById('teach-sel').textContent = picked.trim();
+      var open = teach.querySelector('option[data-open]'); if (open) teach.field.value = open.value;
+      var rect = range.getBoundingClientRect(), base = section.getBoundingClientRect();
+      teach.style.top = (rect.bottom - base.top + 10) + 'px';
+      teach.style.left = Math.max(0, Math.min(rect.left - base.left, base.width - 300)) + 'px';
+      teach.classList.add('open');
+    });
+    document.getElementById('teach-cancel').addEventListener('click', function () { teach.classList.remove('open'); window.getSelection().removeAllRanges(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') teach.classList.remove('open'); });
+  }
+
+  var pl = document.getElementById('preview-link'), sel = document.getElementById('connector');
+  if (pl && sel) {
+    var base = "{% url 'connectors:preview' matter.ref 0 %}".replace(/0\/$/, '');
+    function upd() { pl.href = base + sel.value + '/'; }
+    sel.addEventListener('change', upd); upd();
+  }
+})();
+</script>
+{% endblock %}

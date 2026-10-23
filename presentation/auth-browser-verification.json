@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "syntheticCopiedDatabase": true,
+  "loginToggle": true,
+  "keyboardToggle": true,
+  "independentNewPasswordToggles": true,
+  "emailReset": true,
+  "validation": true,
+  "newPasswordLogin": true,
+  "oldSessionInvalidated": true,
+  "reusedLinkRejected": true,
+  "noJavaScriptFallback": true,
+  "mobile": {
+    "width": 390,
+    "content": 390
+  },
+  "browserErrors": []
+}

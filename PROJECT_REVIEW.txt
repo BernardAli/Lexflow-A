@@ -1,0 +1,404 @@
+HISTORICAL BASELINE — BEFORE PILOT DEMO HARDENING
+The findings below describe the build before the implementation changes in this
+session. Source line numbers refer to that earlier build. See README.md and
+presentation/VERIFICATION.txt for the current status and supported demo scope.
+
+LEXFLOW AI — PRESENTATION ALIGNMENT AND CODE REVIEW
+Reviewed: 22 October 2026
+Presentation: /home/allgift/Downloads/LexFlow_AI_Client_Presentation.pptx
+Project: /home/allgift/Downloads/lexflow-ai/lexflow
+
+VERDICT
+
+The project implements a useful synthetic-data prototype of the presentation's
+central review workflow. It does not yet satisfy the full platform architecture
+or the pilot acceptance condition of one real destination integration. Approval
+integrity, retention, extraction evidence and production configuration also have
+confirmed defects. Do not describe this build as a completed secure pilot.
+
+The working parts include authenticated intake, digital-PDF/text extraction,
+classification, cross-document conflicts, field review and corrections,
+role-based approval, tenant-scoped application views, per-tenant document keys,
+encrypted source files/text and export payloads, a workflow editor, and audit
+events. The existing 42 tests all pass. Passing those tests does not resolve the
+additional failures reproduced below.
+
+SCOPE AND METHOD
+
+Read all 18 slides' text and tables, and inspected the project's six Django
+applications, extraction engine, models, services, views, settings, URL routes,
+management commands, templates, tests, dependency declarations and README.
+Presentation statements were treated as requirements/evidence, not instructions
+to execute. Slide numbers below mean physical PowerPoint slide positions.
+
+Ran the existing test suite, Django checks, migration-drift check, deployment
+checks in development and production mode, and pip dependency consistency check.
+Added 14 focused probes using synthetic values, an in-memory SQLite database and
+a temporary encrypted vault. The stale-state probe simulates a concurrent-request
+interleaving deterministically; it is not a PostgreSQL concurrency/load test.
+
+Existing db.sqlite3 and vault/ were not modified by this review. Their read-only
+inventory was 2 tenants, 39 messages, 38 matters, 31 transfers and 238 audit events.
+Application code was not changed. Review artifacts are in review/.
+
+PRIORITIZED FINDINGS
+
+P1 means a blocker for relying on the stated pilot security/integrity behavior.
+P2 means a material functional, accuracy or traceability gap to resolve or
+explicitly exclude from the agreed pilot. Architecture gaps are identified as
+gaps; no cross-tenant web exploit is alleged where none was observed.
+
+F01 [P1] A stale review request can modify an already approved matter.
+  Code: apps/matters/services.py:180, :207, :164, :303
+  Slides: 4, 8, 11
+  _guard() checks the supplied Python object's cached status. Review mutations
+  and approve() do not lock/reload the same matter row before checking it.
+  Probe: load a field and its related ready matter, approve the matter through a
+  separate instance, then correct the stale field. The correction succeeds;
+  refresh_status() saves the stale matter, changes status back to ready and
+  erases approved_at, while the approval audit event remains.
+  Consequence: overlapping requests can invalidate the approval boundary and
+  leave the persisted matter inconsistent with its audit history.
+  Fix: use a shared row-lock/reload protocol for approval, review, re-extraction,
+  reclassification and transfer, with version checks and narrow update_fields.
+  Test the interleaving on the intended production database.
+
+F02 [P1] Approved exports use mutable mappings and can silently lose fields.
+  Code: apps/connectors/services.py:19; apps/studio/views.py:53
+  Slides: 7, 8, 12
+  build_payload() reads each current FieldDefinition.destination_path at transfer
+  time. Approval stores no immutable mapping/payload snapshot. The studio accepts
+  duplicate and overlapping paths after validating only their syntax.
+  Probe: approve a purchase, then change the buyer path to the seller path through
+  the authorized admin HTTP endpoint. The matter remains approved, its XML
+  changes, and the buyer name disappears because the seller overwrites the same
+  dictionary key. Two fields share one destination without a validation error.
+  Fix: approve an immutable, versioned set of values AND mappings; bind transfers
+  to its digest. Reject duplicate paths and scalar/object prefix collisions.
+
+F03 [P1] Retention can destroy another active matter's source file and keeps email content.
+  Code: apps/intake/models.py:85;
+        apps/intake/management/commands/lexflow_purge.py:24;
+        apps/matters/services.py:34
+  Slides: 9, 11, 13
+  Blob names depend only on the document hash within a tenant. Purge unlinks the
+  file without checking other references. Separately, the original email body
+  also lives in IntakeMessage.body_enc, which purge does not clear.
+  Probe: ingest identical files into an expired transferred matter and an active
+  matter; purge the former. The active attachment raises FileNotFoundError when
+  read. The expired message's original confidential email body is still readable.
+  Fix: use unique attachment blobs or reference-aware blob lifecycle management;
+  purge all retained copies covered by the document-content policy. Make the
+  cleanup recoverable and auditable, and verify active references remain usable.
+
+F04 [P1] Unsupported AI guesses can become high-confidence prefilled fields.
+  Code: apps/matters/engine/providers.py:194;
+        apps/matters/engine/aggregate.py:35
+  Slides: 4, 8
+  The Anthropic provider retains values whose quote is absent from the source,
+  reducing confidence by 40%. Aggregation then boosts repeated unsupported values
+  as independent evidence, without preserving a mandatory evidence-review flag.
+  Probe: three mocked replies repeat a name absent from all three documents.
+  Each has empty source spans, but aggregation returns auto at 0.9270 confidence.
+  This concerns the opt-in external provider; no live API was called.
+  Fix: reject ungrounded candidates or force review regardless of aggregation.
+  Distinguish source-grounding validity from a numerical confidence score.
+
+F05 [P1] Transfers report delivery without delivering to a destination.
+  Code: apps/connectors/services.py:80; apps/connectors/models.py:10
+  Slides: 3, 4, 6, 12, 13, 14
+  transfer() only renders and encrypts an export, creates a delivered Transfer,
+  marks the matter transferred and writes an audit event. There is no target
+  endpoint/import-folder transport, vendor schema validation, acknowledgement,
+  retry or delivery failure handling. The JSON connector is labelled an official
+  API in seed data, but performs no REST request.
+  Probe: an unconfigured JSON connector immediately yields status=delivered.
+  Consequence: the pilot has no demonstrated real integration; its transfer
+  success metric reports local export generation as destination success. Retention
+  can start before a destination has received anything.
+  Fix: distinguish export-created from delivered/import-confirmed. Implement and
+  verify one client-approved destination interface, schema, permissions,
+  acknowledgement and idempotent retry policy. Generic downloads can remain a
+  clearly labelled export capability.
+
+F06 [P1] Production mode accepts public development secrets.
+  Code: config/settings.py:19, :117; apps/core/crypto.py:24;
+        templates/auth/login.html:36;
+        apps/core/management/commands/seed_lexflow.py:19
+  Slides: 9, 10, 11, 13
+  DJANGO_DEBUG=0 does not require a new DJANGO_SECRET_KEY or LEXFLOW_MASTER_KEY.
+  Without them, the application keeps the checked-in secret and derives the
+  envelope master key from it. Database/vault copies are therefore decryptable
+  using publicly known default key material when defaults were used. Production
+  mode also leaves the demo-account/password panel visible; the seed command
+  creates a demo superuser without a production guard.
+  Fix: fail startup with development/missing production secrets; separate demo
+  mode from deployment mode; disable demo seeding/accounts in a real deployment;
+  define key provisioning, rotation and restore procedures. Replace development
+  data/keys as part of preparing the pilot.
+
+F07 [P1] Tenant encryption does not cover structured confidential case data.
+  Code: apps/matters/models.py:81, :138, :162;
+        apps/intake/models.py:26; apps/matters/models.py:23
+  Slides: 7, 9, 11
+  Source blobs, extracted document text and export payloads are encrypted.
+  ExtractedField and FieldCandidate values, FieldRevision old/new values, conflict
+  notes, subjects/titles and sender metadata remain ordinary database columns.
+  Probe: a raw database SELECT returns a corrected synthetic person's full name
+  in both value and normalized, without a tenant cipher.
+  Consequence: the UI's broad encrypted-tenant language overstates protection.
+  Fix: define the complete sensitive-data inventory and encrypt/protect it within
+  the chosen tenant boundary, including indexes, backups and operational access.
+  State the implemented protection accurately while that work is incomplete.
+
+F08 [P1 architecture gap] Tenant databases/storage are not separated as diagrammed.
+  Code: config/settings.py:73; apps/core/models.py:14, :72;
+        apps/core/middleware.py:16
+  Slides: 9, 10
+  The build uses one default SQLite database, or one optional shared PostgreSQL
+  database. Tenant isolation in application queries uses foreign-key filters.
+  Files share one filesystem root with per-tenant subdirectories; keys are
+  separately generated but wrapped by a common application master key. No
+  database router, database-per-tenant provisioning, independent object-store
+  access policy or deployment infrastructure is implemented.
+  Existing HTTP/API tenant-isolation tests pass, and no cross-tenant web access
+  was demonstrated. This is nevertheless materially different from slide 9's
+  explicit Database A/B/C and storage/access boundaries.
+  Fix: implement the agreed boundary and its provisioning/tests, or revise the
+  presentation with the client to explicitly accept a shared database model and
+  its operational controls. A foreign-key filter alone is not the shown design.
+
+F09 [P2] Safe learning can persist a client's name as a reusable rule.
+  Code: apps/matters/services.py:257, :273
+  Slide: 7
+  The text preceding a selection is learned if it passes a character-pattern
+  check. That pattern cannot establish that the prefix is a schema label.
+  Probe: in 'Anna Schmidt: Peter Müller', select Peter Müller as the buyer.
+  Anna Schmidt is saved as an anchor and copied into the audit details.
+  Rules remain tenant-scoped; this did not demonstrate shared model training or
+  cross-tenant sharing. It does contradict the stronger claim that client values
+  are never retained in workflow rules or legal values never enter the audit.
+  Fix: separate filling a field from approving a reusable label; constrain learning
+  to validated template/schema labels and avoid copying unverified prefixes to
+  reusable rules or audit summaries.
+
+F10 [P2] Conflict/confidence logic misses contradictory and duplicate evidence.
+  Code: apps/matters/engine/providers.py:56;
+        apps/matters/engine/aggregate.py:35
+  Slides: 4, 8
+  Rule extraction returns only one candidate per field per document and exits
+  after a 96% match. Aggregation assumes all supplied candidates are independent.
+  Probes: one document containing Grundbuch Blatt 812 and Blatt 872 produces only
+  Blatt 812 and auto=0.9600. Uploading identical lower-confidence content twice
+  raises confidence from 0.88 to 0.9856 and changes the field to auto, despite one
+  unique document hash.
+  Fix: retain all relevant evidence and flag unresolved same-document ambiguity;
+  deduplicate evidence by source content/provenance before confidence aggregation.
+  Validate scores against representative sanitized office documents.
+
+F11 [P2] The default GmbH workflow cannot render an export.
+  Code: apps/studio/defaults.py:53; apps/connectors/services.py:30
+  Slides: 6, 12; also the README's three-workflow prototype claim
+  The director uses Gesellschaft.Geschaeftsfuehrer as a scalar name, while the
+  birth date uses Gesellschaft.Geschaeftsfuehrer.Geburtsdatum as a nested object.
+  Probe: extract the default synthetic GmbH PDFs and call build_payload(). Both
+  values exist; rendering raises TypeError: 'str' object does not support item
+  assignment. All formats call the same builder, including CSV.
+  Fix: migrate the name path to a consistent nested schema such as
+  Gesellschaft.Geschaeftsfuehrer.Name, and validate the entire mapping tree when
+  saving configuration. Add a successful export check for each starter workflow.
+
+F12 [P2] Removing the audit tail still produces an intact-chain result.
+  Code: apps/audit/models.py:67; apps/audit/services.py:55
+  Slides: 4, 9, 11
+  Instance save/delete protections do not protect QuerySet update/delete.
+  Verification checks only the rows that remain, with no independent expected
+  sequence/head checkpoint.
+  Probe: append two events, delete the newest with QuerySet.delete(), then verify.
+  Verification returns ok=true with one event. This requires database/ORM write
+  access; it is not an ordinary clerk-facing delete endpoint. Existing tests
+  cover a middle deletion, which the chain does detect.
+  Fix: restrict the writer's database privileges and independently persist/anchor
+  sequence and head checkpoints or use an appropriate append-only audit store.
+  Scope the integrity claim to the actual threat model.
+
+F13 [P2] Intake limits/failures differ across entry points and can orphan files.
+  Code: apps/intake/api.py:51; apps/intake/views.py:51;
+        apps/matters/services.py:44;
+        apps/matters/engine/text.py:27;
+        apps/intake/management/commands/lexflow_folder_agent.py:46
+  Slides: 2, 4, 6, 13
+  The browser form checks individual file sizes; the API and folder agent do not.
+  Django's memory-upload thresholds are not a substitute for per-file rejection.
+  The API silently drops unsupported extensions. PDF parse/provider errors are
+  not turned into a failed intake/retry workflow, and filesystem writes are not
+  rolled back with the database transaction.
+  Probes: with the configured cap reduced to 1 MiB, the API accepts a 1 MiB+1
+  file with HTTP 201. A malformed PDF raises PdfStreamError, creates no message
+  after database rollback, but leaves one encrypted orphan file on disk.
+  Fix: share size/type/count/empty-input validation across entry points; bound
+  total workload; handle parse/provider failures visibly; stage and clean up blob
+  writes; preserve actionable failure/retry and audit records. Test corrupt and
+  password-protected PDFs and API/folder retries.
+
+F14 [P2] Plugin API readiness disagrees with the approval gate.
+  Code: apps/intake/api.py:29; apps/matters/services.py:287
+  Slides: 6, 8
+  The response's blocked flag only checks conflicts. It ignores missing required
+  fields, ordinary review requirements and unclassified matters.
+  Probe: a purchase awaiting mandatory price confirmation returns blocked=false
+  while approval_blockers() returns 'Check Purchase price.' The server's actual
+  approval/transfer endpoints still apply their gates; this is misleading API
+  readiness information, not a demonstrated write-back bypass.
+  Fix: publish explicit readiness/approval fields and the shared blocker list;
+  retain a separate has_conflicts field if plugins need it.
+
+F15 [P2] Pilot measurements are not yet reliable evidence of pilot outcomes.
+  Code: apps/core/metrics.py:37;
+        apps/core/management/commands/seed_lexflow.py:101, :236;
+        templates/core/dashboard.html:63
+  Slide: 14
+  Baselines default to demonstration values. Seed history assigns simulated
+  received/approval times, but the dashboard says the pilot is measured from real
+  matters. Transfer success measures F05's export-generation records. The
+  correction metric counts current status=corrected, excluding reviewer choices
+  marked confirmed; re-extraction replaces fields and their revision rows.
+  The auto-extracted metric measures fields needing no review, whereas the deck
+  also calls for extraction coverage. Elapsed receipt-to-approval time is not a
+  direct measurement of staff handling time.
+  Fix: label demo metrics, separate demo and pilot cohorts, capture an agreed
+  baseline and outcome definitions, preserve extraction/review history, and use
+  actual destination acknowledgements for transfer success.
+
+ADDITIONAL PRESENTATION CAPABILITIES NOT IMPLEMENTED
+
+Native Office integrations (slides 5-6):
+  The Outlook-style inbox and a standalone server-rendered task pane exist.
+  No Office add-in manifest, Office.js email/attachment selection, native Outlook
+  authentication/consent flow, or Word/DMS verification plugin is present.
+  The task pane is served with X-Frame-Options SAMEORIGIN, so its present framing
+  policy also needs deliberate handling for an external Office host. The screen
+  is not sufficient evidence of an installable native add-in.
+
+Scan/OCR processing (slides 2-4, 6, 13):
+  apps/matters/engine/text.py marks images and image-only PDFs needs_ocr; it does
+  not perform OCR. The review template says OCR runs in the private deployment,
+  but selecting that profile does not activate any OCR implementation. A person
+  must read the original and enter values. No email MIME/attachment parser or
+  connected portal intake is implemented beyond text/manual/API intake.
+
+Deployment profiles and local agent (slides 6, 9-11):
+  Security profiles and hosting-region descriptions are database metadata.
+  Changing the profile does not provision an EU tenant, VPC, private model,
+  customer-controlled key or egress policy. The folder agent is a Django
+  management command calling the ORM/service directly; it is not a separately
+  authenticated office-side agent submitting over the token API. It needs the
+  application's database/key environment. No infrastructure/runbook demonstrates
+  the promised deployment variants, backup/restore, monitoring or availability.
+
+Enterprise/commercial scope (slide 15):
+  Core prototype modules exist. SSO, private networking, connector-pack
+  entitlement, subscriptions/billing and SLA operations are not implemented.
+  Slide 15 is a commercial roadmap, so those are not assumed to be compulsory
+  first-pilot features without an explicit agreement.
+
+Client decisions (slides 13, 16-17):
+  No exact destination vendor/interface, accepted deployment boundary, production
+  approval matrix or representative pilot dataset is recorded in the project.
+  The deck explicitly leaves those decisions to the client. They are required to
+  complete and demonstrate the one-real-integration pilot; a code review cannot
+  select or authorize a customer's integration on its own.
+
+SLIDE-BY-SLIDE ALIGNMENT
+
+Slide | Topic                         | Assessment
+------+-------------------------------+----------------------------------------
+  1   | Product positioning           | Prototype reflects the intended flow;
+      |                               | security/integration claims exceed it.
+  2   | Intake/manual-work problem    | Digital PDF/text/manual intake works;
+      |                               | scans, portal/email integrations partial.
+  3   | Core between source/target    | Core exists; real targets not connected.
+  4   | Seven-stage workflow          | Visible prototype; F01-F05, F10, F12-F13
+      |                               | prevent full acceptance.
+  5   | Native Outlook experience     | Simulated inbox/task pane; no native add-in.
+  6   | Plugins/core/connectors       | Partial API and folder command; no Word
+      |                               | plugin or real destination connector.
+  7   | Safe workflow learning        | Label learning exists; F02/F09 unresolved.
+  8   | Confidence and human approval | Main demo works; F01-F04/F10/F14 undermine
+      |                               | the stated trust guarantees.
+  9   | Tenant security boundaries    | Keys/folders/scoped views/chain present;
+      |                               | F03/F06-F08/F12 remain.
+ 10   | EU/hybrid/private deployment  | Profile selection only; no proven profiles.
+ 11   | Compliance-driven controls    | Partial technical controls; legal and
+      |                               | operational compliance not established.
+ 12   | Supported integration ladder  | Generic export renderers only; F05/F11.
+ 13   | Property-purchase pilot       | Synthetic extraction/review demo exists;
+      |                               | one real integration/hardening incomplete.
+ 14   | Measurable pilot results      | Dashboard present; F05/F15 prevent relying
+      |                               | on displayed results as pilot evidence.
+ 15   | Commercial model              | Roadmap; enterprise/commercial features
+      |                               | largely outside the present build.
+ 16   | Client decisions              | Pending inputs, not implemented features.
+ 17   | Next step/closing             | Workflow chosen in demo; destination and
+      |                               | accepted security profile still needed.
+ 18   | Reference sources             | References in deck; no legal validation
+      |                               | or external source audit performed here.
+
+VERIFICATION RECORD
+
+  .venv/bin/python manage.py test apps --verbosity 2
+    PASS: 42 tests, 36.109 seconds.
+    Includes normal pipeline, HTTP review/approve/export, per-role pages,
+    tenant isolation, document encryption, basic audit verification and commands.
+
+  .venv/bin/python manage.py check
+    PASS: no issues.
+
+  .venv/bin/python manage.py makemigrations --check --dry-run
+    PASS: no changes detected.
+
+  .venv/bin/python manage.py check --deploy
+    6 warnings with current development settings:
+    security.W004, W008, W012, W016, W018, W019.
+
+  DJANGO_DEBUG=0 .venv/bin/python manage.py check --deploy
+    3 warnings: security.W004, W008, W019.
+    HTTPS/HSTS and framing need deployment-specific configuration. Frame policy
+    should reflect the chosen Office hosting model. These checks do not prove
+    secret/key safety or validate deployment infrastructure.
+
+  .venv/bin/python -m pip check
+    PASS: no broken requirements found. This is dependency consistency only,
+    not a vulnerability-advisory scan or reproducible dependency lock.
+
+  .venv/bin/python review/presentation_probes.py
+    Completed 14 probes; results in review/probe-results.jsonl.
+    Each demonstrates the current behavior, including the defects above.
+    This diagnostic script is separate from the normal passing test suite.
+    It uses its own in-memory database and temporary vault, and makes no live
+    provider or destination calls.
+
+WHAT WOULD SATISFY THE FIRST PILOT
+
+1. Fix approval state serialization, freeze approved mappings/values, validate
+   mapping trees, and add regression coverage for the confirmed integrity bugs.
+2. Fix retention reference handling and complete the agreed confidential-data
+   encryption/key/deployment boundary. Remove unsafe production defaults.
+3. Require grounded extraction evidence, preserve ambiguity, prevent duplicate
+   evidence inflation, and validate on the agreed sanitized document set.
+4. Implement one real authorized destination integration with import validation,
+   acknowledgement, retries and observable failures. Prove receipt of the exact
+   approved payload in that system.
+5. Explicitly agree whether native Outlook, OCR and the full deployment variants
+   are in the first pilot; implement them or label/exclude them accurately.
+6. Capture the office baseline and collect a separate, accurately labelled pilot
+   cohort with durable review/delivery measurements and defined acceptance limits.
+
+LIMITS
+
+No live Office host, vendor destination, external model, PostgreSQL deployment,
+SSO provider, cloud isolation boundary or recovery procedure was exercised.
+No visual browser/device/accessibility audit, penetration test, dependency
+advisory scan or German legal compliance assessment was performed. Legal text
+in the presentation was not independently certified. These limits do not affect
+the reproduced local defects, but they prevent a production/compliance sign-off.

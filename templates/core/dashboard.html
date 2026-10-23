@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static lexflow humanize %}
+{% block title %}Overview{% endblock %}
+{% block top_actions %}<a class="btn btn-primary btn-sm" href="{% url 'intake:new' %}"><i aria-hidden="true" class="bi bi-plus-lg me-1"></i>New intake</a>{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <h1 class="lf-title">Overview</h1>
+    <p class="lf-sub">Everything that arrived, what LexFlow did with it, and what still needs a person.</p>
+  </div>
+  <div class="lf-small lf-muted text-end">
+    {% if chain.ok %}<span class="lf-chip lf-chip--moss">Audit chain intact</span>{% else %}<span class="lf-chip lf-chip--seal">Audit chain broken at #{{ chain.broken_at }}</span>{% endif %}
+    <div class="mt-1">{{ chain.checked|intcomma }} events verified</div>
+  </div>
+</div>
+
+<section class="lf-pipeline mb-4" aria-label="Pipeline">
+  {% for name, hint, count in pipeline %}
+  <div class="lf-stage {% if forloop.counter == 5 and count %}lf-stage--attention{% endif %}">
+    <div class="lf-stage-n">{{ forloop.counter }}</div>
+    <div class="lf-stage-name">{{ name }}</div>
+    <div class="lf-stage-hint">{{ hint }}</div>
+    <div class="lf-stage-count">{{ count|intcomma }}</div>
+  </div>
+  {% endfor %}
+</section>
+
+<div class="lf-split mb-4">
+  <section class="lf-panel">
+    <div class="lf-panel-head">
+      <h2>Waiting for a person</h2>
+      <a class="lf-small" href="{% url 'matters:list' %}?status=needs_review">All matters</a>
+    </div>
+    {% if waiting %}
+    <ul class="lf-queue">
+      {% for m in waiting %}
+      <li><a href="{% url 'matters:review' m.ref %}">
+        <span class="t">{{ m.title }}</span>
+        <span class="m"><span class="fw-semibold text-body">{{ m.ref }}</span><span>{{ m.matter_type.name|default:"Type unknown" }}</span><span>received {{ m.created_at|naturaltime }}</span></span>
+        <span class="s">
+          <span class="lf-chip lf-chip--{{ m.status|matter_tone }}">{{ m.get_status_display }}</span>
+          {% if m.conflict_count %}<span class="lf-xs" style="color:var(--lf-seal);font-weight:600">{{ m.conflict_count }} conflict{{ m.conflict_count|pluralize }} block transfer</span>
+          {% elif m.open_count %}<span class="lf-xs lf-muted">{{ m.open_count }} field{{ m.open_count|pluralize }} to check</span>
+          {% elif m.status == 'approved' %}<span class="lf-xs lf-muted">Approved, not yet transferred</span>{% endif %}
+        </span>
+      </a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="lf-empty"><i aria-hidden="true" class="bi bi-check2-all"></i>Nothing is waiting. New intakes appear here when they need a decision.</div>
+    {% endif %}
+  </section>
+
+  <section class="lf-panel lf-panel-pad">
+    <div class="d-flex justify-content-between align-items-baseline mb-2">
+      <h2 class="lf-h2 mb-0">Pilot measurement</h2>
+      <a class="lf-small" href="{% url 'core:security' %}#baseline">Edit baseline</a>
+    </div>
+    <p class="lf-small lf-muted mb-3">{% if metrics_demo %}Synthetic demonstration cohort. Timing and baseline values are illustrative, not measured customer results.{% else %}Live pilot cohort only. Baselines appear after the office records them. Elapsed approval time includes waiting.{% endif %}</p>
+    <div class="lf-metric-head"><span>Measure</span><span>Baseline</span><span>Pilot</span></div>
+    {% for m in pilot %}
+    <div class="lf-metric">
+      <span class="name">{{ m.label }}</span>
+      <span class="hint">{{ m.hint }}</span>
+      <span class="base">{% if m.baseline is not None %}{{ m.baseline|floatformat:"-1" }}{% if m.unit == '%' %}%{% else %} {{ m.unit }}{% endif %}{% else %}—{% endif %}</span>
+      <span class="pilot {{ m|better }}">{% if m.pilot is not None %}{{ m.pilot|floatformat:"-1" }}{% if m.unit == '%' %}%{% else %} {{ m.unit }}{% endif %}{% else %}—{% endif %}</span>
+    </div>
+    {% endfor %}
+  </section>
+</div>
+
+<div class="lf-split">
+  <section class="lf-panel lf-panel-pad">
+    <h2 class="lf-h2">Matters received, last 14 days</h2>
+    <div id="chart-daily" class="lf-chart" role="img" aria-label="Matters per day by outcome"></div>
+  </section>
+  <section class="lf-panel lf-panel-pad">
+    <h2 class="lf-h2">Extraction confidence</h2>
+    <div id="chart-conf" class="lf-chart" role="img" aria-label="Distribution of field confidence"></div>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'vendor/echarts/echarts.min.js' %}"></script>
+<script>
+(function () {
+  var daily = {{ chart_daily|safe }}, conf = {{ chart_conf|safe }};
+  var font = { fontFamily: 'Schibsted Grotesk, Helvetica, Arial, sans-serif', color: '#5d6a67', fontSize: 12 };
+  var axis = { axisLine: { lineStyle: { color: '#c6cec7' } }, axisTick: { show: false }, axisLabel: font, splitLine: { lineStyle: { color: '#e8ede7' } } };
+  var d = echarts.init(document.getElementById('chart-daily'));
+  d.setOption({
+    textStyle: font, grid: { left: 28, right: 8, top: 34, bottom: 24 },
+    legend: { top: 0, left: 0, itemWidth: 10, itemHeight: 10, textStyle: font, icon: 'roundRect' },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    xAxis: Object.assign({ type: 'category', data: daily.labels }, axis),
+    yAxis: Object.assign({ type: 'value', minInterval: 1 }, axis),
+    series: [
+      { name: 'Prefilled, policy check only', type: 'bar', stack: 'm', data: daily.clean, itemStyle: { color: '#2e7656' }, barWidth: '52%' },
+      { name: 'Low confidence or missing', type: 'bar', stack: 'm', data: daily.reviewed, itemStyle: { color: '#d9a64a' } },
+      { name: 'Conflict caught', type: 'bar', stack: 'm', data: daily.conflict, itemStyle: { color: '#a3242c', borderRadius: [3, 3, 0, 0] } }
+    ]
+  });
+  var c = echarts.init(document.getElementById('chart-conf'));
+  c.setOption({
+    textStyle: font, grid: { left: 36, right: 8, top: 16, bottom: 40 },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (p) { return p[0].name + '% confidence<br><b>' + p[0].value + '</b> values found'; } },
+    xAxis: Object.assign({ type: 'category', data: conf.labels, name: 'confidence %', nameLocation: 'middle', nameGap: 26, nameTextStyle: font }, axis),
+    yAxis: Object.assign({ type: 'value', minInterval: 1 }, axis),
+    series: [{ type: 'bar', data: conf.counts.map(function (v, i) { return { value: v, itemStyle: { color: i < 2 ? '#a3242c' : (i < 4 ? '#d9a64a' : '#2e7656'), borderRadius: [3, 3, 0, 0] } }; }), barWidth: '56%' }]
+  });
+  window.addEventListener('resize', function () { d.resize(); c.resize(); });
+})();
+</script>
+{% endblock %}

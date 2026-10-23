@@ -1,0 +1,26 @@
+{
+  "data_class": "synthetic",
+  "guide": "LexFlow_Demo_Guide.pdf",
+  "scenarios": {
+    "property-conflict": [
+      "property-conflict/01_Kaeuferfragebogen.pdf",
+      "property-conflict/02_Grundbuchauszug.pdf",
+      "property-conflict/03_Kaufvertragsentwurf.pdf"
+    ],
+    "property-matching": [
+      "property-matching/01_Kaeuferfragebogen.pdf",
+      "property-matching/02_Grundbuchauszug.pdf",
+      "property-matching/03_Kaufvertragsentwurf.pdf"
+    ],
+    "scan-review": [
+      "scan-review/01_Gescannter_Kaeuferfragebogen.pdf"
+    ]
+  },
+  "expected_conflict": {
+    "field": "grundbuch",
+    "questionnaire_and_register": "München Blatt 812",
+    "draft_contract": "München Blatt 872"
+  },
+  "matching_case": "All three sources state München Blatt 812; policy review still applies",
+  "scan": "Image-only PDF; local OCR and original-source review required"
+}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Not allowed{% endblock %}
+{% block content %}
+<div class="lf-empty" style="padding:96px 20px">
+  <i aria-hidden="true" class="bi bi-shield-lock"></i>
+  <h1 class="lf-title mb-2">You can't do that here</h1>
+  <p class="lf-muted">{{ message|default:"Your role in this office does not include this action." }}</p>
+  <a class="btn btn-quiet" href="{% url 'core:dashboard' %}">Back to overview</a>
+</div>
+{% endblock %}

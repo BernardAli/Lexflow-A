@@ -1,0 +1,9 @@
+{
+  "mode": "presentation_demo",
+  "ready": true,
+  "errors": [],
+  "office_count": 1,
+  "scope": "Property purchase; digital PDF/text and optional local OCR; approved file/HTTP handoff with receipt",
+  "local_ocr_enabled": true,
+  "external_acceptance": "Vendor schema, hosting/operations and client acceptance must be validated separately."
+}

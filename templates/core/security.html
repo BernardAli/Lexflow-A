@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Security{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <h1 class="lf-title">Security</h1>
+    <p class="lf-sub">Office access, encrypted case data and audit integrity for {{ tenant.name }}.</p>
+  </div>
+</div>
+{% if new_token %}
+<div class="lf-panel lf-panel-pad mb-4" style="border-color:var(--lf-amber)">
+  <div class="fw-semibold mb-1">New plugin API token</div>
+  <p class="lf-small lf-muted mb-2">Copy it now. LexFlow stores only a hash and cannot show it again.</p>
+  <div class="lf-token">{{ new_token }}</div>
+</div>
+{% endif %}
+
+<section class="lf-panel lf-panel-pad mb-4">
+  <h2 class="lf-h2">Isolation boundary</h2>
+  <div class="lf-iso">
+    <div><b>Database rows</b>Every query scoped to this office</div>
+    <div><b>Document vault</b>Separate folder, files encrypted</div>
+    <div><b>Encryption key</b>Own data key, fingerprint <span class="lf-hash">{{ tenant.key_fingerprint }}</span></div>
+    <div><b>AI context</b>{% if tenant.allow_external_ai %}External model allowed, per document{% else %}Local rules engine only{% endif %}</div>
+    <div><b>Audit log</b>Own hash chain, {{ chain.checked }} events{% if chain.ok %}, intact{% endif %}</div>
+  </div>
+  <div class="lf-never">
+    <span><i aria-hidden="true" class="bi bi-x-circle me-1"></i>No cross-office retrieval</span>
+    <span><i aria-hidden="true" class="bi bi-x-circle me-1"></i>No shared customer memory</span>
+    <span><i aria-hidden="true" class="bi bi-x-circle me-1"></i>No shared training corpus in LexFlow</span>
+  </div>
+</section>
+
+<form method="post">
+  {% csrf_token %}
+  <section class="mb-4">
+    <h2 class="lf-h2">Deployment plan</h2><p class="lf-small lf-muted">This installation is configured as {{ deployment }}. Profile descriptions record an intended hosting plan; they do not provision or verify infrastructure.</p>
+    <div class="row g-3">
+      {% for v, name, desc, tags in profiles %}
+      <div class="col-md-4">
+        <label class="lf-profile">
+          <span class="pt"><input type="radio" name="security_profile" value="{{ v }}" {% if tenant.security_profile == v %}checked{% endif %} {% if not membership.can_configure %}disabled{% endif %}>{{ name }}</span>
+          <p>{{ desc }}</p>
+          <span class="tags">{% for t in tags %}<span>{{ t }}</span>{% endfor %}</span>
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <section class="lf-panel lf-panel-pad h-100">
+        <h2 class="lf-h2">Processing and retention</h2>
+        <div class="form-check form-switch mb-1">
+          <input class="form-check-input" type="checkbox" role="switch" id="ext" name="allow_external_ai" {% if tenant.allow_external_ai %}checked{% endif %} {% if not membership.can_configure %}disabled{% endif %}>
+          <label class="form-check-label fw-semibold" for="ext">Allow an external AI model</label>
+        </div>
+        <p class="lf-small lf-muted">When off, extraction runs only on the local rules engine. When on, documents may be sent to the configured model provider under a processing agreement (§ 26a BNotO).</p>
+        <label class="form-label" for="ret">Delete document contents after</label>
+        <div class="input-group" style="max-width:220px">
+          <input class="form-control" type="number" id="ret" name="retention_days" min="30" max="3650" value="{{ tenant.retention_days }}" {% if not membership.can_configure %}disabled{% endif %}>
+          <span class="input-group-text">days</span>
+        </div>
+        <div class="form-text">Counted from transfer. Approved data and the audit trail are kept.</div>
+      </section>
+    </div>
+    <div class="col-lg-6" id="baseline">
+      <section class="lf-panel lf-panel-pad h-100">
+        <h2 class="lf-h2">Pilot baseline</h2>
+        <p class="lf-small lf-muted">Measured on the manual process before LexFlow, so the pilot is judged on numbers, not on a demo.</p>
+        <div class="row g-3">
+          <div class="col-sm-4"><label class="form-label" for="b1">Minutes per matter</label><input class="form-control" id="b1" name="baseline_minutes_per_matter" value="{{ tenant.baseline_minutes_per_matter }}" {% if not membership.can_configure %}disabled{% endif %}></div>
+          <div class="col-sm-4"><label class="form-label" for="b2">Re-keying errors %</label><input class="form-control" id="b2" name="baseline_rekey_error_pct" value="{{ tenant.baseline_rekey_error_pct }}" {% if not membership.can_configure %}disabled{% endif %}></div>
+          <div class="col-sm-4"><label class="form-label" for="b3">Audit completeness %</label><input class="form-control" id="b3" name="baseline_audit_completeness_pct" value="{{ tenant.baseline_audit_completeness_pct }}" {% if not membership.can_configure %}disabled{% endif %}></div>
+        </div>
+      </section>
+    </div>
+  </div>
+  {% if membership.can_configure %}<button class="btn btn-primary mb-4">Save security settings</button>{% endif %}
+</form>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <section class="lf-panel lf-panel-pad h-100">
+      <h2 class="lf-h2">Plugin access</h2>
+      <p class="lf-small lf-muted">The remote scanner/email client authenticates with an office token and cannot approve matters. Native Outlook and Word plugins remain planned. Current token starts with <span class="lf-hash">{{ tenant.api_token_prefix|default:"none" }}</span>.</p>
+      {% if membership.can_configure %}
+      <form method="post" action="{% url 'core:regenerate_token' %}">{% csrf_token %}<button class="btn btn-quiet btn-sm">Issue a new token</button></form>
+      {% endif %}
+      <pre class="lf-code mt-3 mb-0">curl -H "Authorization: Bearer lfx_…" \
+     -F subject="Kaufvertrag Musterstraße 1" \
+     -F files=@Kaeuferfragebogen.pdf \
+     {{ request.scheme }}://{{ request.get_host }}/api/v1/intake/</pre>
+    </section>
+  </div>
+  <div class="col-lg-6">
+    <section class="lf-panel lf-panel-pad h-100">
+      <h2 class="lf-h2">People with access</h2>
+      <table class="lf-table">
+        <tbody>
+        {% for m in members %}
+          <tr><td class="fw-semibold">{{ m.user.get_full_name|default:m.user.username }}</td><td class="lf-small lf-muted">{{ m.title }}</td><td class="text-end"><span class="lf-chip lf-chip--plain">{{ m.get_role_display }}</span></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p class="lf-xs lf-muted mt-3 mb-0">Design interpretation of §§ 18, 26a, 35 BNotO, NotAktVV §§ 5–6 and GDPR Art. 32. Validate the production architecture with German notarial compliance specialists.</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

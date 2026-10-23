@@ -1,0 +1,182 @@
+{
+  "version": 1,
+  "scope": "local rules extraction",
+  "dataset_sha256": "3b2ffa9891b93de76291ac2aff5ccc35900aaf2cc88d4748073c9a110b2ba604",
+  "data_class": "synthetic",
+  "cases": 12,
+  "assertions": 64,
+  "passed": 64,
+  "pass_rate": 1.0,
+  "conflicts": {
+    "expected": 2,
+    "detected": 2
+  },
+  "absent_values": {
+    "expected": 10,
+    "correctly_empty": 10
+  },
+  "accepted": true,
+  "results": [
+    {
+      "id": "digital-complete",
+      "assertions": 10,
+      "passed": 10,
+      "failures": [],
+      "methods": [
+        "pdf_text"
+      ],
+      "source_sha256": [
+        "46b8993f5e053153a3b18a214ad6cf28780d9dc670a88c8ec339e3c602a21fb6"
+      ],
+      "elapsed_seconds": 0.087
+    },
+    {
+      "id": "alternate-labels",
+      "assertions": 8,
+      "passed": 8,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "d60782c3d00f6dc80b896ca68ec56a37162a883e43b1adaa26e34a5c7e4983ed"
+      ],
+      "elapsed_seconds": 0.001
+    },
+    {
+      "id": "same-document-register-conflict",
+      "assertions": 3,
+      "passed": 3,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "77d7c9eb2071832e5f6bf4332b187c6769fd7aee8e0500cf7056f3689ec03774"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "cross-document-price-conflict",
+      "assertions": 2,
+      "passed": 2,
+      "failures": [],
+      "methods": [
+        "plain",
+        "plain"
+      ],
+      "source_sha256": [
+        "80a89566a93878827930e6133574dc2d497a06194a3817396bf769aa7cbdcb10",
+        "a5d34e1c33b5f3b775b4af9de82be9939b0b13be8ec5bc92f44b479291b36016"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "missing-required-values",
+      "assertions": 5,
+      "passed": 5,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "ecd3cfb10f6f9318889c038c0bdfa2ac56b30517e7763e7b8ad6127fd60aed6d"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "invalid-date-and-price",
+      "assertions": 4,
+      "passed": 4,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "afb6df83bf4eecc0c8dbc1b8b633d9653e6da0a6bee181603eb4555cb17cc6bb"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "umlauts-and-hyphenated-names",
+      "assertions": 5,
+      "passed": 5,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "4bc1cf24e81197bbe32e116b438bcee59c3e9b3ab39b8f544327cbd84f8fd435"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "labels-on-separate-lines",
+      "assertions": 4,
+      "passed": 4,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "d38497498f9886b184b5bb01f455aab7818a252f042ab93b6cc3d89f87826752"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "scanned-image-german",
+      "assertions": 7,
+      "passed": 7,
+      "failures": [],
+      "methods": [
+        "ocr"
+      ],
+      "source_sha256": [
+        "f1aa50ad0d7c41c874259ec82e750461f19e81a84368fe55ed13bbab147de56f"
+      ],
+      "elapsed_seconds": 0.52
+    },
+    {
+      "id": "image-only-pdf",
+      "assertions": 7,
+      "passed": 7,
+      "failures": [],
+      "methods": [
+        "pdf_ocr"
+      ],
+      "source_sha256": [
+        "9d98f17fb8a6784f59ccbbe06d06e8e6696ea7d8d97e72932ffb39991626a591"
+      ],
+      "elapsed_seconds": 0.742
+    },
+    {
+      "id": "duplicate-evidence",
+      "assertions": 4,
+      "passed": 4,
+      "failures": [],
+      "methods": [
+        "plain",
+        "plain"
+      ],
+      "source_sha256": [
+        "965b4138a3f49ac0125a6a6a5e2249cd3feafd97d926b2f965f5073ea56460b0",
+        "965b4138a3f49ac0125a6a6a5e2249cd3feafd97d926b2f965f5073ea56460b0"
+      ],
+      "elapsed_seconds": 0.0
+    },
+    {
+      "id": "unlabelled-free-text-is-not-guessed",
+      "assertions": 5,
+      "passed": 5,
+      "failures": [],
+      "methods": [
+        "plain"
+      ],
+      "source_sha256": [
+        "de9226507fa333801304877082e2f256d00b6f58e7d16b53944285d687bb4275"
+      ],
+      "elapsed_seconds": 0.0
+    }
+  ],
+  "limits": "Synthetic results are regression evidence, not measured real-office accuracy or calibrated confidence."
+}

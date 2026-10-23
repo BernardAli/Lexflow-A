@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ mt.name }}{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <div class="lf-small mb-2"><a href="{% url 'studio:index' %}" class="lf-muted text-decoration-none"><i aria-hidden="true" class="bi bi-arrow-left"></i> Workflow studio</a></div>
+    <h1 class="lf-title">{{ mt.name }} <span style="font-family:var(--lf-serif);font-style:italic;font-weight:400;color:var(--lf-muted)">{{ mt.german_name }}</span></h1>
+    <p class="lf-sub">{{ mt.description }} Subject words that suggest this workflow: {{ mt.subject_keywords|join:", " }}.</p>
+  </div>
+  {% if membership.can_configure %}
+  <form method="post" action="{% url 'studio:toggle_type' mt.key %}">{% csrf_token %}<button class="btn btn-quiet btn-sm">{% if mt.is_active %}Pause workflow{% else %}Enable workflow{% endif %}</button></form>
+  {% endif %}
+</div>
+{% if not membership.can_configure %}<div class="lf-well lf-small mb-3"><i aria-hidden="true" class="bi bi-lock me-1"></i>Only an office administrator can change rules. You can see what LexFlow applies.</div>{% endif %}
+
+<section class="lf-panel mb-4">
+  <div class="lf-panel-head"><h2>Fields and rules</h2><span class="lf-small lf-muted">Highlighted labels are additional configured schema labels</span></div>
+  <div class="lf-rule-row lf-xs lf-muted d-none d-lg-grid" style="padding-top:10px;padding-bottom:10px;background:#fafbf9">
+    <span>Field</span><span>Destination</span><span>Prefill from</span><span>Labels that precede the value</span><span></span>
+  </div>
+  {% for f in fields %}
+  <div class="lf-rule-row" id="f-{{ f.key }}">
+    <form method="post" action="{% url 'studio:save_field' mt.key f.pk %}" id="form-{{ f.pk }}" hidden>{% csrf_token %}</form>
+    <div>
+      <input class="form-control form-control-sm fw-semibold" name="label" form="form-{{ f.pk }}" value="{{ f.label }}" aria-label="Label" {% if not membership.can_configure %}disabled{% endif %}>
+      <div class="lf-xs lf-muted mt-1">{{ f.get_data_type_display }}</div>
+      <div class="d-flex gap-3 mt-2 lf-small">
+        <label class="form-check-label d-flex gap-1"><input class="form-check-input" type="checkbox" name="required" form="form-{{ f.pk }}" {% if f.required %}checked{% endif %} {% if not membership.can_configure %}disabled{% endif %}>Required</label>
+        <label class="form-check-label d-flex gap-1" title="A person must confirm this field on every matter"><input class="form-check-input" type="checkbox" name="always_review" form="form-{{ f.pk }}" {% if f.always_review %}checked{% endif %} {% if not membership.can_configure %}disabled{% endif %}>Always confirm</label>
+      </div>
+    </div>
+    <div>
+      <input class="form-control form-control-sm" name="destination_path" form="form-{{ f.pk }}" value="{{ f.destination_path }}" aria-label="Destination path" {% if not membership.can_configure %}disabled{% endif %}>
+    </div>
+    <div>
+      <div class="input-group input-group-sm">
+        <input class="form-control" type="number" min="0.50" max="0.99" step="0.01" name="auto_threshold" form="form-{{ f.pk }}" value="{{ f.auto_threshold }}" aria-label="Prefill threshold" {% if not membership.can_configure %}disabled{% endif %}>
+      </div>
+      <div class="lf-xs lf-muted mt-1">confidence</div>
+    </div>
+    <div>
+      {% for a, learned in f.anchor_rows %}
+      <span class="lf-anchor {% if learned %}learned{% endif %}" {% if learned %}title="Additional configured schema label"{% endif %}>{{ a }}
+        {% if membership.can_configure %}<form method="post" action="{% url 'studio:anchors' mt.key f.pk %}" class="d-inline">{% csrf_token %}<input type="hidden" name="op" value="remove"><input type="hidden" name="label" value="{{ a }}"><button aria-label="Remove label {{ a }}"><i aria-hidden="true" class="bi bi-x"></i></button></form>{% endif %}
+      </span>
+      {% endfor %}
+      {% if membership.can_configure %}
+      <form method="post" action="{% url 'studio:anchors' mt.key f.pk %}" class="d-flex gap-1 mt-1" style="max-width:260px">{% csrf_token %}
+        <input class="form-control form-control-sm" name="label" placeholder="Add label" aria-label="New label for {{ f.label }}">
+        <button class="btn btn-quiet btn-sm">Add</button>
+      </form>
+      {% endif %}
+    </div>
+    <div>{% if membership.can_configure %}<button class="btn btn-primary btn-sm" form="form-{{ f.pk }}">Save</button>{% endif %}</div>
+  </div>
+  {% endfor %}
+</section>
+
+<section class="lf-panel" id="documents">
+  <div class="lf-panel-head"><h2>Document types</h2><span class="lf-small lf-muted">Phrases that identify a document and point to this workflow</span></div>
+  {% for d in doc_types %}
+  <form method="post" action="{% url 'studio:save_doctype' mt.key d.pk %}" class="lf-rule-row" style="grid-template-columns: 1.1fr 3fr auto">{% csrf_token %}
+    <div><div class="fw-semibold">{{ d.name }}</div><div class="lf-xs lf-muted">weight {{ d.weight }}</div></div>
+    <input class="form-control form-control-sm" name="keywords" value="{{ d.keywords|join:', ' }}" aria-label="Phrases for {{ d.name }}" {% if not membership.can_configure %}disabled{% endif %}>
+    <div>{% if membership.can_configure %}<button class="btn btn-quiet btn-sm">Save</button>{% endif %}</div>
+  </form>
+  {% endfor %}
+</section>
+{% endblock %}

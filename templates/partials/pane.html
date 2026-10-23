@@ -1,0 +1,52 @@
+{% load lexflow %}
+<div class="lf-pane-head">
+  <svg width="20" height="20" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b6b67"/><path d="M8 10h9M8 15h6M8 20h9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="23" cy="20" r="3.2" fill="#f4e4a1"/></svg>
+  LexFlow
+  <small>{{ selected.ref }}</small>
+</div>
+<div class="lf-pane-body">
+  {% if matter %}
+    <div class="lf-pane-type">
+      {% if matter.matter_type %}
+      <strong>{{ matter.matter_type.name }}</strong>
+      {{ matter.matter_type.german_name }}, classified with {{ matter.type_pct }}% confidence
+      {% else %}
+      <strong>Type not recognised</strong>
+      Choose the matter type in the review.
+      {% endif %}
+    </div>
+    {% if pane_conflicts %}
+    <div class="lf-alert-seal">
+      <strong><i aria-hidden="true" class="bi bi-exclamation-octagon me-1"></i>Conflict detected — review required</strong>
+      {% for f in pane_conflicts %}{{ f.note }}{% if not forloop.last %}<br>{% endif %}{% endfor %}
+    </div>
+    {% endif %}
+    {% if pane_fields %}
+    <div class="lf-pane-fields">
+      {% for f in pane_fields %}
+      <div class="lf-pane-field {% if f.status == 'conflict' %}seal{% endif %}">
+        <span class="l">{{ f.definition.label }}</span>
+        <span class="v">{% if f.display_value %}{{ f.display_value }}{% else %}<span class="lf-faint fw-normal">Not found</span>{% endif %}</span>
+        <span class="p lf-meter--{{ f|meter_tone }}">{% if f.status == 'conflict' %}<i aria-hidden="true" class="bi bi-exclamation-triangle-fill"></i> {% endif %}{{ f.confidence_pct }}%</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="d-flex align-items-center justify-content-between">
+      <span class="lf-chip lf-chip--{{ matter.status|matter_tone }}">{{ matter.get_status_display }}</span>
+      <a class="btn btn-primary btn-sm" href="{% url 'matters:review' matter.ref %}" {% if pane_target %}target="{{ pane_target }}"{% endif %}>Open review</a>
+    </div>
+  {% else %}
+    <div class="lf-empty-pane">
+      <i aria-hidden="true" class="bi bi-magic"></i>
+      <div class="fw-semibold text-body mb-1">Not processed yet</div>
+      LexFlow will classify the {{ selected.files.count }} attachment{{ selected.files.count|pluralize }}, extract the fields and flag anything uncertain.
+    </div>
+    <form method="post" action="{% url 'intake:process' selected.ref %}">
+      {% csrf_token %}
+      {% if pane_target %}<input type="hidden" name="next" value="pane">{% endif %}
+      <button class="btn btn-primary w-100"><i aria-hidden="true" class="bi bi-lightning-charge me-1"></i>Process with LexFlow</button>
+    </form>
+  {% endif %}
+  <p class="lf-xs lf-faint mb-0">Data stays inside {{ selected.tenant.name }}'s encrypted tenant. Nothing is written to other systems until a notary approves.</p>
+</div>

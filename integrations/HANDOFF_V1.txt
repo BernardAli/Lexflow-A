@@ -1,0 +1,114 @@
+LEXFLOW AUTHENTICATED HANDOFF v1
+
+Scope
+-----
+This is a documented LexFlow interface for a destination adapter. It is not a
+vendor or BNotK interface. A chosen vendor's supported schema and write mechanism
+must be implemented and accepted separately. The supplied reference_receiver.py
+is an independent, synthetic-only contract fixture with its own durable database.
+
+Sender configuration
+--------------------
+The deployment operator maps an endpoint key to one exact HTTPS URL:
+  LEXFLOW_WEBHOOK_ENDPOINTS={"office-import":"https://receiver.example.invalid/v1/handoffs"}
+
+Supply a random 32–64 character shared secret through a private regular file
+(mode 0600), separately to the sender and destination. In the dedicated stack:
+  python manage.py configure_http_connector --name "Office import v1" \
+    --endpoint-key office-import --destination "Approved office destination" \
+    --secret-file /run/secrets/handoff-key
+
+Changing a connector that already has exports requires a new versioned name.
+Retain historical secrets/receipts under the office's key policy. The application
+stores the connector secret encrypted. URLs come only from operator settings;
+request data cannot choose a network destination. Credentials in URLs, query
+strings and fragments are rejected. Redirects are not followed. TLS certificate
+and hostname verification use the operating system's trusted CA store. Private
+endpoints must be explicitly configured by the operator. No proxy environment is
+used. The only plaintext exception is explicitly enabled loopback demonstration
+traffic in development mode; production settings cannot enable that exception.
+
+Request
+-------
+POST to the configured URL, Content-Type: application/json.
+Headers:
+  X-LexFlow-Version: 1
+  X-LexFlow-Timestamp: integer UTC Unix seconds
+  Idempotency-Key: 64 lowercase hex characters, stable across retries
+  X-LexFlow-Transfer: transfer reference
+  X-LexFlow-SHA256: lowercase SHA256 of the exact UTF-8 request body
+  X-LexFlow-Approval: digest of the frozen approval snapshot
+  X-LexFlow-Signature: lowercase HMAC-SHA256 described below
+
+Request signature input is UTF-8, with LF separators and NO trailing LF:
+  lexflow-request-v1\n{timestamp}\n{idempotency_key}\n{sha256}\n{approval_hash}\n{transfer}
+Sign with HMAC-SHA256 using the shared secret's UTF-8 bytes as the key.
+
+JSON body:
+  schema: "lexflow.handoff/1"
+  data_class: "synthetic" or "office", frozen at approval
+  ref: matter reference
+  matter_type: configured workflow key
+  approved_at: ISO 8601 timestamp
+  approved_by: approver's frozen display name or username
+  data: nested object produced by the office's approved destination mappings
+
+Sign/hash raw body bytes; do not reserialize them before checking. The reference
+receiver rejects bodies above 2 MiB, signatures outside a 300-second clock
+window, malformed metadata, unsigned/changed bodies and non-synthetic inputs.
+
+Destination behavior
+--------------------
+1. Validate authentication, version, schema and destination-specific field rules.
+2. Bind the idempotency key to the checksum, approval and transfer reference.
+3. Commit the import durably before returning acceptance. A matching repeat
+   returns the ORIGINAL receipt; a reused key with different content returns 409.
+4. Return a signed receipt. A vendor adapter must align the idempotency record
+   with actual vendor acceptance; a local queue write alone is not vendor delivery.
+
+Receipt
+-------
+HTTP 200 (matching repeat) or 201 (new acceptance), JSON envelope:
+  {"receipt": {...}, "signature": "lowercase HMAC hex"}
+Required receipt fields:
+  version: 1
+  status: "accepted"
+  idempotency_key, sha256, approval_hash, transfer: exact request bindings
+  reference: nonempty destination receipt/case reference, at most 200 characters
+Additional authenticated metadata is permitted. The reference includes its
+destination label and received_at timestamp.
+
+Canonical receipt bytes use UTF-8 JSON with keys sorted, separators (",", ":"),
+unescaped Unicode, and no trailing LF (Python json.dumps with sort_keys=True,
+separators=(",", ":"), ensure_ascii=False). The signed message is:
+  UTF-8("lexflow-receipt-v1\n") + canonical_receipt_bytes
+Sign it with HMAC-SHA256 using the shared secret. Request/receipt domain prefixes
+differ. The sender rejects oversized responses (>16 KiB), non-acceptance status,
+incorrect signatures, missing references or mismatched payload/approval bindings.
+
+Delivery and retries
+--------------------
+An approver creates an export, then explicitly sends it. Consequential requests
+serialize against approval/reopen with the office lock. A timeout or invalid
+receipt leaves the export pending and the matter approved; it does not start
+retention. A retry uses the same approved bytes and idempotency key. There is no
+automatic background retry scheduler. A signed accepted receipt is encrypted and
+its digest bound into the audit trail before delivery is recorded. HTTP transfers
+cannot use a typed manual receipt to bypass authentication. Delivered transfers
+are returned without a second send. Superseded approvals cannot be sent.
+
+Try the independent destination
+-------------------------------
+  python integrations/reference_receiver.py --database /private/receiver.sqlite3 \
+    --secret-file /private/handoff-key --port 8091
+
+It binds 127.0.0.1 only. Alternatively start the complete synthetic presentation:
+  .venv/bin/python tools/presentation_demo.py --http-handoff
+
+Verification
+------------
+apps/core/tests/test_handoff.py exercises actual HTTP, durable remote bytes,
+wrong keys, expired timestamps, invalid receipt signatures, role/reopen gates
+and recovery after a response is lost following remote acceptance.
+tools/verify_pilot_acceptance.py checks a separate receiver process, remote
+scanner/email intake, encrypted recovery, independent checkpoints and extraction.

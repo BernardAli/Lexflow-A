@@ -1,0 +1,16 @@
+{
+  "mode": "live_pilot",
+  "ready": false,
+  "errors": [
+    "An active HTTP connector lacks a valid HTTPS endpoint or signing secret.",
+    "Disable development/debug and demonstration modes.",
+    "Use the dedicated PostgreSQL deployment for the live pilot's locking guarantees.",
+    "Use a clean live database without seeded demonstration intakes.",
+    "Record an agreed office baseline before measuring the pilot.",
+    "Record a validated destination receipt for a sanitized live-pilot acceptance case."
+  ],
+  "office_count": 1,
+  "scope": "Property purchase; digital PDF/text and optional local OCR; approved file/HTTP handoff with receipt",
+  "local_ocr_enabled": true,
+  "external_acceptance": "Vendor schema, hosting/operations and client acceptance must be validated separately."
+}

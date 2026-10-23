@@ -1,0 +1,19 @@
+{
+  "matters": 38,
+  "exports": 31,
+  "offices": 2,
+  "audit_chains": [
+    {
+      "office": "keller",
+      "verified": true,
+      "events": 226
+    },
+    {
+      "office": "hoffmann",
+      "verified": true,
+      "events": 23
+    }
+  ],
+  "migration": "connectors.0003_authenticated_http_handoff",
+  "pre_migration_snapshot": "/tmp/lexflow-before-http-migration-9cdgyp8w/db.sqlite3"
+}

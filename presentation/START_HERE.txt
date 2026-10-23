@@ -1,0 +1,90 @@
+LEXFLOW AI — DEDICATED-OFFICE PILOT PRESENTATION
+
+Open LexFlow_Pilot_Presentation.pptx for the editable 12-slide deck, or use
+LexFlow_Pilot_Presentation.pdf. slide-content.json contains reusable slide text.
+The original client deck remains unchanged.
+
+START
+
+  .venv/bin/python tools/presentation_demo.py --http-handoff --port 8010
+
+Open http://127.0.0.1:8010/presentation/
+Synthetic accounts: keller.clerk, keller.notar, admin
+Synthetic password: lexflow-demo-2026
+
+The HTTP option starts an independent synthetic-only receiver process/database.
+The launcher detects local Tesseract and adds a scan example when OCR is available.
+This workspace has a local OCR runtime under .pilot-tools/ (excluded from builds).
+On another host install Tesseract German/English packs and Poppler. The dedicated
+container definition includes those packages; its build still needs validation.
+
+--reset archives the previous synthetic demo under /tmp and prepares fresh cases.
+--prepare-only prepares the file demonstration without starting network services.
+--port chooses the web port. Existing db.sqlite3 and vault/ stay separate.
+
+SEVEN-MINUTE CORE WALKTHROUGH
+
+00:00–01:00 — As keller.clerk, open the Becker intake and show its attachments.
+Process with LexFlow. Explain that the web Inbox represents the employee workflow;
+native Outlook/Word add-ins remain a separate milestone. The remote scanner/email
+client is implemented and has a real API acceptance drill.
+
+01:00–03:00 — Open the Anna Schmidt property conflict from the presenter guide.
+Click Land register sheet. Questionnaire/register say Blatt 812; contract says
+872. Show blocked approval. Choose the register's value and confirm the price.
+Show that the clerk cannot approve the matter.
+
+03:00–04:00 — Briefly show Workflow studio: required fields, review policy and
+explicit destination mappings. Source selections update the case; reusable labels
+are administered separately so a client's name is not automatically learned.
+
+04:00–05:00 — Sign in as keller.notar and approve the matter. Values, mappings
+and approval identity are frozen. Select HTTP reference receiver and create the
+approved export. Export creation alone does not mark it delivered.
+
+05:00–06:00 — Select Send to HTTP destination. The separate receiver validates
+the signed request, commits the actual bytes and returns a matching signed
+receipt. Delivery is recorded only after verification. Explain that this is a
+reference destination using the documented LexFlow contract, not a vendor system.
+
+06:00–07:00 — Show Audit and Overview. Conflict, review, approval, export, send
+and signed receipt are traceable. Metrics are a labelled synthetic cohort. Show
+the verification evidence: 100 PostgreSQL tests, real concurrency, encrypted
+restore drills on both database engines, and 64 synthetic extraction checks.
+
+OPTIONAL TWO-MINUTE EXTENSION
+
+Open the scanned property purchase from the presenter guide. Show the local OCR
+text and source highlights. Open the original. Approval stays blocked until the
+reviewer acknowledges checking every page and confirms the price. OCR is a
+proposal for review, not a calibrated probability of correctness.
+
+The XML file export and checksum-checking demo receiver remain available as an
+alternative. Select the XML connector, create the export and run the demo receiver.
+Its receipt is explicitly a synthetic file-receiver receipt.
+
+WHAT THE BUILD NOW SUPPORTS
+
+- Local digital PDF/text and OCR for scanned PDFs/images, with explicit review.
+- Remote scanner/saved-email intake using only the office API token.
+- Conflict handling, source-linked corrections and role-based frozen approval.
+- File export and authenticated HTTP handoff with safe idempotent retries.
+- Encrypted private data, signed audit state and independent audit checkpoints.
+- Encrypted backup/restore with source, private-field, approval and export checks.
+- PostgreSQL row-lock tests and reproducible synthetic acceptance drills.
+
+WHAT STILL NEEDS CLIENT ACCEPTANCE
+
+The actual vendor interface/import and receipt; hosted containers/TLS/operations;
+representative sanitized office samples and measured manual baseline; agreed
+scope and compliance review. Native Office plugins, SSO and additional hosting
+models remain roadmap scope. No legal certification or customer savings are claimed.
+
+EVIDENCE AND HANDOFF
+
+presentation/VERIFICATION.txt and verification.json: current results and limits.
+presentation/postgres-acceptance.json and sqlite-acceptance.json: complete drills.
+presentation/extraction-evaluation.json: 12 cases / 64 checks, explicitly synthetic.
+integrations/HANDOFF_V1.txt: implementable sender/receiver contract.
+deployment/OPERATIONS.txt: provisioning, agent, backup, recovery and custody steps.
+README.md: setup and commands. PROJECT_REVIEW.txt and review/ are historical.

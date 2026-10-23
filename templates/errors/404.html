@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+{% block content %}
+<div class="lf-empty" style="padding:96px 20px">
+  <i aria-hidden="true" class="bi bi-search"></i>
+  <h1 class="lf-title mb-2">Nothing here</h1>
+  <p class="lf-muted">The page or record doesn't exist in this office. Records from other offices are never shown.</p>
+  {% if request.user.is_authenticated %}<a class="btn btn-quiet" href="{% url 'core:dashboard' %}">Back to overview</a>{% else %}<a class="btn btn-quiet" href="{% url 'core:login' %}">Sign in</a>{% endif %}
+</div>
+{% endblock %}

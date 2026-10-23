@@ -1,0 +1,63 @@
+# One stack, database, master key and volumes per office. Put behind an HTTPS
+# proxy on the same isolated network. Never publish PostgreSQL to the host.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: lexflow
+      POSTGRES_USER: lexflow
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a database secret}
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lexflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  app:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    env_file: pilot.env
+    environment:
+      DJANGO_DEBUG: "0"
+      LEXFLOW_DEMO_MODE: "0"
+      LEXFLOW_DEPLOYMENT: dedicated
+      LEXFLOW_VAULT_ROOT: /data/vault
+      LEXFLOW_EXPORT_ROOT: /data/exports
+      USE_POSTGRES: "1"
+      POSTGRES_DB: lexflow
+      POSTGRES_USER: lexflow
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a database secret}
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - "8000"
+    volumes:
+      - files:/data
+      - static:/app/staticfiles
+    restart: unless-stopped
+  proxy:
+    image: caddy:2
+    environment:
+      LEXFLOW_PUBLIC_HOST: ${LEXFLOW_PUBLIC_HOST:?Set the pilot HTTPS hostname}
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - static:/srv/static:ro
+      - certificates:/data
+      - proxy_config:/config
+    restart: unless-stopped
+volumes:
+  certificates:
+  proxy_config:
+  database:
+  files:
+  static:

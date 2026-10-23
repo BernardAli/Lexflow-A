@@ -1,0 +1,10 @@
+Creating test database for alias 'default'...
+...........................EOF marker not found
+....................................................sssss................
+----------------------------------------------------------------------
+Ran 100 tests in 48.670s
+
+OK (skipped=5)
+Destroying test database for alias 'default'...
+Found 100 test(s).
+System check identified no issues (0 silenced).

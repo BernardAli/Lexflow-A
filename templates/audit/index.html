@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Audit trail{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <h1 class="lf-title">Audit trail</h1>
+    <p class="lf-sub">Who did what, and when. Each event is sealed with the hash of the one before it, so a changed or deleted entry is detected.</p>
+  </div>
+  <a class="btn btn-quiet btn-sm" href="{% url 'audit:export' %}?group={{ group }}&q={{ q|urlencode }}"><i aria-hidden="true" class="bi bi-download me-1"></i>Export CSV</a>
+</div>
+
+<div class="lf-chain mb-4 {% if not chain.ok %}broken{% endif %}">
+  <i aria-hidden="true" class="ico bi {% if chain.ok %}bi-shield-check{% else %}bi-shield-exclamation{% endif %}"></i>
+  <div class="flex-grow-1">
+    {% if chain.ok %}
+    <strong>Chain verified: {{ chain.checked|intcomma }} events, no gaps or changes</strong>
+    <span class="lf-small lf-muted">Latest seal <span class="lf-hash">{{ chain.head|slice:":24" }}…</span></span>
+    {% else %}
+    <strong>Chain broken at event #{{ chain.broken_at }}</strong>
+    <span class="lf-small">{{ chain.reason }}</span>
+    {% endif %}
+  </div>
+  <div class="lf-links d-none d-md-flex" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+</div>
+
+<form class="d-flex gap-2 mb-3 flex-wrap" method="get">
+  <nav class="lf-tabs mb-0 flex-grow-1" style="border-bottom:0">
+    {% for v, l in groups %}<a href="?group={{ v }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if group == v %}aria-current="true"{% endif %}>{{ l }}</a>{% endfor %}
+  </nav>
+  <input type="hidden" name="group" value="{{ group }}">
+  <input class="form-control form-control-sm" style="width:240px" type="search" name="q" value="{{ q }}" placeholder="Reference, person or text" aria-label="Search audit trail">
+</form>
+
+<section class="lf-panel lf-table-wrap">
+  <table class="lf-table">
+    <thead><tr><th class="text-end">#</th><th>When</th><th>Who</th><th>What</th><th>Object</th><th>Seal</th></tr></thead>
+    <tbody>
+      {% for e in page %}
+      <tr>
+        <td class="text-end num lf-muted">{{ e.seq }}</td>
+        <td class="lf-small text-nowrap">{{ e.created_at|date:"j M Y, H:i:s" }}</td>
+        <td class="lf-small text-nowrap">{% if e.actor_id %}{{ e.actor_label }}{% else %}<span class="lf-muted">{{ e.actor_label }}</span>{% endif %}</td>
+        <td><div class="lf-small fw-semibold">{{ e.summary }}</div><div class="lf-xs lf-faint">{{ e.action }}</div></td>
+        <td class="lf-small">{% if e.object_type == 'matter' %}<a class="lf-ref" href="{% url 'matters:review' e.object_ref %}">{{ e.object_ref }}</a>{% else %}{{ e.object_ref }}{% endif %}</td>
+        <td><span class="lf-hash" title="prev {{ e.prev_hash }}&#10;this {{ e.hash }}">{{ e.hash|slice:":10" }}</span></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6"><div class="lf-empty">No events match.</div></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% if page.has_other_pages %}
+<nav class="d-flex justify-content-between align-items-center mt-3 lf-small">
+  <span class="lf-muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+  <span class="d-flex gap-2">
+    {% if page.has_previous %}<a class="btn btn-quiet btn-sm" href="?group={{ group }}&q={{ q|urlencode }}&page={{ page.previous_page_number }}">Newer</a>{% endif %}
+    {% if page.has_next %}<a class="btn btn-quiet btn-sm" href="?group={{ group }}&q={{ q|urlencode }}&page={{ page.next_page_number }}">Older</a>{% endif %}
+  </span>
+</nav>
+{% endif %}
+{% endblock %}

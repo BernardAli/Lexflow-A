@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load lexflow humanize %}
+{% block title %}Inbox{% endblock %}
+{% block content_class %}lf-content--flush{% endblock %}
+{% block top_actions %}<a class="btn btn-primary btn-sm" href="{% url 'intake:new' %}"><i aria-hidden="true" class="bi bi-plus-lg me-1"></i>New intake</a>{% endblock %}
+{% block content %}
+<div class="lf-mail">
+  <nav class="lf-mail-list" aria-label="Messages">
+    <div class="lf-mail-tools">
+      <select class="form-select form-select-sm" aria-label="Filter by source" onchange="location.href='?source='+this.value">
+        <option value="">All sources</option>
+        {% for v, l in sources %}<option value="{{ v }}" {% if source == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select>
+    </div>
+    {% for m in items %}
+    <a class="lf-mail-item {% if m.status == 'new' %}unread{% endif %}" href="?m={{ m.ref }}{% if source %}&source={{ source }}{% endif %}" {% if selected and m.pk == selected.pk %}aria-current="true"{% endif %}>
+      <div class="from"><span class="text-truncate">{{ m.sender_name|default:m.sender_email|default:"Unknown sender" }}</span><time datetime="{{ m.received_at|date:'c' }}">{{ m.received_at|naturaltime }}</time></div>
+      <div class="subj">{{ m.subject }}</div>
+      <div class="meta">
+        {% if m.status == 'new' %}<span class="lf-chip lf-chip--ink">Not processed</span>
+        {% elif m.matter %}<span class="lf-chip lf-chip--{{ m.matter.status|matter_tone }}">{{ m.matter.get_status_display }}</span>{% endif %}
+        <span>{{ m.get_source_display }}</span>
+      </div>
+    </a>
+    {% empty %}
+    <div class="lf-empty"><i aria-hidden="true" class="bi bi-inbox"></i>No messages yet. Use New intake or connect the Outlook plugin.</div>
+    {% endfor %}
+  </nav>
+
+  {% if selected %}
+  <article class="lf-mail-read">
+    <h1>{{ selected.subject }}</h1>
+    <div class="lf-mail-from">
+      <span class="lf-avatar">{{ selected.sender_name|default:"?"|slice:":1" }}</span>
+      <div class="lh-sm">
+        <div class="fw-semibold">{{ selected.sender_name|default:"Unknown sender" }} {% if selected.sender_email %}<span class="lf-muted fw-normal">&lt;{{ selected.sender_email }}&gt;</span>{% endif %}</div>
+        <div class="lf-small lf-muted">{{ selected.received_at|date:"D j M Y, H:i" }} via {{ selected.get_source_display }}</div>
+      </div>
+    </div>
+    {% with body=selected.body %}
+    {% if body %}<div class="lf-mail-body">{{ body }}</div>{% else %}<p class="lf-muted fst-italic">No message text — documents only.</p>{% endif %}
+    {% endwith %}
+    <div class="lf-files">
+      {% for f in files %}
+      <a class="lf-file" href="{% url 'intake:download' f.pk %}{% if f.filename|lower|slice:'-4:' == '.pdf' %}?inline=1{% endif %}" target="_blank" rel="noopener">
+        <i aria-hidden="true" class="bi {{ f|doc_icon }}"></i>
+        <span>{{ f.filename }}<span class="k">{% if f.doc_type %}{{ f.doc_type.name }}{% else %}{{ f.size|filesizeformat }}{% endif %}</span></span>
+      </a>
+      {% endfor %}
+    </div>
+  </article>
+  <aside class="lf-pane" aria-label="LexFlow add-in">
+    {% include "partials/pane.html" %}
+  </aside>
+  {% else %}
+  <div class="lf-mail-read"><div class="lf-empty">Select a message.</div></div>
+  <aside class="lf-pane"></aside>
+  {% endif %}
+</div>
+{% endblock %}

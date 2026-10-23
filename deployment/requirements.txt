@@ -1,0 +1,3 @@
+-r ../requirements.txt
+gunicorn>=23,<26
+psycopg[binary]>=3.2,<4

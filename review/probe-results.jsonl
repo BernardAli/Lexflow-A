@@ -1,0 +1,15 @@
+{"probe": "approved_mapping_mutates", "admin_http_status": 302, "approved": true, "payload_changed": true, "buyer_name_missing": true, "duplicate_destination_count": 2}
+{"probe": "stale_edit_after_approval", "new_value": "Erika Mustermann", "resulting_status": "ready", "approved_at_erased": true, "approval_audit_still_present": true}
+{"probe": "plaintext_structured_data", "raw_database_value": "Erika Mustermann", "raw_database_normalized": "Erika Mustermann"}
+{"probe": "retention_breaks_shared_blob_and_keeps_body", "shared_blob": true, "old_attachment_purged": true, "active_download_error": "FileNotFoundError", "original_email_body_retained": true}
+{"probe": "learning_persists_personal_prefix", "learned": "Anna Schmidt", "client_name_in_rules": true, "client_name_in_audit": true}
+{"probe": "ungrounded_llm_auto_prefill", "candidates": 3, "status": "auto", "confidence": "0.9270", "all_source_spans_empty": true}
+{"probe": "same_document_conflict_ignored", "candidates": 1, "normalized": "München Blatt 812", "status": "auto", "confidence": "0.9600"}
+{"probe": "duplicate_document_inflates_confidence", "unique_document_hashes": 1, "candidate_count": 2, "status": "auto", "confidence": "0.9856"}
+{"probe": "gmbh_default_mapping_crashes", "matter_type": "gmbh-formation", "director_present": true, "birthdate_present": true, "error": "'str' object does not support item assignment"}
+{"probe": "api_upload_limit_bypassed", "configured_limit_bytes": 1048576, "upload_bytes": 1048577, "http_status": 201}
+{"probe": "corrupt_pdf_leaves_orphan", "exception": "PdfStreamError", "messages_created": 0, "orphan_blobs": 1}
+{"probe": "audit_tail_deletion_undetected", "queryset_deleted": 1, "verifies": true, "events_remaining": 1}
+{"probe": "api_blocked_omits_review_gate", "api_blocked": false, "approval_blockers": ["Check Purchase price."]}
+{"probe": "transfer_delivered_without_transport", "status": "delivered", "configured_destination_url": false, "stored_payload_bytes": 688}
+{"summary": {"probes_completed": 14, "database": ":memory:", "vault": "temporary"}}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}New intake{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <h1 class="lf-title">New intake</h1>
+    <p class="lf-sub">Add an email and its attachments the way they arrived. LexFlow stores every file encrypted with your office key before reading it.</p>
+  </div>
+</div>
+<form method="post" enctype="multipart/form-data" class="row g-4" novalidate>
+  {% csrf_token %}
+  <div class="col-lg-7">
+    <section class="lf-panel lf-panel-pad">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label" for="sender_name">Sender name</label>
+          <input class="form-control" id="sender_name" name="sender_name" value="{{ form.sender_name|default:'' }}" placeholder="Anna Schmidt">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label" for="sender_email">Sender email</label>
+          <input class="form-control" type="email" id="sender_email" name="sender_email" value="{{ form.sender_email|default:'' }}" placeholder="anna@example.test">
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="subject">Subject</label>
+          <input class="form-control" id="subject" name="subject" required value="{{ form.subject|default:'' }}" placeholder="Unterlagen zum Kauf der Wohnung …">
+          <div class="form-text">Words like Kaufvertrag, GmbH or Vollmacht help LexFlow pick the workflow.</div>
+        </div>
+        <div class="col-12">
+          <label class="form-label" for="body">Email text</label>
+          <textarea class="form-control" id="body" name="body" rows="7" placeholder="Paste the message text, if any.">{{ form.body|default:'' }}</textarea>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="lf-panel lf-panel-pad">
+      <label class="form-label" for="files">Documents</label>
+      <label class="lf-drop d-block" id="drop" for="files">
+        <i aria-hidden="true" class="bi bi-cloud-arrow-up"></i>
+        <div class="fw-semibold mt-1">Drop PDFs here or choose files</div>
+        <div class="lf-small lf-muted">PDF, text or scanned images, up to 20 MB each</div>
+        <input class="visually-hidden" type="file" id="files" name="files" multiple accept=".pdf,.txt,.eml,.png,.jpg,.jpeg,.tif,.tiff">
+      </label>
+      <ul class="list-unstyled lf-small mt-2 mb-0" id="file-list"></ul>
+      <hr>
+      <label class="form-label" for="source">Arrived through</label>
+      <select class="form-select mb-3" id="source" name="source">
+        <option value="email">Outlook / email</option>
+        <option value="upload" selected>Manual upload</option>
+        <option value="folder">Scanner / folder agent</option>
+      </select>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="process" name="process" checked>
+        <label class="form-check-label" for="process">Process with LexFlow right away</label>
+      </div>
+      <button class="btn btn-primary w-100">Add to inbox</button>
+    </section>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var input = document.getElementById('files'), drop = document.getElementById('drop'), list = document.getElementById('file-list');
+  function show() {
+    list.innerHTML = '';
+    Array.prototype.forEach.call(input.files, function (f) {
+      var li = document.createElement('li');
+      li.className = 'd-flex justify-content-between py-1 border-bottom';
+      li.innerHTML = '<span></span><span class="lf-muted"></span>';
+      li.children[0].textContent = f.name;
+      li.children[1].textContent = Math.max(1, Math.round(f.size / 1024)) + ' KB';
+      list.appendChild(li);
+    });
+  }
+  input.addEventListener('change', show);
+  ['dragenter', 'dragover'].forEach(function (e) { drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (e) { drop.addEventListener(e, function (ev) { ev.preventDefault(); drop.classList.remove('over'); }); });
+  drop.addEventListener('drop', function (ev) { input.files = ev.dataTransfer.files; show(); });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Connectors{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <h1 class="lf-title">Connectors</h1>
+    <p class="lf-sub">Approved snapshots produce checksummed XML, JSON and CSV exports. A confirmed destination receipt is required before delivery is recorded.</p>
+  </div>
+</div>
+<div class="lf-split mb-4">
+  <section class="lf-panel">
+    <div class="lf-panel-head"><h2>Configured for {{ tenant.name }}</h2></div>
+    {% for c in connectors %}
+    <div class="lf-connector">
+      <span class="ico"><i aria-hidden="true" class="bi {% if c.kind == 'xml' %}bi-filetype-xml{% elif c.kind == 'json' %}bi-braces{% else %}bi-filetype-csv{% endif %}"></i></span>
+      <div>
+        <div class="fw-semibold">{{ c.name }}</div>
+        <div class="lf-small lf-muted">{{ c.description }}</div>
+        <div class="lf-xs lf-faint mt-1">Prepared for {{ c.destination }} · {{ c.get_delivery_display }}{% if c.signing_secret %}, signed with HMAC-SHA256{% endif %}</div>
+      </div>
+      <span class="lf-chip lf-chip--ink lf-chip--plain">{{ c.get_tier_display }}</span>
+    </div>
+    {% endfor %}
+  </section>
+  <section class="lf-panel lf-panel-pad">
+    <h2 class="lf-h2">Safest supported path first</h2>
+    <ol class="lf-ladder">
+      {% for name, tag, desc, on in ladder %}
+      <li class="{% if not on %}off{% endif %}"><b>{{ name }}</b><span class="d">{{ desc }}</span><span class="t"><span class="lf-chip {% if on %}lf-chip--moss{% else %}lf-chip--muted{% endif %}">{% if on %}{{ tag }}{% else %}Not used{% endif %}</span></span></li>
+      {% endfor %}
+    </ol>
+  </section>
+</div>
+<section class="lf-panel lf-table-wrap">
+  <div class="lf-panel-head"><h2>Recent transfers</h2></div>
+  <table class="lf-table">
+    <thead><tr><th>Transfer</th><th>Matter</th><th>Connector / status</th><th class="text-end">Fields</th><th>SHA-256</th><th>By</th><th>When</th><th></th></tr></thead>
+    <tbody>
+    {% for t in transfers %}
+      <tr>
+        <td class="fw-semibold num">{{ t.ref }}</td>
+        <td><a class="lf-ref" href="{% url 'matters:review' t.matter.ref %}">{{ t.matter.ref }}</a></td>
+        <td>{{ t.connector.name }}<div class="lf-xs">{{ t.get_status_display }}</div></td>
+        <td class="text-end num">{{ t.field_count }}</td>
+        <td><span class="lf-hash" title="{{ t.checksum }}">{{ t.checksum|slice:":16" }}…</span></td>
+        <td class="lf-small">{{ t.created_by.get_full_name }}</td>
+        <td class="lf-small lf-muted text-nowrap">{{ t.created_at|naturaltime }}</td>
+        <td><a class="btn btn-quiet btn-sm" href="{% url 'connectors:download' t.ref %}">Download</a></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="8"><div class="lf-empty"><i aria-hidden="true" class="bi bi-send"></i>No transfers yet. Approve a matter, then send it through a connector.</div></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

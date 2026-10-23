@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "data_class": "synthetic",
+  "description": "Explicit synthetic regression corpus, separate from the demo generator. No office accuracy claim.",
+  "cases": [
+    {
+      "id": "digital-complete",
+      "subject": "Grundstück Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"format": "pdf", "text": "Käuferfragebogen\nKäufer: Maria Beispiel\nGeburtsdatum: 21.08.1987\nAnschrift: Lindenweg 12, 10115 Berlin\nVerkäufer: Thomas Muster\nKaufpreis: 425.500,00 EUR\nGrundbuch: Berlin Blatt 421\nFlurstück: 123/4\nObjektanschrift: Parkstraße 9, 10115 Berlin\nÜbergabetermin: 15.02.2027"}],
+      "expected": {"buyer_name": "Maria Beispiel", "buyer_birthdate": "1987-08-21", "buyer_address": "Lindenweg 12, 10115 Berlin", "seller_name": "Thomas Muster", "purchase_price": "425500.00", "grundbuch": "Berlin Blatt 421", "parcel": "123/4", "property_address": "Parkstraße 9, 10115 Berlin", "handover_date": "2027-02-15"}
+    },
+    {
+      "id": "alternate-labels",
+      "subject": "Immobilie Kauf",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Erwerber: Emil Beispiel\ngeboren am: 09.11.1991\nWohnanschrift: Talweg 8, 10115 Berlin\nVeräußerer: Laura Muster\nGesamtkaufpreis: 1.250.000,00 EUR\nGrundbuchblatt: Berlin Blatt 987\nFlst.: 98/2\nLage: Gartenweg 2, 10115 Berlin\nBesitzübergang: 30.06.2027"}],
+      "expected": {"buyer_name": "Emil Beispiel", "buyer_birthdate": "1991-11-09", "seller_name": "Laura Muster", "purchase_price": "1250000.00", "grundbuch": "Berlin Blatt 987", "parcel": "98/2", "handover_date": "2027-06-30"}
+    },
+    {
+      "id": "same-document-register-conflict",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Grundbuch: Köln Blatt 512\nGrundbuch: Köln Blatt 521\nKäufer: Nora Beispiel"}],
+      "expected": {"buyer_name": "Nora Beispiel"},
+      "conflicts": ["grundbuch"]
+    },
+    {
+      "id": "cross-document-price-conflict",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Käufer: Nora Beispiel\nKaufpreis: 510.000,00 EUR"}, {"text": "Kaufvertrag Entwurf\nKaufpreis: 515.000,00 EUR"}],
+      "conflicts": ["purchase_price"]
+    },
+    {
+      "id": "missing-required-values",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Käuferfragebogen\nKäufer: Max Beispiel\nDer Preis wird später vereinbart. Kein Datum angegeben."}],
+      "expected": {"buyer_name": "Max Beispiel", "purchase_price": null, "buyer_birthdate": null, "grundbuch": null}
+    },
+    {
+      "id": "invalid-date-and-price",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Käufer: Max Beispiel\nGeburtsdatum: 31.02.2020\nKaufpreis: noch offen"}],
+      "expected": {"buyer_name": "Max Beispiel", "buyer_birthdate": null, "purchase_price": null}
+    },
+    {
+      "id": "umlauts-and-hyphenated-names",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Käufer: Anna-Lena Müller\nVerkäufer: Jörg Schäfer\nGrundbuch: München Blatt 229\nKaufpreis: 275.000,50 EUR"}],
+      "expected": {"buyer_name": "Anna-Lena Müller", "seller_name": "Jörg Schäfer", "grundbuch": "München Blatt 229", "purchase_price": "275000.50"}
+    },
+    {
+      "id": "labels-on-separate-lines",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Käufer:\nLisa Beispiel\nKaufpreis:\n730.000,00 EUR\nGrundbuch:\nBonn Blatt 194"}],
+      "expected": {"buyer_name": "Lisa Beispiel", "purchase_price": "730000.00", "grundbuch": "Bonn Blatt 194"}
+    },
+    {
+      "id": "scanned-image-german",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"format": "scan", "text": "Käuferfragebogen\nKäufer: Felix Beispiel\nGeburtsdatum: 14.05.1982\nVerkäufer: Julia Muster\nKaufpreis: 420.000,00 EUR\nGrundbuch: Berlin Blatt 745"}],
+      "expected": {"buyer_name": "Felix Beispiel", "buyer_birthdate": "1982-05-14", "seller_name": "Julia Muster", "purchase_price": "420000.00", "grundbuch": "Berlin Blatt 745"}
+    },
+    {
+      "id": "image-only-pdf",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"format": "scanned_pdf", "text": "Kaufvertrag Entwurf\nKäufer: Lena Beispiel\nGeburtsdatum: 18.07.1990\nVerkäufer: Tobias Muster\nKaufpreis: 635.000,00 EUR\nGrundbuch: Hamburg Blatt 361"}],
+      "expected": {"buyer_name": "Lena Beispiel", "buyer_birthdate": "1990-07-18", "seller_name": "Tobias Muster", "purchase_price": "635000.00", "grundbuch": "Hamburg Blatt 361"}
+    },
+    {
+      "id": "duplicate-evidence",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Käufer: Ida Beispiel\nGrundbuch: Dresden Blatt 103"}, {"text": "Käufer: Ida Beispiel\nGrundbuch: Dresden Blatt 103"}],
+      "expected": {"buyer_name": "Ida Beispiel", "grundbuch": "Dresden Blatt 103", "purchase_price": null}
+    },
+    {
+      "id": "unlabelled-free-text-is-not-guessed",
+      "subject": "Kaufvertrag",
+      "matter_type": "property-purchase",
+      "documents": [{"text": "Vereinbarung zur Immobilie. Die Beteiligten beraten noch über den Erwerb. Der Betrag ist nicht festgelegt."}],
+      "expected": {"buyer_name": null, "seller_name": null, "purchase_price": null, "buyer_birthdate": null}
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "workflow": [
+    "login",
+    "source highlighting",
+    "blocked conflict",
+    "clerk review",
+    "role restriction",
+    "notary approval",
+    "frozen UI",
+    "file export awaiting receipt",
+    "checked demo receipt",
+    "verified audit",
+    "readable activity layout",
+    "mobile guide"
+  ],
+  "browserErrors": [],
+  "mobile": {
+    "width": 390,
+    "content": 390
+  },
+  "extended": {
+    "httpReceipt": true,
+    "scanReview": true
+  },
+  "syntheticDataOnly": true
+}

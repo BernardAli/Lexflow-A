@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-23",
+  "scope": "Resume the saved LexFlow pilot build and local presentation after the power cut",
+  "restart_fix": {
+    "problem": "Demo seeding failed when the office had multiple connectors of the same format, including the HTTP reference receiver",
+    "change": "Select the named seeded XML and JSON connectors when preparing synthetic history",
+    "regression": "The expanded idempotency test failed before the fix and passed in the full suite afterward; additional connectors, transfers and audit counts are preserved"
+  },
+  "tests": {
+    "command": ".venv/bin/python manage.py test apps --noinput",
+    "passed": 95,
+    "skipped": 5,
+    "skip_reason": "PostgreSQL concurrency checks require PostgreSQL",
+    "elapsed_seconds": 50.027,
+    "system_check": "passed",
+    "migration_drift": "none",
+    "dependency_check": "passed"
+  },
+  "demo": {
+    "command": ".venv/bin/python tools/presentation_demo.py --http-handoff --port 8010",
+    "url": "http://127.0.0.1:8010/presentation/",
+    "reused_existing_demo": true,
+    "readiness_passed": true,
+    "http_reference_receiver_started": true,
+    "scan_example_available": true
+  },
+  "browser": {
+    "passed": true,
+    "checks": ["login", "conflict remains blocked", "source highlighting", "scan example available", "audit chain verified", "mobile guide"],
+    "mobile_viewport_width": 390,
+    "mobile_content_width": 390,
+    "errors": []
+  },
+  "limits": [
+    "PostgreSQL and hosted deployment acceptance were not rerun during this recovery",
+    "The restored demo uses synthetic data and an independent reference receiver"
+  ]
+}

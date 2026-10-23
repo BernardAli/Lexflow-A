@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "scope": "local rules extraction",
+  "dataset_sha256": "529a1d2516fc062568285143183ce79644388bd2c9795f5ca40536e2218ae0fe",
+  "data_class": "synthetic",
+  "cases": 3,
+  "assertions": 30,
+  "passed": 30,
+  "pass_rate": 1.0,
+  "conflicts": {
+    "expected": 1,
+    "detected": 1
+  },
+  "absent_values": {
+    "expected": 0,
+    "correctly_empty": 0
+  },
+  "accepted": true,
+  "results": [
+    {
+      "id": "property-conflict",
+      "assertions": 10,
+      "passed": 10,
+      "failures": [],
+      "methods": [
+        "pdf_text",
+        "pdf_text",
+        "pdf_text"
+      ],
+      "source_sha256": [
+        "bf5d7bac585a70026cebc4b758d9772898ab6ecabc236f74146213f3323cc99f",
+        "52f83b9fb5b9c88a3798f4a4d7e488015486b58c185b3379dd976b110211b9b8",
+        "a9bb4b2614d5caec1d3602d1e6206df8f43b509d95686934a937b05b36b9360c"
+      ],
+      "elapsed_seconds": 0.072
+    },
+    {
+      "id": "property-matching",
+      "assertions": 10,
+      "passed": 10,
+      "failures": [],
+      "methods": [
+        "pdf_text",
+        "pdf_text",
+        "pdf_text"
+      ],
+      "source_sha256": [
+        "bf5d7bac585a70026cebc4b758d9772898ab6ecabc236f74146213f3323cc99f",
+        "52f83b9fb5b9c88a3798f4a4d7e488015486b58c185b3379dd976b110211b9b8",
+        "92d137e0198a21752a0eecce12ba930135477074a19315a44ab4fcb37a39dba3"
+      ],
+      "elapsed_seconds": 0.019
+    },
+    {
+      "id": "scan-review",
+      "assertions": 10,
+      "passed": 10,
+      "failures": [],
+      "methods": [
+        "pdf_ocr"
+      ],
+      "source_sha256": [
+        "9566739bce28f8603dbdec826c2eeb7d772ca462493f9b8c732d60adfeb05960"
+      ],
+      "elapsed_seconds": 1.296
+    }
+  ],
+  "limits": "Synthetic results are regression evidence, not measured real-office accuracy or calibrated confidence."
+}

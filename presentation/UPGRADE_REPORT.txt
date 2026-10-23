@@ -1,0 +1,31 @@
+LEXFLOW PILOT — UPGRADE AGAINST THE ORIGINAL PRESENTATION
+
+Assessment: approximately 8/10 for the agreed dedicated-office pilot prototype.
+This is an engineering assessment, not a measured completion percentage or a
+claim that the entire multi-profile platform is complete. A live-client 9/10
+rating still needs the chosen vendor, hosted operations and office acceptance.
+
+Previous gap                      Delivered and verified
+-------------                     ----------------------
+Scans required manual entry       Local German/English OCR for images/scanned PDF;
+                                  original-source review still blocks approval.
+Receipt only simulated in app     Actual signed HTTP transport to an independent
+                                  durable receiver; authenticated bound receipts;
+                                  lost-response retries without duplicate imports.
+Folder command needed DB/keys     Remote scanner/saved-email client needs only an
+                                  office intake token and HTTPS API access.
+PostgreSQL locking untested       Five actual concurrency tests; full 100-test
+                                  PostgreSQL suite passes.
+Recovery was an operator task     Encrypted maintenance snapshots and fresh-target
+                                  restore; both database engines tested end to end.
+Old valid DB replay undetected    Independently held signed checkpoint comparison;
+                                  regression test detects whole-database rollback.
+No extraction acceptance corpus   Twelve explicit synthetic cases, 64 checks;
+                                  reusable evaluator for sanitized office samples.
+Presentation lagged the build     Updated editable deck, PDF, talk track, extended
+                                  browser walkthrough and current evidence index.
+
+Remaining original-platform scope: native Outlook/Word/DMS integrations, a named
+notary vendor/BNotK connection, hosted deployment acceptance, SSO and additional
+hosting/commercial features. Prioritize the actual destination and client-hosted
+acceptance before expanding that roadmap.

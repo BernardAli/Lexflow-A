@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+{% block body %}
+<div class="lf-login">
+  <section class="lf-login-art" aria-label="About LexFlow">
+    <div class="d-flex align-items-center gap-2">
+      <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b6b67"/><path d="M8 10h9M8 15h6M8 20h9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="23" cy="20" r="3.2" fill="#f4e4a1"/></svg>
+      <span class="lf-brand-name text-white fs-5 fw-bold">LexFlow <span style="color:#8fb2ad;font-weight:400">AI</span></span>
+    </div>
+    <div>
+      <h1>Keep the systems. Remove the copying between them.</h1>
+      <p>LexFlow reads incoming documents, extracts the data your notary software needs, and stops for a person whenever the documents disagree.</p>
+    </div>
+    <blockquote class="lf-login-quote mb-0">
+      Im Grundbuch von <mark>München Blatt 812</mark> ist der Verkäufer <mark>Peter Müller</mark> als Eigentümer eingetragen …<br>
+      <span class="lf-small" style="font-family:var(--lf-sans);color:#8fb2ad">Kaufvertragsentwurf, § 1:</span> Grundbuch von <mark class="c">München Blatt 872</mark>
+    </blockquote>
+  </section>
+  <main class="lf-login-form">
+    <div class="lf-auth-content">
+      {% block auth_content %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'js/password-toggle.js' %}" defer></script>
+{% endblock %}

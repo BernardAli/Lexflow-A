@@ -1,0 +1,91 @@
+{% load static lexflow %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LexFlow{% endblock %} · LexFlow AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231e5250'/%3E%3Cpath d='M8 10h9M8 15h6M8 20h9' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3Ccircle cx='23' cy='20' r='3.2' fill='%23f4e4a1'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/lexflow.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+{% block body %}
+<div class="lf-shell">
+  <aside class="lf-rail" aria-label="Main navigation">
+    <a class="lf-brand" href="{% url 'core:dashboard' %}">
+      <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#2b6b67"/><path d="M8 10h9M8 15h6M8 20h9" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="23" cy="20" r="3.2" fill="#f4e4a1"/></svg>
+      <span class="lf-brand-name">LexFlow <span>AI</span></span>
+    </a>
+    <ul class="lf-nav">
+      <li><a aria-label="Overview" href="{% url 'core:dashboard' %}" {% if nav == 'overview' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-grid-1x2"></i><span class="lbl">Overview</span></a></li>
+      <li><a aria-label="Inbox" href="{% url 'intake:inbox' %}" {% if nav == 'inbox' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-inbox"></i><span class="lbl">Inbox</span></a></li>
+      <li><a aria-label="Matters" href="{% url 'matters:list' %}" {% if nav == 'matters' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-folder2-open"></i><span class="lbl">Matters</span>{% if nav_review_count %}<span class="lf-count" title="Waiting for review">{{ nav_review_count }}</span>{% endif %}</a></li>
+    </ul>
+    <div class="lf-nav-sep"></div>
+    <ul class="lf-nav">
+      <li><a aria-label="Workflow studio" href="{% url 'studio:index' %}" {% if nav == 'studio' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-diagram-3"></i><span class="lbl">Workflow studio</span></a></li>
+      <li><a aria-label="Connectors" href="{% url 'connectors:index' %}" {% if nav == 'connectors' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-plug"></i><span class="lbl">Connectors</span></a></li>
+      <li><a aria-label="Audit trail" href="{% url 'audit:index' %}" {% if nav == 'audit' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-journal-check"></i><span class="lbl">Audit trail</span></a></li>
+      <li><a aria-label="Security" href="{% url 'core:security' %}" {% if nav == 'security' %}aria-current="page"{% endif %}><i aria-hidden="true" class="bi bi-shield-lock"></i><span class="lbl">Security</span></a></li>
+    </ul>
+    {% if tenant %}
+    <div class="lf-rail-foot">
+      <strong>{{ tenant.get_security_profile_display }}</strong>
+      {{ tenant.hosting_region }}
+      <span class="lf-key"><i aria-hidden="true" class="bi bi-key"></i> Office key {{ tenant.key_fingerprint|slice:":8" }}</span>
+    </div>
+    {% endif %}
+  </aside>
+
+  <div class="lf-main">
+    <header class="lf-top">
+      {% if tenant %}
+      <div class="lf-office">{{ tenant.name }}<small>{{ tenant.city }}</small></div>
+      {% endif %}
+      <div class="lf-user">
+        {% block top_actions %}{% endblock %}
+        <div class="dropdown">
+          <button class="btn btn-quiet btn-sm d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="lf-avatar">{{ request.user|initials }}</span>
+            <span class="d-none d-md-inline text-start lh-sm">{{ request.user.get_full_name|default:request.user.username }}<br><span class="lf-xs lf-muted fw-normal">{{ membership.get_role_display }}</span></span>
+            <i aria-hidden="true" class="bi bi-chevron-down lf-xs"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-2" style="min-width:260px">
+            {% if nav_memberships|length > 1 %}
+            <div class="lf-xs lf-muted px-2 pb-1">Office</div>
+            {% for m in nav_memberships %}
+            <form method="post" action="{% url 'core:switch_tenant' %}">{% csrf_token %}<input type="hidden" name="tenant" value="{{ m.tenant_id }}">
+              <button class="dropdown-item d-flex justify-content-between rounded" {% if m.tenant_id == tenant.id %}disabled{% endif %}>{{ m.tenant.name }}{% if m.tenant_id == tenant.id %}<i aria-hidden="true" class="bi bi-check2"></i>{% endif %}</button>
+            </form>
+            {% endfor %}
+            <hr class="dropdown-divider">
+            {% endif %}
+            <form method="post" action="{% url 'core:logout' %}">{% csrf_token %}<button class="dropdown-item rounded">Sign out</button></form>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="{% block content_class %}lf-content{% endblock %}" id="main">
+      {% if demo_mode %}<div class="lf-well lf-small mb-3"><strong>Presentation demo · synthetic data</strong> · Export and receipt workflow; destination vendor integration is a separate pilot milestone. <a href="{% url 'core:presentation' %}">Presenter guide</a></div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% if messages %}
+<div class="lf-flash" role="status" aria-live="polite">
+  {% for m in messages %}
+  <div class="lf-toast {% if m.level_tag == 'error' %}error{% endif %}"><i aria-hidden="true" class="bi {% if m.level_tag == 'error' %}bi-exclamation-octagon{% else %}bi-check2-circle{% endif %}"></i><span>{{ m }}</span><button type="button" aria-label="Dismiss" onclick="this.parentElement.remove()"><i aria-hidden="true" class="bi bi-x-lg"></i></button></div>
+  {% endfor %}
+</div>
+{% endif %}
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script>
+  document.querySelectorAll('.lf-toast:not(.error)').forEach(function (t) { setTimeout(function () { t.remove(); }, 6000); });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

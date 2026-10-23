@@ -1,0 +1,110 @@
+LEXFLOW AI — CURRENT PILOT PROTOTYPE VERIFICATION
+22 October 2026
+
+ASSESSED SCOPE
+
+One dedicated office; synthetic property-purchase intake; local PDF/text and scan
+reading; source review; frozen approval; file export or authenticated HTTP handoff;
+signed receipt; remote scanner/email intake; audit and encrypted recovery.
+The original presentation's broader platform roadmap is not fully implemented.
+
+CHECKS COMPLETED
+
+1. PostgreSQL: all 100 tests passed in 64.433 seconds. This includes actual row-lock
+   tests for a stale edit waiting behind approval, concurrent idempotent exports,
+   concurrent external-ID intake, concurrent audit appends and consistent audit
+   verification while appends occur. See postgres-test-results.txt.
+
+2. SQLite: 95 tests passed in 48.670 seconds; five PostgreSQL-specific concurrency
+   tests deliberately skipped. SQLite remains a presentation environment, not the
+   supported concurrent production database. See sqlite-test-results.txt.
+
+3. Independent HTTP contract tests exercise actual request bytes and durable
+   destination records. They cover wrong keys, expired requests, invalid receipt
+   authentication, typed-receipt bypass, role/superseded-approval gates and a lost
+   response following remote acceptance. Retry creates no duplicate remote import.
+   The reference receiver is a synthetic-only destination, not a vendor adapter.
+
+4. Separate-process acceptance drills passed on BOTH PostgreSQL and SQLite:
+   - a separate receiver accepted approved JSON over actual loopback HTTP;
+   - received bytes and approval digest matched the stored sender export;
+   - the remote scanner/email client submitted a saved MIME email to the real API;
+   - repeated runs and loss of local state produced only one additional intake;
+   - maintenance backup restored to a new database and new storage;
+   - four source blobs, 68 encrypted private records, a frozen approval, one export
+     and the signed audit trail verified after restore;
+   - comparison against an independently held audit checkpoint passed.
+   See postgres-acceptance.json and sqlite-acceptance.json. Small-fixture restore
+   timings are local measurements, not promised recovery times at client scale.
+
+5. The separate extraction corpus passed all 64 explicit checks across 12
+   synthetic cases: digital PDF, alternate labels, missing/invalid values, German
+   names, split labels, duplicate evidence, source conflicts, an actual scanned
+   image and an image-only PDF. Both expected conflicts were detected; all ten
+   expected absent values remained empty. No external AI provider was called.
+   This is regression evidence, not representative office accuracy or calibrated
+   confidence. See extraction-evaluation.json and evaluation/property_cases.json.
+
+6. Extended Chromium walkthrough passed with no browser errors:
+   login; source highlights; blocked conflict; clerk review/role restriction;
+   notary approval; frozen UI; actual file and HTTP receipts; original-scan
+   acknowledgement and price confirmation; audit; mobile guide at 390px with no
+   horizontal overflow. Actual browser screenshots are in screenshots/. These are
+   synthetic records. See browser-verification.json.
+
+7. Independent audit anchors now detect replay of an entire older internally
+   valid database. Regression coverage explicitly restores an earlier valid
+   chain/head and confirms that the later external checkpoint rejects it. The
+   operator must keep the newest trusted anchor outside database-writer control;
+   local files alone are not WORM storage or an external custody service.
+
+8. Django system check, migration drift and dependency consistency passed.
+   Production checks have no errors and one advisory, security.W021: HSTS preload
+   is intentionally an operator/domain registration decision. These checks are
+   not a penetration test or vulnerability-advisory audit.
+
+9. The additive HTTP migration preserved all 38 existing development matters and
+   31 exports. Both office audit chains verify. A pre-migration database snapshot
+   is under /tmp/lexflow-before-http-migration-9cdgyp8w/. The dedicated demo remains
+   separate from this older two-office development database. See
+   http-migration-verification.json. The earlier encrypted-field migration and its
+   raw-column inventory remain recorded in migration-verification.json.
+
+10. The isolated demo passes lexflow_pilot_check --demo --json. Live mode correctly
+    refuses the synthetic/debug/SQLite setup. See demo-readiness.json and
+    live-readiness.json. Do not describe a demo readiness pass as client approval.
+
+11. Updated PowerPoint: 12 slides; all XML parsed and internal relationships
+    resolve. PDF: 12 pages with extracted text on every page. Handoff/deployment
+    slides and the scan-review screen were visually inspected. Desktop Microsoft
+    PowerPoint was unavailable for a renderer-specific check.
+
+NEW OPERATIONAL DELIVERABLES
+
+- integrations/HANDOFF_V1.txt: concrete authenticated request/receipt contract.
+- integrations/reference_receiver.py: independent synthetic contract destination.
+- tools/scanner_agent.py: remote, token-only scanner and saved-email client.
+- tools/verify_pilot_acceptance.py: reproducible isolated acceptance/recovery drill.
+- lexflow_backup / lexflow_restore / lexflow_audit_checkpoint commands.
+- configure_http_connector command with operator-controlled HTTPS endpoint keys.
+- lexflow_evaluate command for local sanitized/synthetic datasets without case writes.
+- deployment/OPERATIONS.txt: provisioning, secret custody, maintenance, recovery,
+  reconciliation and client acceptance steps. Docker build context excludes local
+  databases, vaults, secrets, backups and development runtimes.
+
+REMAINING BEFORE REAL CLIENT DATA
+
+A supported vendor integration and real test receipt; built/hosted dedicated
+containers and TLS; environment-specific monitoring/access/key/restore procedures;
+representative sanitized office samples; manual baseline and agreed acceptance
+limits; office scope acceptance and specialist compliance review.
+
+Docker/cloud hosting and an actual vendor were unavailable. Their acceptance is
+not claimed. Local PostgreSQL, OCR, transport and recovery ARE tested; they no
+longer belong in the unimplemented list. Native Outlook/Word plugins, DMS
+verification, SSO, additional hosting models and commercial administration remain
+roadmap scope. No legal certification, customer accuracy or savings are claimed.
+
+The original client PowerPoint remains unchanged. PROJECT_REVIEW.txt and review/
+are the historical pre-hardening baseline. verification.json is the current
+machine-readable evidence index; START_HERE.txt is the updated presenter script.

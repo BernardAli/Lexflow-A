@@ -1,0 +1,7 @@
+Django>=5.2,<6.0
+cryptography>=42
+pypdf>=5.0
+reportlab>=4.0
+Pillow>=11,<14
+# Optional: PostgreSQL (USE_POSTGRES=1)
+# psycopg[binary]>=3.1

@@ -1,0 +1,15 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LexFlow for Outlook</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/lexflow.css' %}">
+  <style>body{background:#f7f9f6}.lf-pane{border:0;min-height:100vh;max-width:380px}</style>
+</head>
+<body>
+  <div class="lf-pane">{% with pane_target="_blank" %}{% include "partials/pane.html" %}{% endwith %}</div>
+  {% if messages %}<div class="lf-flash">{% for m in messages %}<div class="lf-toast">{{ m }}</div>{% endfor %}</div>{% endif %}
+</body>
+</html>
