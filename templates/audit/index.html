@@ -25,8 +25,8 @@
 </div>
 
 <form class="d-flex gap-2 mb-3 flex-wrap" method="get">
-  <nav class="lf-tabs mb-0 flex-grow-1" style="border-bottom:0">
-    {% for v, l in groups %}<a href="?group={{ v }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if group == v %}aria-current="true"{% endif %}>{{ l }}</a>{% endfor %}
+  <nav class="lf-tabs mb-0 flex-grow-1" aria-label="Group audit events" style="border-bottom:0">
+    {% for v, l in groups %}<a href="?group={{ v }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if group == v %}aria-current="page"{% endif %}>{{ l }}</a>{% endfor %}
   </nav>
   <input type="hidden" name="group" value="{{ group }}">
   <input class="form-control form-control-sm" style="width:240px" type="search" name="q" value="{{ q }}" placeholder="Reference, person or text" aria-label="Search audit trail">

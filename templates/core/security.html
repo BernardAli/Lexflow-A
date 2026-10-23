@@ -15,6 +15,17 @@
 </div>
 {% endif %}
 
+<div data-tabs="security">
+<nav class="lf-tabs" data-tab-list aria-label="Security sections">
+  <a href="#security-data" data-tab>Data protection</a>
+  <a href="#baseline" data-tab>Pilot baseline</a>
+  <a href="#security-plugins" data-tab>Plugin access</a>
+  <a href="#security-people" data-tab>People <span class="n">{{ members|length }}</span></a>
+</nav>
+
+<form method="post">
+  {% csrf_token %}
+<div id="security-data" data-tab-panel>
 <section class="lf-panel lf-panel-pad mb-4">
   <h2 class="lf-h2">Isolation boundary</h2>
   <div class="lf-iso">
@@ -31,8 +42,6 @@
   </div>
 </section>
 
-<form method="post">
-  {% csrf_token %}
   <section class="mb-4">
     <h2 class="lf-h2">Deployment plan</h2><p class="lf-small lf-muted">This installation is configured as {{ deployment }}. Profile descriptions record an intended hosting plan; they do not provision or verify infrastructure.</p>
     <div class="row g-3">
@@ -48,9 +57,7 @@
     </div>
   </section>
 
-  <div class="row g-4 mb-4">
-    <div class="col-lg-6">
-      <section class="lf-panel lf-panel-pad h-100">
+      <section class="lf-panel lf-panel-pad mb-4">
         <h2 class="lf-h2">Processing and retention</h2>
         <div class="form-check form-switch mb-1">
           <input class="form-check-input" type="checkbox" role="switch" id="ext" name="allow_external_ai" {% if tenant.allow_external_ai %}checked{% endif %} {% if not membership.can_configure %}disabled{% endif %}>
@@ -64,9 +71,10 @@
         </div>
         <div class="form-text">Counted from transfer. Approved data and the audit trail are kept.</div>
       </section>
-    </div>
-    <div class="col-lg-6" id="baseline">
-      <section class="lf-panel lf-panel-pad h-100">
+  {% if membership.can_configure %}<button class="btn btn-primary mb-4">Save security settings</button>{% endif %}
+</div>
+<div id="baseline" data-tab-panel>
+      <section class="lf-panel lf-panel-pad mb-4">
         <h2 class="lf-h2">Pilot baseline</h2>
         <p class="lf-small lf-muted">Measured on the manual process before LexFlow, so the pilot is judged on numbers, not on a demo.</p>
         <div class="row g-3">
@@ -75,14 +83,11 @@
           <div class="col-sm-4"><label class="form-label" for="b3">Audit completeness %</label><input class="form-control" id="b3" name="baseline_audit_completeness_pct" value="{{ tenant.baseline_audit_completeness_pct }}" {% if not membership.can_configure %}disabled{% endif %}></div>
         </div>
       </section>
-    </div>
-  </div>
   {% if membership.can_configure %}<button class="btn btn-primary mb-4">Save security settings</button>{% endif %}
+</div>
 </form>
 
-<div class="row g-4">
-  <div class="col-lg-6">
-    <section class="lf-panel lf-panel-pad h-100">
+    <section class="lf-panel lf-panel-pad" id="security-plugins" data-tab-panel>
       <h2 class="lf-h2">Plugin access</h2>
       <p class="lf-small lf-muted">The remote scanner/email client authenticates with an office token and cannot approve matters. Native Outlook and Word plugins remain planned. Current token starts with <span class="lf-hash">{{ tenant.api_token_prefix|default:"none" }}</span>.</p>
       {% if membership.can_configure %}
@@ -93,10 +98,9 @@
      -F files=@Kaeuferfragebogen.pdf \
      {{ request.scheme }}://{{ request.get_host }}/api/v1/intake/</pre>
     </section>
-  </div>
-  <div class="col-lg-6">
-    <section class="lf-panel lf-panel-pad h-100">
+    <section class="lf-panel lf-panel-pad" id="security-people" data-tab-panel>
       <h2 class="lf-h2">People with access</h2>
+      <div class="lf-table-wrap">
       <table class="lf-table">
         <tbody>
         {% for m in members %}
@@ -104,8 +108,8 @@
         {% endfor %}
         </tbody>
       </table>
+      </div>
       <p class="lf-xs lf-muted mt-3 mb-0">Design interpretation of §§ 18, 26a, 35 BNotO, NotAktVV §§ 5–6 and GDPR Art. 32. Validate the production architecture with German notarial compliance specialists.</p>
     </section>
-  </div>
 </div>
 {% endblock %}

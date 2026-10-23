@@ -8,8 +8,12 @@
     <p class="lf-sub">Teach LexFlow the workflow, not the client's secrets. Each workflow defines which fields to find, which labels precede them, and where approved values are written.</p>
   </div>
 </div>
-<div class="lf-split">
-  <section class="lf-panel">
+<div data-tabs="studio">
+  <nav class="lf-tabs" data-tab-list aria-label="Workflow studio sections">
+    <a href="#studio-workflows" data-tab>Workflows <span class="n">{{ types|length }}</span></a>
+    <a href="#studio-labels" data-tab>Schema labels and history</a>
+  </nav>
+  <section class="lf-panel" id="studio-workflows" data-tab-panel>
     <div class="lf-panel-head"><h2>Workflows</h2><span class="lf-small lf-muted">{{ types|length }} configured</span></div>
     {% for t in types %}
     <a class="lf-wf" href="{% url 'studio:matter_type' t.key %}">
@@ -24,7 +28,7 @@
     </a>
     {% endfor %}
   </section>
-  <section>
+  <section id="studio-labels" data-tab-panel>
     <div class="lf-panel lf-panel-pad mb-3">
       <h2 class="lf-h2">How learning works</h2>
       <div class="lf-flow mb-3">

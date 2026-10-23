@@ -1,0 +1,24 @@
+{
+  "passed": true,
+  "sections": [
+    "overview",
+    "studio",
+    "workflow-rules",
+    "connectors",
+    "security",
+    "presentation",
+    "matter-details",
+    "matter-documents"
+  ],
+  "keyboard": true,
+  "deepLinks": true,
+  "rememberedSelection": true,
+  "draftValuesPreserved": true,
+  "hiddenInvalidFieldRevealed": true,
+  "settingsSave": true,
+  "chartsVisible": true,
+  "sourceAndFieldLinks": true,
+  "mobilePages": 7,
+  "noJavaScriptFallback": true,
+  "browserErrors": []
+}

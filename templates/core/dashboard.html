@@ -14,6 +14,12 @@
   </div>
 </div>
 
+<div data-tabs="overview">
+<nav class="lf-tabs" data-tab-list aria-label="Overview sections">
+  <a href="#overview-queue" data-tab>Work queue</a>
+  <a href="#overview-analytics" data-tab>Pilot analytics</a>
+</nav>
+<div id="overview-queue" data-tab-panel>
 <section class="lf-pipeline mb-4" aria-label="Pipeline">
   {% for name, hint, count in pipeline %}
   <div class="lf-stage {% if forloop.counter == 5 and count %}lf-stage--attention{% endif %}">
@@ -25,7 +31,6 @@
   {% endfor %}
 </section>
 
-<div class="lf-split mb-4">
   <section class="lf-panel">
     <div class="lf-panel-head">
       <h2>Waiting for a person</h2>
@@ -50,8 +55,10 @@
     <div class="lf-empty"><i aria-hidden="true" class="bi bi-check2-all"></i>Nothing is waiting. New intakes appear here when they need a decision.</div>
     {% endif %}
   </section>
+</div>
 
-  <section class="lf-panel lf-panel-pad">
+<div id="overview-analytics" data-tab-panel>
+  <section class="lf-panel lf-panel-pad mb-4">
     <div class="d-flex justify-content-between align-items-baseline mb-2">
       <h2 class="lf-h2 mb-0">Pilot measurement</h2>
       <a class="lf-small" href="{% url 'core:security' %}#baseline">Edit baseline</a>
@@ -67,7 +74,6 @@
     </div>
     {% endfor %}
   </section>
-</div>
 
 <div class="lf-split">
   <section class="lf-panel lf-panel-pad">
@@ -79,6 +85,8 @@
     <div id="chart-conf" class="lf-chart" role="img" aria-label="Distribution of field confidence"></div>
   </section>
 </div>
+</div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'vendor/echarts/echarts.min.js' %}"></script>
@@ -87,7 +95,12 @@
   var daily = {{ chart_daily|safe }}, conf = {{ chart_conf|safe }};
   var font = { fontFamily: 'Schibsted Grotesk, Helvetica, Arial, sans-serif', color: '#5d6a67', fontSize: 12 };
   var axis = { axisLine: { lineStyle: { color: '#c6cec7' } }, axisTick: { show: false }, axisLabel: font, splitLine: { lineStyle: { color: '#e8ede7' } } };
-  var d = echarts.init(document.getElementById('chart-daily'));
+  var d, c;
+  function resizeCharts() {
+  var dailyElement = document.getElementById('chart-daily');
+  if (!dailyElement.offsetWidth) return;
+  if (d) { d.resize(); c.resize(); return; }
+  d = echarts.init(dailyElement);
   d.setOption({
     textStyle: font, grid: { left: 28, right: 8, top: 34, bottom: 24 },
     legend: { top: 0, left: 0, itemWidth: 10, itemHeight: 10, textStyle: font, icon: 'roundRect' },
@@ -100,7 +113,7 @@
       { name: 'Conflict caught', type: 'bar', stack: 'm', data: daily.conflict, itemStyle: { color: '#a3242c', borderRadius: [3, 3, 0, 0] } }
     ]
   });
-  var c = echarts.init(document.getElementById('chart-conf'));
+  c = echarts.init(document.getElementById('chart-conf'));
   c.setOption({
     textStyle: font, grid: { left: 36, right: 8, top: 16, bottom: 40 },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function (p) { return p[0].name + '% confidence<br><b>' + p[0].value + '</b> values found'; } },
@@ -108,7 +121,10 @@
     yAxis: Object.assign({ type: 'value', minInterval: 1 }, axis),
     series: [{ type: 'bar', data: conf.counts.map(function (v, i) { return { value: v, itemStyle: { color: i < 2 ? '#a3242c' : (i < 4 ? '#d9a64a' : '#2e7656'), borderRadius: [3, 3, 0, 0] } }; }), barWidth: '56%' }]
   });
-  window.addEventListener('resize', function () { d.resize(); c.resize(); });
+  }
+  resizeCharts();
+  document.addEventListener('lexflow:tabchange', resizeCharts);
+  window.addEventListener('resize', resizeCharts);
 })();
 </script>
 {% endblock %}

@@ -47,6 +47,15 @@ slide text, a timed presenter script and verification notes. Rebuild the slides
 with `.venv/bin/python tools/build_pilot_presentation.py`. The generator uses the
 original client deck's theme; keep that referenced source file available.
 
+## Page sections
+
+Overview separates the work queue from pilot analytics. Workflow Studio,
+workflow rules, Connectors, Security and the presenter guide have section tabs.
+Matter review keeps source documents beside extracted data, with a separate
+Activity tab. Arrow keys, Home and End switch tabs; section and field links open
+the relevant panel. Switching tabs preserves unsaved form values, and all
+sections remain readable when JavaScript is disabled.
+
 ## Password reset and visibility
 
 The eye button shows or hides a password on sign-in and new-password forms.

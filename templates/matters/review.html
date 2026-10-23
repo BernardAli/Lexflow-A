@@ -23,18 +23,18 @@
 
 <div class="lf-review">
   <!-- ======================= documents ======================= -->
-  <section aria-label="Documents">
-    <div class="lf-docbar" role="tablist">
+  <section aria-label="Documents" data-tabs="matter-documents" data-tabs-default="document-{{ active_doc }}" data-tabs-remember="false">
+    <nav class="lf-docbar" data-tab-list aria-label="Source documents">
       {% for d in docs %}
-      <button type="button" role="tab" data-doc-tab="{{ d.att.pk }}" aria-selected="{% if d.att.pk == active_doc %}true{% else %}false{% endif %}">
+      <a href="#document-{{ d.att.pk }}" data-tab data-doc-tab="{{ d.att.pk }}">
         <i aria-hidden="true" class="bi {{ d.att|doc_icon }}"></i>{{ d.att.display_name }}
         {% if d.att.doc_type %}<span class="dt">{{ d.att.doc_type.key }}</span>{% endif %}
-      </button>
+      </a>
       {% endfor %}
-    </div>
+    </nav>
     <div class="lf-desk" id="desk">
       {% for d in docs %}
-      <article class="lf-sheet" data-doc="{{ d.att.pk }}" {% if d.att.pk != active_doc %}hidden{% endif %}>
+      <article class="lf-sheet" data-doc="{{ d.att.pk }}" id="document-{{ d.att.pk }}" data-tab-panel>
         <div class="lf-sheet-meta">
           <span>{{ d.att.display_name }}{% if d.att.page_count > 1 %}, {{ d.att.page_count }} pages{% endif %}</span>
           <span>
@@ -165,8 +165,13 @@
     </div>
     {% endif %}
 
+    <div data-tabs="matter-details">
     {% if fields %}
-    <div class="lf-ledger">
+    <nav class="lf-tabs" data-tab-list aria-label="Matter details">
+      <a href="#matter-data" data-tab>Extracted data <span class="n">{{ fields|length }}</span></a>
+      <a href="#matter-activity" data-tab>Activity</a>
+    </nav>
+    <div class="lf-ledger" id="matter-data" data-tab-panel>
       <div class="lf-ledger-head">
         <div>
           <h2 class="lf-h2 mb-0">Extracted data</h2>
@@ -229,7 +234,7 @@
     </div>
     {% endif %}
 
-    <section class="lf-panel lf-panel-pad mt-3">
+    <section class="lf-panel lf-panel-pad" id="matter-activity" data-tab-panel>
       <div class="d-flex justify-content-between align-items-baseline">
         <h2 class="lf-h2">Activity</h2>
         <a class="lf-small" href="{% url 'audit:index' %}?q={{ matter.ref }}">Full audit trail</a>
@@ -240,6 +245,7 @@
         {% endfor %}
       </ol>
     </section>
+    </div>
   </section>
 </div>
 {% endblock %}
@@ -249,10 +255,8 @@
 (function () {
   var desk = document.getElementById('desk');
   function showDoc(id) {
-    document.querySelectorAll('[data-doc-tab]').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.docTab === String(id) ? 'true' : 'false'); });
-    document.querySelectorAll('.lf-sheet[data-doc]').forEach(function (s) { s.hidden = s.dataset.doc !== String(id); });
+    window.LexFlowTabs.reveal('document-' + id);
   }
-  document.querySelectorAll('[data-doc-tab]').forEach(function (b) { b.addEventListener('click', function () { showDoc(b.dataset.docTab); }); });
 
   function focusMark(key, docId) {
     var sheet = docId ? document.querySelector('.lf-sheet[data-doc="' + docId + '"]') : null;
@@ -271,6 +275,8 @@
   }
   function focusField(key) {
     var row = document.getElementById('field-' + key); if (!row) return;
+    window.LexFlowTabs.reveal(row);
+    history.replaceState(null, '', '#' + encodeURIComponent(row.id));
     document.querySelectorAll('.lf-field.is-focus').forEach(function (r) { r.classList.remove('is-focus'); });
     row.classList.add('is-focus');
     row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });

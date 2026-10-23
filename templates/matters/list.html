@@ -14,7 +14,7 @@
   </form>
 </div>
 <nav class="lf-tabs" aria-label="Filter by status">
-  {% for v, label, n in tabs %}<a href="?status={{ v }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if status == v %}aria-current="true"{% endif %}>{{ label }}<span class="n">{{ n }}</span></a>{% endfor %}
+  {% for v, label, n in tabs %}<a href="?status={{ v }}{% if q %}&q={{ q|urlencode }}{% endif %}" {% if status == v %}aria-current="page"{% endif %}>{{ label }}<span class="n">{{ n }}</span></a>{% endfor %}
 </nav>
 <div class="lf-panel lf-table-wrap">
   <table class="lf-table">

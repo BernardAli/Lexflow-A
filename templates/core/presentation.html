@@ -2,8 +2,12 @@
 {% block title %}Presenter guide{% endblock %}
 {% block content %}
 <div class="lf-head"><div><h1 class="lf-title">From documents to an approved handoff</h1><p class="lf-sub">A seven-minute pilot demonstration · one dedicated office · synthetic property purchase.</p></div></div>
-<div class="lf-split">
-<section class="lf-panel lf-panel-pad">
+<div data-tabs="presentation">
+<nav class="lf-tabs" data-tab-list aria-label="Presenter guide sections">
+  <a href="#demo-walkthrough" data-tab>Live walkthrough</a>
+  <a href="#demo-scope" data-tab>Capabilities and pilot scope</a>
+</nav>
+<section class="lf-panel lf-panel-pad" id="demo-walkthrough" data-tab-panel>
 <h2 class="lf-h2">Live walkthrough</h2>
 <ol class="lh-lg">
 <li><strong>Receive.</strong> {% if new_case %}<a href="{% url 'intake:inbox' %}?m={{ new_case.ref }}">Open the unprocessed intake</a>{% else %}<a href="{% url 'intake:inbox' %}">Open Inbox</a>{% endif %}. Show the documents and select Process with LexFlow.</li>
@@ -18,7 +22,7 @@
 <p><strong>HTTP handoff.</strong> With the reference receiver running, choose HTTP reference receiver after approval, create its export and select Send to HTTP destination. A signed receipt confirms the actual network handoff. This is an independent reference destination.</p>
 {% if scan_case.matter %}<p><strong>Scanned intake.</strong> <a href="{% url 'matters:review' scan_case.matter.ref %}">Open the scanned property purchase</a>. Show the extracted text, open the original, and acknowledge that every page was checked before approval.</p>{% endif %}
 </section>
-<section class="lf-panel lf-panel-pad">
+<section class="lf-panel lf-panel-pad" id="demo-scope" data-tab-panel>
 <h2 class="lf-h2">What you can demonstrate</h2>
 <p>Digital PDF/text intake, {% if ocr_enabled %}local scan reading, {% endif %}source evidence, conflicting values, human correction, role-based approval, frozen exports, authenticated HTTP receipts, encrypted case data and a signed audit checkpoint.</p>
 <h2 class="lf-h2 mt-4">What the client pilot adds</h2>

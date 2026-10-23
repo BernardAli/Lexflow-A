@@ -47,7 +47,7 @@ the signed request, commits the actual bytes and returns a matching signed
 receipt. Delivery is recorded only after verification. Explain that this is a
 reference destination using the documented LexFlow contract, not a vendor system.
 
-06:00–07:00 — Show Audit and Overview. Conflict, review, approval, export, send
+06:00–07:00 — Show Audit and Overview > Pilot analytics. Conflict, review, approval, export, send
 and signed receipt are traceable. Metrics are a labelled synthetic cohort. Show
 the verification evidence: 100 PostgreSQL tests, real concurrency, encrypted
 restore drills on both database engines, and 64 synthetic extraction checks.

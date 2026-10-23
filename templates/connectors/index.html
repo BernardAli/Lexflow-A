@@ -8,7 +8,12 @@
     <p class="lf-sub">Approved snapshots produce checksummed XML, JSON and CSV exports. A confirmed destination receipt is required before delivery is recorded.</p>
   </div>
 </div>
-<div class="lf-split mb-4">
+<div data-tabs="connectors">
+<nav class="lf-tabs" data-tab-list aria-label="Connector sections">
+  <a href="#connector-destinations" data-tab>Destinations <span class="n">{{ connectors|length }}</span></a>
+  <a href="#connector-transfers" data-tab>Transfer history</a>
+</nav>
+<div class="lf-split" id="connector-destinations" data-tab-panel>
   <section class="lf-panel">
     <div class="lf-panel-head"><h2>Configured for {{ tenant.name }}</h2></div>
     {% for c in connectors %}
@@ -32,7 +37,7 @@
     </ol>
   </section>
 </div>
-<section class="lf-panel lf-table-wrap">
+<section class="lf-panel lf-table-wrap" id="connector-transfers" data-tab-panel>
   <div class="lf-panel-head"><h2>Recent transfers</h2></div>
   <table class="lf-table">
     <thead><tr><th>Transfer</th><th>Matter</th><th>Connector / status</th><th class="text-end">Fields</th><th>SHA-256</th><th>By</th><th>When</th><th></th></tr></thead>
@@ -54,4 +59,5 @@
     </tbody>
   </table>
 </section>
+</div>
 {% endblock %}

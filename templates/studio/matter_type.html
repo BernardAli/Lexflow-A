@@ -13,7 +13,12 @@
 </div>
 {% if not membership.can_configure %}<div class="lf-well lf-small mb-3"><i aria-hidden="true" class="bi bi-lock me-1"></i>Only an office administrator can change rules. You can see what LexFlow applies.</div>{% endif %}
 
-<section class="lf-panel mb-4">
+<div data-tabs="workflow-rules">
+<nav class="lf-tabs" data-tab-list aria-label="Workflow settings">
+  <a href="#workflow-fields" data-tab>Fields and rules <span class="n">{{ fields|length }}</span></a>
+  <a href="#documents" data-tab>Document types <span class="n">{{ doc_types|length }}</span></a>
+</nav>
+<section class="lf-panel" id="workflow-fields" data-tab-panel>
   <div class="lf-panel-head"><h2>Fields and rules</h2><span class="lf-small lf-muted">Highlighted labels are additional configured schema labels</span></div>
   <div class="lf-rule-row lf-xs lf-muted d-none d-lg-grid" style="padding-top:10px;padding-bottom:10px;background:#fafbf9">
     <span>Field</span><span>Destination</span><span>Prefill from</span><span>Labels that precede the value</span><span></span>
@@ -56,7 +61,7 @@
   {% endfor %}
 </section>
 
-<section class="lf-panel" id="documents">
+<section class="lf-panel" id="documents" data-tab-panel>
   <div class="lf-panel-head"><h2>Document types</h2><span class="lf-small lf-muted">Phrases that identify a document and point to this workflow</span></div>
   {% for d in doc_types %}
   <form method="post" action="{% url 'studio:save_doctype' mt.key d.pk %}" class="lf-rule-row" style="grid-template-columns: 1.1fr 3fr auto">{% csrf_token %}
@@ -66,4 +71,5 @@
   </form>
   {% endfor %}
 </section>
+</div>
 {% endblock %}
