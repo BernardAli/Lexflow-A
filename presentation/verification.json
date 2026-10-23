@@ -279,5 +279,18 @@
     "Native Office plugins and SSO remain roadmap scope"
   ],
   "demo_rehearsal_reset": true,
-  "http_configuration_command_smoke_passed": true
+  "http_configuration_command_smoke_passed": true,
+  "demonstration_video": {
+    "date": "2026-10-23",
+    "file": "video/LexFlow_Demonstration.mp4",
+    "verification": "video/verification.json",
+    "duration_seconds": 237.12,
+    "resolution": "1920x1080",
+    "narration": "Locally synthesized English",
+    "captions": true,
+    "embedded_chapters": 20,
+    "full_decode_passed": true,
+    "synthetic_data_only": true,
+    "existing_cases_untouched": true
+  }
 }

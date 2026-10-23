@@ -55,6 +55,27 @@ the guide and its existing sample archive without regenerating source PDFs:
 .venv/bin/python tools/build_demo_documents.py --guide-only
 ```
 
+The [sample demonstration video](presentation/video/LexFlow_Demonstration.mp4)
+records an actual synthetic case from PDF upload through conflict review, notary
+approval and a verified HTTP receipt, followed by scan-review requirements,
+analytics and the integration roadmap. It includes locally synthesized English
+narration, on-screen captions, [spoken subtitles](presentation/video/LexFlow_Demonstration.srt)
+and a [transcript](presentation/video/LexFlow_Demonstration_Transcript.txt).
+
+To record it again, install Node/Playwright with Chromium and FFmpeg with libx264,
+libass and flite support. Set `LEXFLOW_PLAYWRIGHT_MODULE` if Playwright is installed
+outside Node's normal module search path, then run:
+
+```sh
+.venv/bin/python tools/record_demo_video.py
+```
+
+The recorder provisions a fresh disposable office, database, vault and independent
+receiver under `/tmp`; it leaves existing demonstration cases untouched. Local OCR
+must be available for the scan scene. Use `--check-only` to exercise the flow
+without rendering, or `--output-dir` to change the artifact directory. The output
+includes chapter timestamps, a poster and media/workflow verification results.
+
 ## Page sections
 
 Overview separates the work queue from pilot analytics. Workflow Studio,

@@ -1,0 +1,198 @@
+{
+  "scenes": [
+    {
+      "id": "intro",
+      "chapter": "WELCOME",
+      "caption": "From documents to a verified handoff.",
+      "narration": "Welcome to LexFlow. This synthetic demonstration follows a property purchase from incoming documents to human review, approved delivery, and office analytics.",
+      "seconds": 11.595,
+      "start": 0.03,
+      "end": 11.631
+    },
+    {
+      "id": "overview",
+      "chapter": "01 / OFFICE WORKFLOW",
+      "caption": "One queue shows the work that still needs a person.",
+      "narration": "The office overview follows seven visible stages. The work queue brings together cases that need classification, review, approval, or transfer.",
+      "seconds": 11.235,
+      "start": 11.631,
+      "end": 22.867
+    },
+    {
+      "id": "upload",
+      "chapter": "02 / RECEIVE DOCUMENTS",
+      "caption": "Upload the three sample PDFs as one intake.",
+      "narration": "Start a new intake with the buyer questionnaire, register extract, and draft contract. Every person, address, and register entry in this video is fictional.",
+      "seconds": 12.395,
+      "start": 22.867,
+      "end": 35.263
+    },
+    {
+      "id": "process",
+      "chapter": "03 / CLASSIFY AND EXTRACT",
+      "caption": "A disagreement blocks approval.",
+      "narration": "LexFlow identifies the property purchase and proposes structured values. Here the documents disagree on the land register sheet, so approval is blocked.",
+      "seconds": 11.37,
+      "start": 35.263,
+      "end": 46.633
+    },
+    {
+      "id": "evidence",
+      "chapter": "04 / FOLLOW THE EVIDENCE",
+      "caption": "Compare the proposed value with its source.",
+      "narration": "Select the land register field to locate its source evidence. The questionnaire and register say sheet eight twelve. The draft contract says eight seventy two.",
+      "seconds": 11.125,
+      "start": 46.633,
+      "end": 57.761
+    },
+    {
+      "id": "resolve",
+      "chapter": "05 / RESOLVE THE CONFLICT",
+      "caption": "Choose the register's value for this synthetic case.",
+      "narration": "The clerk compares the candidates and chooses the register extract. The selected value is recorded, and the unresolved conflict is removed.",
+      "seconds": 9.785,
+      "start": 57.761,
+      "end": 67.549
+    },
+    {
+      "id": "confirm",
+      "chapter": "06 / COMPLETE HUMAN REVIEW",
+      "caption": "The purchase price requires explicit confirmation.",
+      "narration": "Office policy requires a person to confirm the purchase price. Once all blockers are cleared, the case becomes ready for approval.",
+      "seconds": 9.745000000000001,
+      "start": 67.549,
+      "end": 77.296
+    },
+    {
+      "id": "notary",
+      "chapter": "07 / AUTHORISED APPROVAL",
+      "caption": "Switch from the clerk to the notary.",
+      "narration": "Approval belongs to the notary or another authorised approver. The clerk can review the case, but cannot approve this transfer.",
+      "seconds": 9.335,
+      "start": 77.296,
+      "end": 86.635
+    },
+    {
+      "id": "approve",
+      "chapter": "08 / FREEZE THE DECISION",
+      "caption": "Approval freezes the values and destination mappings.",
+      "narration": "The notary approves the reviewed matter. LexFlow freezes the values, destination mappings, and approval identity in an auditable snapshot.",
+      "seconds": 10.77,
+      "start": 86.635,
+      "end": 97.408
+    },
+    {
+      "id": "export",
+      "chapter": "09 / CREATE THE EXPORT",
+      "caption": "Export creation is separate from confirmed delivery.",
+      "narration": "Choose the HTTP reference receiver and create an approved export. The export is bound to the frozen approval, and still requires a receipt.",
+      "seconds": 10.55,
+      "start": 97.408,
+      "end": 107.959
+    },
+    {
+      "id": "send",
+      "chapter": "10 / AUTHENTICATED HANDOFF",
+      "caption": "Send the approved payload to the reference destination.",
+      "narration": "The notary explicitly sends the approved payload. The independent reference receiver validates the signed request and commits the received data before responding.",
+      "seconds": 11.115,
+      "start": 107.959,
+      "end": 119.077
+    },
+    {
+      "id": "receipt",
+      "chapter": "11 / VERIFY THE RECEIPT",
+      "caption": "A verified signed receipt records delivery.",
+      "narration": "A matching signed receipt confirms delivery. Retries reuse the same approval bound identity to avoid duplicates. This reference receiver is separate from any real vendor integration.",
+      "seconds": 12.975,
+      "start": 119.077,
+      "end": 132.055
+    },
+    {
+      "id": "audit",
+      "chapter": "12 / TRACE THE OUTCOME",
+      "caption": "Review, approval, export and delivery are auditable.",
+      "narration": "Open the audit trail for this case. Review, approval, export, and receipt events are traceable, and the office audit chain is verified.",
+      "seconds": 10.25,
+      "start": 132.055,
+      "end": 142.309
+    },
+    {
+      "id": "scan",
+      "chapter": "13 / HANDLE SCANNED SOURCES",
+      "caption": "OCR proposals still require original-source review.",
+      "narration": "Scanned documents can be read locally. The proposed values remain subject to review. Approval stays blocked until someone checks the original and acknowledges the source.",
+      "seconds": 11.885,
+      "start": 142.309,
+      "end": 154.196
+    },
+    {
+      "id": "analytics",
+      "chapter": "14 / FILTER THE REPORT",
+      "caption": "Keep synthetic and live-office measurements separate.",
+      "narration": "Pilot analytics uses one consistent set of receipt dates, workflow, source, and data cohort filters. The six summary cards describe the same selected intake cohort.",
+      "seconds": 13.05,
+      "start": 154.196,
+      "end": 167.252
+    },
+    {
+      "id": "quality",
+      "chapter": "15 / EXTRACTION AND REVIEW",
+      "caption": "First extraction stays distinct from human-completed data.",
+      "narration": "Inspect initial extraction coverage, current field states, changed values, and pending source acknowledgements. Confidence scores are heuristic proposals, not measured customer accuracy.",
+      "seconds": 14.08,
+      "start": 167.252,
+      "end": 181.337
+    },
+    {
+      "id": "workload",
+      "chapter": "16 / WORKLOAD AND TIMING",
+      "caption": "Turnaround includes waiting; it does not measure staff effort.",
+      "narration": "Workload reporting shows case aging, source breakdowns, and median and ninetieth percentile turnaround with sample counts. Elapsed approval time includes waiting, not just staff handling.",
+      "seconds": 13.86,
+      "start": 181.337,
+      "end": 195.199
+    },
+    {
+      "id": "delivery",
+      "chapter": "17 / DELIVERY AND AUDIT",
+      "caption": "Separate pending exports, failures and verified receipts.",
+      "narration": "Delivery reporting separates pending, failed, and delivered exports, with connector reliability and audit coverage. Each chart also provides an exact value table, and the filtered report can be exported.",
+      "seconds": 14.85,
+      "start": 195.199,
+      "end": 210.05
+    },
+    {
+      "id": "roadmap",
+      "chapter": "18 / EXPAND INTEGRATIONS",
+      "caption": "Native plugins and actual vendor adapters remain planned.",
+      "narration": "The next integrations are native Outlook intake and one office selected vendor adapter, followed by Word and cloud sources. These remain planned work, with destination acceptance required.",
+      "seconds": 13.68,
+      "start": 210.05,
+      "end": 223.736
+    },
+    {
+      "id": "outro",
+      "chapter": "LEXFLOW AI",
+      "caption": "Receive. Review. Approve. Verify. Measure.",
+      "narration": "LexFlow keeps evidence, human decisions, verified handoffs, and reporting together. Use the included sample documents and updated guide to present this controlled workflow.",
+      "seconds": 13.545,
+      "start": 223.737,
+      "end": 237.282
+    }
+  ],
+  "checks": {
+    "uploaded_three_pdfs": true,
+    "conflict_blocks_approval": true,
+    "source_highlighting": true,
+    "clerk_cannot_approve": true,
+    "notary_approval_and_frozen_ui": true,
+    "export_awaits_receipt": true,
+    "actual_http_signed_receipt": true,
+    "audit_chain_verified": true,
+    "scan_requires_original_acknowledgement": true,
+    "synthetic_analytics": true,
+    "all_four_analytics_tabs": true
+  },
+  "browser_errors": []
+}

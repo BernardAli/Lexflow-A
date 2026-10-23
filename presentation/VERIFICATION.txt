@@ -40,6 +40,16 @@ The original presentation's broader platform roadmap is not fully implemented.
   guide and all seven source PDFs, unchanged from their prior bytes. README links,
   the presenter template and Django system checks passed. Desktop PowerPoint
   rendering remains untested.
+- Narrated demonstration video: video/LexFlow_Demonstration.mp4 is 3:57 at
+  1920x1080, H.264/AAC with 48kHz stereo, locally synthesized English voiceover,
+  burned-in captions and 20 embedded chapters. The fresh-office recording checks
+  cover PDF upload, source highlighting/conflict, clerk role restrictions, frozen
+  notary approval, actual signed HTTP receipt, verified audit, scan acknowledgement
+  requirements and all four analytics tabs. Full media decode, caption/chapter
+  timing, fast-start structure and representative frames passed checks. Existing
+  presentation database/source fingerprints stayed unchanged. Full subtitles,
+  transcript, poster, chapters and evidence are under video/; the recorder and
+  exporter are tools/record_demo_video.py and tools/record_demo_browser.cjs.
 
 CHECKS COMPLETED
 

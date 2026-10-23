@@ -1,0 +1,79 @@
+1
+00:00:00,630 --> 00:00:11,381
+Welcome to LexFlow. This synthetic demonstration follows a property purchase from incoming documents to human review, approved delivery, and office analytics.
+
+2
+00:00:12,231 --> 00:00:22,617
+The office overview follows seven visible stages. The work queue brings together cases that need classification, review, approval, or transfer.
+
+3
+00:00:23,467 --> 00:00:35,013
+Start a new intake with the buyer questionnaire, register extract, and draft contract. Every person, address, and register entry in this video is fictional.
+
+4
+00:00:35,863 --> 00:00:46,383
+LexFlow identifies the property purchase and proposes structured values. Here the documents disagree on the land register sheet, so approval is blocked.
+
+5
+00:00:47,233 --> 00:00:57,511
+Select the land register field to locate its source evidence. The questionnaire and register say sheet eight twelve. The draft contract says eight seventy two.
+
+6
+00:00:58,361 --> 00:01:07,299
+The clerk compares the candidates and chooses the register extract. The selected value is recorded, and the unresolved conflict is removed.
+
+7
+00:01:08,149 --> 00:01:17,046
+Office policy requires a person to confirm the purchase price. Once all blockers are cleared, the case becomes ready for approval.
+
+8
+00:01:17,896 --> 00:01:26,385
+Approval belongs to the notary or another authorised approver. The clerk can review the case, but cannot approve this transfer.
+
+9
+00:01:27,235 --> 00:01:37,158
+The notary approves the reviewed matter. LexFlow freezes the values, destination mappings, and approval identity in an auditable snapshot.
+
+10
+00:01:38,008 --> 00:01:47,709
+Choose the HTTP reference receiver and create an approved export. The export is bound to the frozen approval, and still requires a receipt.
+
+11
+00:01:48,559 --> 00:01:58,827
+The notary explicitly sends the approved payload. The independent reference receiver validates the signed request and commits the received data before responding.
+
+12
+00:01:59,677 --> 00:02:11,805
+A matching signed receipt confirms delivery. Retries reuse the same approval bound identity to avoid duplicates. This reference receiver is separate from any real vendor integration.
+
+13
+00:02:12,655 --> 00:02:22,059
+Open the audit trail for this case. Review, approval, export, and receipt events are traceable, and the office audit chain is verified.
+
+14
+00:02:22,909 --> 00:02:33,946
+Scanned documents can be read locally. The proposed values remain subject to review. Approval stays blocked until someone checks the original and acknowledges the source.
+
+15
+00:02:34,796 --> 00:02:47,002
+Pilot analytics uses one consistent set of receipt dates, workflow, source, and data cohort filters. The six summary cards describe the same selected intake cohort.
+
+16
+00:02:47,852 --> 00:03:01,087
+Inspect initial extraction coverage, current field states, changed values, and pending source acknowledgements. Confidence scores are heuristic proposals, not measured customer accuracy.
+
+17
+00:03:01,937 --> 00:03:14,949
+Workload reporting shows case aging, source breakdowns, and median and ninetieth percentile turnaround with sample counts. Elapsed approval time includes waiting, not just staff handling.
+
+18
+00:03:15,799 --> 00:03:29,800
+Delivery reporting separates pending, failed, and delivered exports, with connector reliability and audit coverage. Each chart also provides an exact value table, and the filtered report can be exported.
+
+19
+00:03:30,650 --> 00:03:43,486
+The next integrations are native Outlook intake and one office selected vendor adapter, followed by Word and cloud sources. These remain planned work, with destination acceptance required.
+
+20
+00:03:44,337 --> 00:03:57,032
+LexFlow keeps evidence, human decisions, verified handoffs, and reporting together. Use the included sample documents and updated guide to present this controlled workflow.

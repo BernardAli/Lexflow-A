@@ -1,0 +1,64 @@
+LEXFLOW AI — SYNTHETIC DEMONSTRATION VIDEO
+
+English narration is synthesized locally with FFmpeg/flite (voice: slt).
+Recorded on a fresh disposable office; the existing presentation cases were not used.
+
+00:00:00  WELCOME
+Welcome to LexFlow. This synthetic demonstration follows a property purchase from incoming documents to human review, approved delivery, and office analytics.
+
+00:00:11  01 / OFFICE WORKFLOW
+The office overview follows seven visible stages. The work queue brings together cases that need classification, review, approval, or transfer.
+
+00:00:22  02 / RECEIVE DOCUMENTS
+Start a new intake with the buyer questionnaire, register extract, and draft contract. Every person, address, and register entry in this video is fictional.
+
+00:00:35  03 / CLASSIFY AND EXTRACT
+LexFlow identifies the property purchase and proposes structured values. Here the documents disagree on the land register sheet, so approval is blocked.
+
+00:00:46  04 / FOLLOW THE EVIDENCE
+Select the land register field to locate its source evidence. The questionnaire and register say sheet eight twelve. The draft contract says eight seventy two.
+
+00:00:57  05 / RESOLVE THE CONFLICT
+The clerk compares the candidates and chooses the register extract. The selected value is recorded, and the unresolved conflict is removed.
+
+00:01:07  06 / COMPLETE HUMAN REVIEW
+Office policy requires a person to confirm the purchase price. Once all blockers are cleared, the case becomes ready for approval.
+
+00:01:17  07 / AUTHORISED APPROVAL
+Approval belongs to the notary or another authorised approver. The clerk can review the case, but cannot approve this transfer.
+
+00:01:26  08 / FREEZE THE DECISION
+The notary approves the reviewed matter. LexFlow freezes the values, destination mappings, and approval identity in an auditable snapshot.
+
+00:01:37  09 / CREATE THE EXPORT
+Choose the HTTP reference receiver and create an approved export. The export is bound to the frozen approval, and still requires a receipt.
+
+00:01:47  10 / AUTHENTICATED HANDOFF
+The notary explicitly sends the approved payload. The independent reference receiver validates the signed request and commits the received data before responding.
+
+00:01:59  11 / VERIFY THE RECEIPT
+A matching signed receipt confirms delivery. Retries reuse the same approval bound identity to avoid duplicates. This reference receiver is separate from any real vendor integration.
+
+00:02:12  12 / TRACE THE OUTCOME
+Open the audit trail for this case. Review, approval, export, and receipt events are traceable, and the office audit chain is verified.
+
+00:02:22  13 / HANDLE SCANNED SOURCES
+Scanned documents can be read locally. The proposed values remain subject to review. Approval stays blocked until someone checks the original and acknowledges the source.
+
+00:02:34  14 / FILTER THE REPORT
+Pilot analytics uses one consistent set of receipt dates, workflow, source, and data cohort filters. The six summary cards describe the same selected intake cohort.
+
+00:02:47  15 / EXTRACTION AND REVIEW
+Inspect initial extraction coverage, current field states, changed values, and pending source acknowledgements. Confidence scores are heuristic proposals, not measured customer accuracy.
+
+00:03:01  16 / WORKLOAD AND TIMING
+Workload reporting shows case aging, source breakdowns, and median and ninetieth percentile turnaround with sample counts. Elapsed approval time includes waiting, not just staff handling.
+
+00:03:15  17 / DELIVERY AND AUDIT
+Delivery reporting separates pending, failed, and delivered exports, with connector reliability and audit coverage. Each chart also provides an exact value table, and the filtered report can be exported.
+
+00:03:30  18 / EXPAND INTEGRATIONS
+The next integrations are native Outlook intake and one office selected vendor adapter, followed by Word and cloud sources. These remain planned work, with destination acceptance required.
+
+00:03:43  LEXFLOW AI
+LexFlow keeps evidence, human decisions, verified handoffs, and reporting together. Use the included sample documents and updated guide to present this controlled workflow.

@@ -12,6 +12,21 @@ seven existing synthetic source PDFs. Rebuild just the guide/archive with:
 
 integrations/EXPANSION_GUIDE.txt is the developer/operator integration roadmap.
 
+SAMPLE VIDEO
+
+Open video/LexFlow_Demonstration.mp4 for the narrated 1080p walkthrough. It shows
+an actual synthetic PDF upload, source-linked conflict review, notary approval,
+authenticated reference handoff/receipt, scan-review requirements and analytics.
+The native-plugin/vendor roadmap is identified as planned. Narration is locally
+synthesized in English; short captions are burned into the MP4. Full spoken
+subtitles and a transcript are alongside the video, with chapters and a poster.
+
+Re-record with .venv/bin/python tools/record_demo_video.py. It requires Node with
+Playwright/Chromium, FFmpeg (libx264/libass/flite) and the local OCR dependencies.
+Set LEXFLOW_PLAYWRIGHT_MODULE for a nonstandard module installation. The recorder
+creates and removes a separate disposable synthetic office and reference receiver;
+existing presentation cases remain untouched. Use --check-only for a flow check.
+
 START
 
   .venv/bin/python tools/presentation_demo.py --http-handoff --port 8010
