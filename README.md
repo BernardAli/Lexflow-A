@@ -19,6 +19,13 @@ deployment and office measurements still require acceptance.
 
 ## Documentation
 
+The German public product website lives in [public-site/](public-site/README.md).
+Its short homepage links to dedicated product, use-case, security, integration,
+demo, resources/FAQ and pilot pages. It includes an interactive synthetic
+walkthrough, video, downloadable resources and a browser-local pilot brief.
+It is a separate static Sites source checkout with no connection to office data;
+contact details are explicitly fictional demo information.
+
 | Need | Guide |
 | --- | --- |
 | Staff workflow, case schema and ProNotar32 extension steps | [ProNotar32 readiness](integrations/PRONOTAR32_READINESS.txt) |
