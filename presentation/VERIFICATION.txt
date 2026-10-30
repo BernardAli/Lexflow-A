@@ -1,5 +1,5 @@
 LEXFLOW AI — CURRENT PILOT PROTOTYPE VERIFICATION
-Updated 23 October 2026; earlier acceptance evidence recorded 22 October 2026.
+Updated 30 October 2026; earlier evidence is retained under its original dates.
 
 ASSESSED SCOPE
 
@@ -8,11 +8,65 @@ reading; source review; frozen approval; file export or authenticated HTTP hando
 signed receipt; remote scanner/email intake; audit and encrypted recovery.
 The current build also includes password reset/visibility, accessible section tabs
 and four analytics tabs with shared filters, chart tables, case links and CSV.
+It also includes encrypted additional parties/properties, case references,
+versioned destination mappings, canonical JSON exports and approved-case reads.
 The original presentation's broader platform roadmap is not fully implemented.
 
-23 OCTOBER UPDATE
+30 OCTOBER UPDATE — CASE MODEL AND PRONOTAR32 EXTENSION FOUNDATION
 
-- Latest full SQLite suite: 128 tests in 49.775 seconds; 123 passed and five
+- PostgreSQL 17: all 152 tests passed in 76.618 seconds, with no skips, on an
+  isolated temporary database. Seven concurrency tests include the new cases for
+  a details edit waiting behind approval and concurrent mapping revision creation.
+  The suite also covers encrypted repeated records, primary source bindings,
+  stale edits, tenant/role boundaries, frozen profile revisions, approved-case
+  API responses, required mappings and blocked ProNotar rendering/export.
+- SQLite: the existing 56-test pipeline/view/pilot subset and the initial 19
+  case-adapter tests passed. A later 150-test run passed 137, skipped five
+  PostgreSQL-only checks and encountered eight local-socket permission errors in
+  the sandbox. All eight HTTP tests passed when rerun with local networking.
+  The two subsequently added concurrency tests were exercised in PostgreSQL;
+  this is not a claim that the final 152-test suite ran completely on SQLite.
+- Chromium: an isolated synthetic walkthrough at 1440px desktop and 390px mobile
+  saved office references, added a company and a property, approved the case and
+  downloaded canonical JSON containing three participants and two properties.
+  It checked no horizontal mobile overflow and locked details after approval.
+  The temporary verification script required one quoting fix before passing.
+  These new results were recorded in the implementation session; the older
+  browser-verification.json remains evidence of the earlier workflow only.
+- Django checks, migration consistency, applied-migration checks and diff
+  whitespace checks passed. Database backups preceded the additive migrations
+  in the local development and dedicated demo databases. Structured download
+  destinations were enabled there (six development, three demo).
+- Internal approval snapshots now include version 2 case/profile data. Public
+  case JSON uses lexflow.case/1; the signed transport remains lexflow.handoff/1.
+  Export creation/download still does not establish destination receipt.
+- No ProNotar installation was contacted. The pronotar32 adapter explicitly
+  rejects export; canonical-json-v1 is the implemented renderer. The office's
+  vendor version, import schema, accepted fixtures and test environment are
+  required before a compatible adapter and real import can be accepted.
+
+30 OCTOBER DOCUMENTATION REFRESH
+
+- README, operations, staff walkthrough, integration/API contracts and the
+  readiness guide now describe the implemented case/profile foundation, upgrade
+  behavior, compatibility limits and operator troubleshooting.
+- Rebuilt the six-page demonstration guide, matching sample ZIP, 12-slide
+  editable PowerPoint/PDF and reusable slide text. All PowerPoint XML and internal
+  relationships validated; every PDF page contains text; README file links resolve.
+- All seven existing synthetic source PDFs retain their original checksums;
+  the ZIP contains those exact files and the rebuilt guide. The case-details and
+  roadmap guide pages and ProNotar32 slide were visually checked after rendering.
+  Desktop Microsoft PowerPoint rendering was not tested.
+- The in-app presenter template compiles; the documented mapping example validates
+  against the current source-field schema. Documentation generator syntax and
+  diff whitespace checks passed. No application behavior changed in this refresh;
+  the 152-test result above belongs to the preceding implementation run.
+- The existing MP4, transcript, subtitles and raw test logs were preserved as
+  historical artifacts. Their README/index entries identify their earlier scope.
+
+23 OCTOBER UPDATE — HISTORICAL
+
+- SQLite suite on that date: 128 tests in 49.775 seconds; 123 passed and five
   PostgreSQL-only concurrency tests skipped. Nineteen analytics tests cover
   receipt-date boundaries, office/demo separation, previous cohorts, current vs
   initial extraction, re-extraction history, confidence counts, receipt rates,
@@ -28,11 +82,12 @@ The original presentation's broader platform roadmap is not fully implemented.
   an isolated synthetic copy. See tabs-browser-verification.json and
   browser-verification.json. These checks did not mutate the presentation cases.
 - Django system checks, migration drift and JavaScript syntax checks passed.
-- No new PostgreSQL, hosted deployment or real-vendor acceptance run is claimed.
+- No new PostgreSQL, hosted deployment or real-vendor run was made in that update.
   The 100-test PostgreSQL result below belongs to the earlier 22 October suite.
-- Documentation now includes integrations/EXPANSION_GUIDE.txt. Native Office and
+- Documentation then added integrations/EXPANSION_GUIDE.txt. Native Office and
   cloud plugins, a named vendor adapter, per-plugin credentials/scopes, a setup
-  catalog, per-destination mapping profiles and background retries remain planned.
+  catalog, per-destination mapping profiles and background retries were planned
+  at that time. Mapping profiles are implemented in the 30 October update above.
 - Documentation artifacts regenerated: five-page demonstration guide, matching
   sample ZIP, and 12-slide PowerPoint/PDF with reusable slide text. All PowerPoint
   XML/relationships resolve; the PDFs contain text on every page. The new analytics
@@ -127,6 +182,10 @@ recorded 22 October run. Later browser/UI checks are identified above.
 
 NEW OPERATIONAL DELIVERABLES
 
+- integrations/PRONOTAR32_READINESS.txt: current case schema, staff workflow,
+  mapping configuration, troubleshooting and the vendor adapter extension contract.
+- configure_mapping_profile command and integrations/examples/property_case_profile.json.
+- GET /api/v1/matters/<ref>/approved/: complete frozen canonical case, read-only.
 - integrations/HANDOFF_V1.txt: concrete authenticated request/receipt contract.
 - integrations/EXPANSION_GUIDE.txt: implemented API/configuration and proposed
   plugin/adapter expansion, credentials, mappings, delivery and acceptance plan.
@@ -155,4 +214,6 @@ roadmap scope. No legal certification, customer accuracy or savings are claimed.
 
 The original client PowerPoint remains unchanged. PROJECT_REVIEW.txt and review/
 are the historical pre-hardening baseline. verification.json is the evidence index
-with dates for the different test runs; START_HERE.txt is the presenter script.
+with dates for the different test runs; START_HERE.txt is the current presenter
+script. Raw test-result text files and acceptance JSON retain their earlier runs.
+The video/transcript/subtitles describe the earlier recording, not the new UI.

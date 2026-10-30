@@ -4,7 +4,7 @@ from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_http_methods, require_POST
 
 from apps.audit.models import AuditEvent
 from apps.connectors.models import Connector
@@ -15,6 +15,69 @@ from . import services
 from .models import ExtractedField, FieldCandidate, Matter
 
 STAGES = ["Receive", "Classify", "Extract", "Validate", "Review", "Transfer", "Audit"]
+
+
+@require_http_methods(["GET", "POST"])
+@tenant_view()
+def case_details(request, ref):
+    from .case_data import bindings, canonical_case, revision, save_details
+    from .case_forms import detail_form
+    matter = get_object_or_404(Matter.objects.select_related("tenant", "matter_type"), tenant=request.tenant, ref=ref)
+    if not matter.matter_type:
+        messages.error(request, "Classify this matter before entering case details.")
+        return redirect(matter_url(matter))
+    bound = None
+    error_status = 200
+    if request.method == "POST":
+        group, key = request.POST.get("group", ""), request.POST.get("record_id", "")
+        if group not in ("metadata", "participants", "properties"):
+            from django.http import HttpResponseBadRequest
+            return HttpResponseBadRequest("Unknown case section.")
+        if key and group != "metadata" and not any(row["id"] == key for row in canonical_case(matter)[group]):
+            from django.http import Http404
+            raise Http404
+        prefix = f"{group}-{key or 'new'}"
+        form = detail_form(matter, group, key, data=request.POST, prefix=prefix)
+        deleting = request.POST.get("action") == "delete"
+        if deleting or form.is_valid():
+            values = {} if deleting else {k: v for k, v in form.cleaned_data.items() if not form.fields[k].disabled}
+            try:
+                save_details(matter, request.user, group, values, record_id=key,
+                             expected_revision=request.POST.get("revision", ""), delete=deleting)
+            except ValidationError as exc:
+                form.add_error(None, exc)
+                matter.refresh_from_db()
+            else:
+                messages.success(request, "Case details saved. They will be included in the next approval.")
+                return redirect(request.path + f"#{group}")
+        bound = (group, key, form)
+        error_status = 400
+    case = canonical_case(matter)
+
+    def make_form(group, key=""):
+        if bound and bound[:2] == (group, key):
+            return bound[2]
+        return detail_form(matter, group, key, prefix=f"{group}-{key or 'new'}")
+
+    sections = []
+    for group, label in (("participants", "Participants"), ("properties", "Properties")):
+        rows = [{"id": item["id"], "label": item.get("name") or item.get("address") or item.get("land_register") or item["id"],
+                 "form": make_form(group, item["id"]), "primary": item["id"] in bindings(matter, group)} for item in case[group]]
+        sections.append({"group": group, "label": label, "rows": rows, "new_form": make_form(group)})
+    from apps.connectors.services import render as render_export
+    destinations = []
+    for connector in Connector.objects.filter(tenant=request.tenant, is_active=True,
+            mapping_profile__matter_type=matter.matter_type).select_related("mapping_profile"):
+        try:
+            render_export(connector, matter)
+        except ValidationError as exc:
+            status = " ".join(exc.messages)
+        else:
+            status = "Ready for approved export." if matter.is_locked else "Ready after case approval."
+        destinations.append({"connector": connector, "status": status})
+    return render(request, "matters/case_details.html", {"matter": matter, "sections": sections,
+        "metadata_form": make_form("metadata"), "revision": revision(matter), "destinations": destinations,
+        "nav": "matters"}, status=error_status)
 
 
 def render_marked(text, spans):

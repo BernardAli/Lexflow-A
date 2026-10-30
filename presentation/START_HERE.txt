@@ -1,4 +1,5 @@
 LEXFLOW AI — DEDICATED-OFFICE PILOT PRESENTATION
+Updated 30 October 2026
 
 Open LexFlow_Pilot_Presentation.pptx for the editable 12-slide deck, or use
 LexFlow_Pilot_Presentation.pdf. slide-content.json contains reusable slide text.
@@ -11,6 +12,8 @@ seven existing synthetic source PDFs. Rebuild just the guide/archive with:
   .venv/bin/python tools/build_demo_documents.py --guide-only
 
 integrations/EXPANSION_GUIDE.txt is the developer/operator integration roadmap.
+integrations/PRONOTAR32_READINESS.txt describes the current case schema, profile
+configuration and ProNotar32 extension work. ProNotar import is not implemented.
 
 SAMPLE VIDEO
 
@@ -20,6 +23,9 @@ authenticated reference handoff/receipt, scan-review requirements and analytics.
 The native-plugin/vendor roadmap is identified as planned. Narration is locally
 synthesized in English; short captions are burned into the MP4. Full spoken
 subtitles and a transcript are alongside the video, with chapters and a poster.
+The existing video predates the 30 October case-details/mapping update; it does
+not demonstrate the new screens. Its transcript and media checks remain records
+of that earlier recording. Use the live structured-case walkthrough below.
 
 Re-record with .venv/bin/python tools/record_demo_video.py. It requires Node with
 Playwright/Chromium, FFmpeg (libx264/libass/flite) and the local OCR dependencies.
@@ -74,10 +80,34 @@ reference destination using the documented LexFlow contract, not a vendor system
 review, approval, export, send and signed receipt are traceable. Show the filters,
 workflow links and Download analytics CSV. Metrics are a labelled synthetic intake
 cohort; dates select receipt, with later review/delivery outcomes included.
-The latest SQLite suite ran 128 tests: 123 passed, five PostgreSQL-only skipped.
-The separately recorded 22 October PostgreSQL run passed 100 tests; it has not
-been rerun for the expanded suite. Both engines have recorded encrypted-restore
-drills; the synthetic extraction corpus passed 64 checks across 12 cases.
+The 30 October PostgreSQL 17 run passed all 152 tests, including seven concurrency
+tests. Desktop/mobile Chromium checks cover the structured-case workflow.
+Earlier restore drills for both engines and the 12-case/64-check synthetic
+extraction evaluation remain separately dated evidence; see VERIFICATION.txt.
+
+STRUCTURED CASE / PRONOTAR32 EXTENSION WALKTHROUGH
+
+Use a separate unapproved synthetic case for this extension; saved additional
+details make legacy XML/JSON/CSV exports unavailable for that case.
+
+1. Sign in as admin. In Connectors choose Enable structured case exports. This
+   adds one Case JSON download destination per active workflow. A fresh or reset
+   demo needs this step; repeating it does not duplicate configured destinations.
+2. As a reviewer, open a classified case and choose Case details · parties and
+   properties. Add an office designation/code, a second buyer or company, and a
+   second property. Enrich primary records with register/tax/contact details.
+   Edit source-bound primary values in Extracted data.
+3. Show Export readiness. It reports local mapping errors, not vendor acceptance.
+   Complete source review, resolve conflicts and confirm the purchase price.
+4. As keller.notar, approve and choose Case JSON — Property purchase. Download
+   the JSON and show participants[], properties[] and the frozen mapping version.
+   The case details are locked. Download alone does not prove delivery.
+5. In Connectors show LexFlow case JSON v1 as available and ProNotar32 as not
+   implemented. Explain that its exact version, import contract, accepted sample
+   files and vendor test environment are the next inputs.
+
+The API at GET /api/v1/matters/<ref>/approved/ reads the complete frozen case using
+the office token. It does not apply a destination mapping or send the case.
 
 OPTIONAL TWO-MINUTE EXTENSION
 
@@ -118,15 +148,19 @@ WHAT THE BUILD NOW SUPPORTS
 - PostgreSQL row-lock tests and reproducible synthetic acceptance drills.
 - Four filtered analytics tabs, chart data tables, case links and aggregate CSV.
 - Section tabs with keyboard/deep-link support, password visibility and reset.
+- Encrypted additional participants, properties, representation and office references.
+- Immutable destination mapping revisions and a canonical JSON rendering adapter.
+- Export-readiness checks and approved-case API; legacy omission prevention.
 
 PLUGIN AND DESTINATION ROADMAP
 
 Current: intake/case-read API, remote scanner/saved email, approved XML/JSON/CSV
-exports and authenticated HTTP handoff. The reference receiver is synthetic-only.
+exports, canonical case JSON, frozen destination mappings, an approved-case API
+and authenticated HTTP handoff. The reference receiver is synthetic-only.
 Planned: integration setup/status and connection tests; separate scoped plugin
-credentials; versioned per-destination mappings; automatic background delivery.
-Then build native Outlook intake and one actual office-selected vendor adapter,
-followed by Word template filling and the office's chosen cloud document source.
+credentials; automatic background delivery and native Office/cloud integrations.
+The immediate vendor extension is ProNotar32 against its documented contract and
+accepted fixtures. Existing XML import buttons do not supply that specification.
 
 Confirm the destination product/version, documented interface, credentials, schema,
 sandbox and durable acceptance/receipt before implementation. Native Outlook/Word,
@@ -143,11 +177,12 @@ models remain roadmap scope. No legal certification or customer savings are clai
 
 EVIDENCE AND HANDOFF
 
-presentation/VERIFICATION.txt and verification.json: current results and limits.
-presentation/postgres-acceptance.json and sqlite-acceptance.json: complete drills.
+presentation/VERIFICATION.txt and verification.json: dated results and current limits.
+presentation/postgres-acceptance.json and sqlite-acceptance.json: 22 October drills.
 presentation/extraction-evaluation.json: 12 cases / 64 checks, explicitly synthetic.
 integrations/HANDOFF_V1.txt: implementable sender/receiver contract.
 integrations/EXPANSION_GUIDE.txt: current plugin API and proposed expansion plan.
+integrations/PRONOTAR32_READINESS.txt: implemented case/profile foundation and next steps.
 presentation/analytics-browser-verification.json: analytics browser checks.
 deployment/OPERATIONS.txt: provisioning, agent, backup, recovery and custody steps.
 README.md: setup and commands. PROJECT_REVIEW.txt and review/ are historical.

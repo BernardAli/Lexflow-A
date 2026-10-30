@@ -73,6 +73,46 @@ class PostgreSQLConcurrencyTests(TransactionTestCase):
         self.assertEqual(Transfer.objects.count(), 1)
         self.assertTrue(verify_chain(self.office).ok)
 
+    def test_case_details_wait_for_approval_and_reject_stale_edit(self):
+        from apps.matters.case_data import revision, save_details
+        from apps.matters.models import Matter
+        ready = threading.Event()
+
+        def edit():
+            close_old_connections()
+            try:
+                matter = Matter.objects.get(pk=self.matter.pk)
+                expected = revision(matter)
+                ready.set()
+                try:
+                    save_details(matter, self.users["clerk"], "metadata", {"case_code": "KV"}, expected_revision=expected)
+                    return "changed"
+                except ValidationError:
+                    return "blocked"
+            finally:
+                connections.close_all()
+
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            with transaction.atomic():
+                Tenant.objects.select_for_update().get(pk=self.office.pk)
+                future = pool.submit(edit)
+                self.assertTrue(ready.wait(5))
+                with self.assertRaises(TimeoutError):
+                    future.result(timeout=.25)
+                services.approve(self.matter, self.notary)
+            self.assertEqual(future.result(timeout=10), "blocked")
+        self.matter.refresh_from_db()
+        self.assertEqual(self.matter.case_data, {})
+
+    def test_parallel_profile_updates_allocate_distinct_revisions(self):
+        from apps.connectors.profiles import configure_profile
+        connector = Connector.objects.get(tenant=self.office, kind="json")
+        versions = self.parallel(3, lambda _: configure_profile(self.office, connector, {
+            "key": "concurrent", "name": "Concurrent profile", "matter_type": "property-purchase", "rules": []}).version)
+        self.assertEqual(sorted(versions), [1, 2, 3])
+        connector.refresh_from_db()
+        self.assertEqual(connector.mapping_profile.version, 3)
+
     def test_parallel_intake_deduplicates_same_external_id(self):
         ids = self.parallel(4, lambda _: services.ingest_message(self.office, subject="Synthetic intake", body="Example",
                            external_id="same-scanner-id", process=False).pk)

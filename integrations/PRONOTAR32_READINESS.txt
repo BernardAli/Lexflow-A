@@ -1,0 +1,200 @@
+PRONOTAR32 EXTENSION FOUNDATION
+Updated 30 October 2026
+
+Scope
+-----
+LexFlow now has a vendor-neutral case model, case-detail review forms, immutable
+destination mapping revisions and a code-level adapter registry. ProNotar32 is
+listed as not implemented and its adapter rejects preview/export. No ProNotar
+XML schema, API, credentials or successful vendor import has been assumed.
+
+Use the new workflow
+--------------------
+1. Apply the additive migrations with the office's usual configured environment:
+     .venv/bin/python manage.py migrate
+   Existing cases receive empty details; existing connectors keep their format.
+2. As an office administrator, open Connectors and choose "Enable structured
+   case exports". This idempotently adds a Case JSON destination for each active
+   workflow. Enabling exports does not send data or create a vendor connection.
+   A fresh/reset demo needs this step even though the launcher applies migrations.
+   Existing installations may already have these destinations; repeating setup
+   does not duplicate them. The default transport is a manual JSON download.
+3. Open a matter, then "Case details · parties and properties". Enter the case
+   designation, office abbreviation and optional master/destination references.
+   Expand a primary record to enrich it, or add further parties/properties.
+4. Correct source-bound primary names/dates/addresses in Extracted data. Those
+   fields are disabled in the case-detail forms and cannot be overridden through
+   the service. Additional records are entered by staff, not automatically extracted.
+5. Inspect Export readiness, complete document review and approve the case.
+   Select the Case JSON destination. The file is LexFlow's canonical case data
+   for adapter development, NOT a file validated for import into ProNotar.
+   File creation leaves delivery unconfirmed. A genuine destination receipt is
+   still required before the case is marked transferred.
+
+Approval freezes case details and the complete applicable mapping revisions.
+Mappings enabled after approval require reopening/reapproval. Revisions created
+later do not change an earlier approved export. Delivered cases remain immutable.
+Legacy XML/JSON/CSV destinations reject cases with saved additional details so
+they cannot silently omit those details. Cases without enrichment retain the
+existing legacy behavior. A deliberate new mapping can select a subset of data;
+its author is responsible for the vendor's required fields and coverage.
+
+Case schema: lexflow.case/1
+--------------------------
+Top level:
+  schema, ref, matter_type, metadata, fields, participants[], properties[]
+
+metadata:
+  designation, case_code, master_file_reference, external_case_reference
+fields:
+  stable extraction field keys (buyer_name, purchase_price, etc.) and normalized
+  string values from the reviewed workflow. Destination paths do not define keys.
+participants:
+  id, kind (natural/legal), role, name, birth_name, birth_date, address,
+  postal_code, city, country, email, phone, tax_id, nationality, marital_status,
+  marital_regime, legal_form, registered_seat, register_court, register_number,
+  vat_id, ownership_share, share_amount, represents, external_id
+properties:
+  id, address, postal_code, city, land_register, sheet, volume, inventory_number,
+  district, section, parcel, area, ownership_share, use, category, external_id
+
+Values are strings. Dates use ISO YYYY-MM-DD; monetary/area entries use decimal
+strings; ownership fractions use numerator/denominator. Missing optional fields
+can be absent or empty. Adapters must not infer values from missing data.
+Primary record IDs (buyer, seller, property, company, director, principal,
+attorney) are stable within a case. Additional IDs are UUIDs scoped to that case.
+represents refers to another participant ID; cycles and dangling links are
+rejected. external_id and master_file_reference are office-entered references,
+not proof that the referenced destination record exists. There is no shared
+cross-case party directory, automatic duplicate merge or live lookup yet.
+
+The UI validates bounded record counts, field lengths, dates, email, decimal
+amounts and fractions. It does not certify legal completeness or register data.
+Primary extraction rules/requirements remain the existing workflow's rules.
+All enrichment is encrypted with the office key. Updates use the same office /
+matter locking order as approval and reject stale form revisions. Audit events
+record section/record IDs and content digests, not plaintext personal details.
+Changing workflow requires removing saved party/property enrichment first.
+
+Approved-data API
+-----------------
+  GET /api/v1/matters/<ref>/approved/
+  Authorization: Bearer <office API token>
+
+200: {approval_hash, approved_at, case: <frozen lexflow.case/1>}
+401: missing/invalid token; 404: absent or other-office case;
+409: missing/superseded/unverifiable approval or a legacy approval without case data.
+Responses use Cache-Control: no-store. The endpoint never rebuilds the approved
+case from current fields. The existing shared office token permits both intake
+and reading case data; per-plugin credentials/scopes remain future work.
+This is the complete vendor-neutral approved case, not the result of a mapping
+profile. Use the connector export when a destination-specific projection is needed.
+The endpoint is read-only; it cannot approve, edit or send a case.
+
+Destination mapping profiles
+----------------------------
+One connector binds to one workflow-specific MappingProfile revision. Use
+different connectors for multiple workflows or concurrently supported formats.
+Revisions are created through the audited operator command:
+
+Find the connector ID in the configured office environment (replace office-slug):
+
+  .venv/bin/python manage.py shell -c "from apps.connectors.models import Connector; print(list(Connector.objects.filter(tenant__slug='office-slug').values('id', 'name', 'kind', 'mapping_profile_id')))"
+
+Then install the specification using that connector's numeric ID:
+
+  .venv/bin/python manage.py configure_mapping_profile --tenant <office-slug> \
+    --connector <JSON-connector-id> \
+    --spec integrations/examples/property_case_profile.json
+
+The example is a LexFlow JSON mapping, not an invented ProNotar schema. The
+command allocates the next version under an office lock and validates ownership,
+source names, adapter selection and output format. It makes no network calls.
+Choose a different profile key when changing the conceptual contract/workflow.
+
+Profile document:
+  key, name, matter_type, adapter, target_version, specification, rules[]
+Rules use source, target, optional required (boolean) and optional items[].
+Sources address fields.<workflow-key>, metadata.<key>, ref, matter_type,
+participants or properties; whole fields/metadata objects can also be selected.
+Collection rules may map each item's fields while
+preserving order/cardinality. Target paths create nested JSON objects. Empty
+rules emit the whole canonical case. Required missing values block export.
+No executable expressions, embedded values, URLs or credential expansion exist.
+Profile metadata describes the contract; it must not contain client data/secrets.
+Specifications are bounded to 64 KiB; rule lists allow up to 150 rules, paths up
+to 120 characters/eight components, and one collection-item mapping level.
+Unknown source names and overlapping targets are rejected. Arrays retain their
+order; there is no role-filtering or executable transformation language. A vendor
+requiring richer transformations needs an explicit versioned renderer.
+
+The canonical-json-v1 adapter retains the lexflow.handoff/1 JSON envelope,
+adds case_schema and mapping metadata, and stores the structured/mapped case in
+data. Existing authenticated transport, stored payload checksums, idempotency,
+signed receipts and delivery gates are reused. A reference-receiver receipt
+demonstrates LexFlow transport acceptance only, never ProNotar acceptance.
+
+Common operator outcomes
+------------------------
+- "This mapping was not included in the approval": select the matching workflow
+  connector, or reopen an undelivered case and approve it after enabling the mapping.
+- "This case includes additional details": choose the matching Case JSON
+  destination. Legacy formats deliberately refuse to drop the saved enrichment.
+- "Mapping requires ...": fill/review that source value before a new approval,
+  or correct the profile's required-field policy in a new mapping revision.
+- "The case changed while this form was open": reload the case, compare the
+  current values with the intended edit and save again. Stale writes are rejected.
+- "ProNotar32 delivery is not implemented": no configuration switch can enable
+  vendor compatibility. Implement and validate the vendor adapter first.
+- A delivered case cannot be reopened. Start a new intake for the amendment.
+
+Export readiness runs the configured renderer and reports mapping errors. It
+does not contact a vendor, validate credentials, approve the matter or prove
+destination acceptance. Source-review and approval blockers still apply.
+
+Implement the real ProNotar32 adapter
+------------------------------------
+Obtain the office's exact installed version, supported import specification/XSD
+or API documentation, licensing/access conditions, accepted anonymized fixtures,
+required fields, identity/upsert rules and an isolated vendor test installation.
+The XML buttons in screenshots are clues, not a complete contract.
+
+1. Add a versioned adapter class to apps/connectors/adapters.py with a distinct
+   immutable key, label, availability flag and render(snapshot, profile) method.
+   Return (body, filename, content_type, nonempty_value_count). Consume only the
+   frozen snapshot's case and profile; do not query mutable case fields.
+2. Validate/map against the actual vendor schema and exact encoding. Keep older
+   adapter versions available while their approvals need rendering/retries.
+   The current renderer returns UTF-8 text; extend the payload contract explicitly
+   if the vendor requires another encoding or binary packages.
+3. For a file interface, create the vendor-compatible file and verify import
+   in the test installation. A typed destination reference is the existing manual
+   receipt mechanism, not automated proof of the vendor's internal transaction.
+4. For a vendor API, add a bridge that implements HANDOFF_V1.txt and translates
+   the request/authentication to the supported vendor API. Do not point LexFlow's
+   generic HTTP sender at a vendor URL that does not implement that contract.
+5. Test multiple parties/properties, legal entities and representatives; missing
+   IDs; creates vs updates; duplicates; partial rejection; timeout after commit;
+   retry; superseded approvals; and exact receipt-to-import binding. Record the
+   destination case ID only after durable acceptance.
+
+Native Word/DOCX processing, a full Vollzug task engine, invoicing, official
+register submissions and per-plugin credential management remain separate work.
+
+Verification
+------------
+  .venv/bin/python manage.py test apps.core.tests.test_case_adapters
+  .venv/bin/python manage.py test apps
+  .venv/bin/python manage.py makemigrations --check --dry-run
+
+The tests exercise encrypted repeated records, source bindings, stale edits,
+tenant/role gates, frozen mapping revisions, approval-bound API reads, required
+mapping values, legacy omission prevention and blocked ProNotar operations.
+Use PostgreSQL for concurrent deployment; SQLite cannot prove row-lock behavior.
+
+Recorded on 30 October 2026: all 152 tests passed on isolated PostgreSQL 17,
+including both new concurrency checks. Django checks, migration consistency and
+diff whitespace checks passed. A Chromium walkthrough at 1440px and 390px
+verified form saves, three participants/two properties in the approved JSON,
+no horizontal mobile overflow and locked details after approval. The walkthrough
+used an isolated synthetic database and local server; no vendor was contacted.

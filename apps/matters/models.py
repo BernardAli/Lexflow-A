@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 
 from apps.core.models import TenantScoped
-from apps.core.fields import EncryptedTextField
+from apps.core.fields import EncryptedJSONField, EncryptedTextField
 from apps.core.utils import format_eur, pct, unique_ref
 
 
@@ -35,6 +35,7 @@ class Matter(TenantScoped):
     is_demo = models.BooleanField(default=False)
     initial_metrics = models.JSONField(default=dict, editable=False)
     corrected_keys = models.JSONField(default=list, editable=False)
+    case_data = EncryptedJSONField(default=dict, blank=True, editable=False)
 
     class Meta:
         ordering = ["-created_at"]

@@ -24,8 +24,10 @@ from . import protocol
 
 
 def make_approval_snapshot(matter):
-    return {
-        "version": 1, "ref": matter.ref, "matter_type": matter.matter_type.key,
+    from apps.matters.case_data import canonical_case, has_details
+    from .profiles import freeze_profiles
+    snapshot = {
+        "version": 2, "ref": matter.ref, "matter_type": matter.matter_type.key,
         "data_class": "synthetic" if matter.is_demo else "office",
         "received_at": matter.message.received_at.isoformat(),
         "approved_at": matter.approved_at.isoformat() if matter.approved_at else None,
@@ -36,6 +38,10 @@ def make_approval_snapshot(matter):
                     "status": f.status, "source_sha256": f.source.sha256 if f.source else None}
                    for f in matter.fields.select_related("definition", "source").order_by("definition__sort_order", "id")],
     }
+    snapshot["case"] = canonical_case(matter, {f["key"]: f["value"] for f in snapshot["fields"]})
+    snapshot["has_case_details"] = has_details(matter)
+    snapshot["mapping_profiles"] = freeze_profiles(matter)
+    return snapshot
 
 
 def approval_snapshot(matter):
@@ -95,7 +101,16 @@ def _xml(snapshot, tree):
 
 
 def render(connector, matter):
+    from .adapters import get_adapter
+    from .profiles import profile_for_snapshot
+    if connector.tenant_id != matter.tenant_id or not connector.is_active:
+        raise ValidationError("That connector is not available for this office.")
     snapshot = _snapshot(matter)
+    profile = profile_for_snapshot(connector, snapshot)
+    if profile:
+        return get_adapter(profile["adapter"]).render(snapshot, profile)
+    if snapshot.get("has_case_details"):
+        raise ValidationError("This case includes additional details. Select a structured case export to include them.")
     tree, flat = _build(snapshot)
     stem = f'{snapshot["ref"]}-{snapshot["matter_type"]}'
     if connector.kind == Connector.Kind.XML:
@@ -195,7 +210,8 @@ def transfer(matter, connector, user):
     result.checksum, result.signature, result.error = checksum, signature, ""
     result.save()
     record(matter.tenant, "transfer.exported", f"Created an approved export with {count} fields; receipt required",
-           actor=user, obj=matter, details={"transfer": result.ref, "sha256": checksum, "approval": matter.approval_hash})
+           actor=user, obj=matter, details={"transfer": result.ref, "sha256": checksum, "approval": matter.approval_hash,
+                                          "mapping": approval_snapshot(matter).get("mapping_profiles", {}).get(str(connector.pk), {}).get("digest", "")})
     if connector.delivery == Connector.Delivery.FOLDER:
         try:
             _write_export(result)

@@ -22,14 +22,14 @@ E.register_namespace("a", A)
 E.register_namespace("r", R)
 EMU = 914400
 INK, PETROL, PAPER, WHITE, MUTED, GOLD = "142D2C", "1E5250", "F3F5F1", "FFFFFF", "5D6A67", "F4E4A1"
-DATE = "23 OCTOBER 2026"
+DATE = "30 OCTOBER 2026"
 
 SLIDES = [
     ("LEXFLOW AI / PILOT DEMONSTRATION", "From documents to an approved handoff", "Secure workflow automation for a dedicated notary office", [
         ("The workflow", "Receive documents. Extract structured values. Resolve uncertainty. Approve a frozen export. Confirm its receipt."),
         ("The demonstration", "One office, synthetic property-purchase documents and an independent reference HTTP destination.")]),
     ("01 / A CONTAINED FIRST USE CASE", "Property purchase intake", "Prove a complete, reviewable workflow before expanding integrations.", [
-        ("Inputs and output", "Digital PDFs, scanned PDFs/images and saved email produce a structured property-purchase case and an approved XML, JSON or CSV handoff."),
+        ("Inputs and output", "Read PDFs, scans and saved email; review extracted values. Staff can add further parties and properties. Enriched cases use canonical JSON; legacy exports remain available for cases without additional details."),
         ("Scope boundary", "A dedicated-office prototype has PostgreSQL concurrency, HTTP, scanner and restore evidence. Vendor acceptance, client hosting and office measurements remain.")]),
     ("02 / THE EMPLOYEE WORKFLOW", "Seven visible stages", "Every consequential decision stays visible to the office.", [
         ("Receive > Classify > Extract", "Keep incoming evidence with the case. Identify the workflow and propose values with their source locations."),
@@ -55,11 +55,11 @@ SLIDES = [
     ("09 / LIVE DEMONSTRATION", "A seven-minute walkthrough", "Use /presentation/ as your presenter guide.", [
         ("Minutes 1–4", "Open the unprocessed intake. Process the documents. Show the Blatt 812 / 872 conflict. Resolve the source choice and confirm the price as the clerk."),
         ("Minutes 5–7", "Sign in as the notary. Approve, create the HTTP export and send it. Show its verified receipt and audit trail. Optionally demonstrate scanned intake and mandatory source review.")]),
-    ("10 / WHAT IS NEXT", "Expand plugins and destinations", "Build the shared foundation, then validate Outlook intake and one actual destination.", [
-        ("Shared foundation — proposed", "Separate scoped plugin credentials, integration setup and connection tests, versioned destination mappings, and queued delivery. Preserve the existing approval, idempotency and verified-receipt controls."),
-        ("First integrations — proposed", "Build Outlook intake and one office-selected vendor adapter against documented APIs/imports. Validate the exact product/version and durable receipt. Word template filling and cloud intake follow. Native plugins remain unimplemented.")]),
+    ("10 / DESTINATION EXTENSION", "Prepare the ProNotar32 connection", "The case and mapping foundation is implemented; vendor import still needs validation.", [
+        ("Implemented foundation", "Encrypted additional parties and properties, office references, immutable mapping revisions and a canonical JSON adapter. Approval freezes the complete case and mapping; an API serves approved case data."),
+        ("Next: validate ProNotar32", "Obtain the office's version, import schema, accepted sample files and test environment. Implement and verify the vendor adapter. ProNotar delivery is blocked; native plugins, scoped credentials and queued sends remain planned.")]),
     ("LEXFLOW AI / THE NEXT STEP", "Select one destination. Validate one workflow.", "A controlled, demonstrable foundation for the first office pilot.", [
-        ("What you can present today", "A working case from PDF or scan to reviewed data, frozen approval, authenticated HTTP handoff and signed receipt, with PostgreSQL, recovery and extraction evidence."),
+        ("What you can present today", "Reviewed case details, frozen mappings, canonical exports and signed HTTP handoff. All 152 tests passed on PostgreSQL 17; the new case-details workflow passed desktop/mobile browser checks. Vendor acceptance remains separate."),
         ("What the client supplies next", "A supported destination interface and test environment, sanitized examples, an accepted deployment boundary and agreed success criteria.")]),
 ]
 

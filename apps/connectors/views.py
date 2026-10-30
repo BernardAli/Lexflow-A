@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from apps.audit.services import record
-from apps.core.decorators import APPROVERS, tenant_view
+from apps.core.decorators import ADMINS, APPROVERS, tenant_view
 from apps.matters.models import Matter
 
 from . import services
@@ -15,9 +15,11 @@ from .models import Connector, Transfer
 
 @tenant_view()
 def index(request):
+    from .adapters import ADAPTERS
     t = request.tenant
     return render(request, "connectors/index.html", {
-        "connectors": Connector.objects.filter(tenant=t),
+        "connectors": Connector.objects.filter(tenant=t).select_related("mapping_profile"),
+        "adapters": ADAPTERS.values(),
         "transfers": Transfer.objects.filter(tenant=t).select_related("matter", "connector", "created_by")[:50],
         "ladder": [
             ("Official API", "Best option", "Preferred when the vendor supplies an approved API; not implemented in this demo.", False),
@@ -28,6 +30,15 @@ def index(request):
         ],
         "nav": "connectors",
     })
+
+
+@require_POST
+@tenant_view(roles=ADMINS)
+def enable_structured(request):
+    from .profiles import enable_case_exports
+    created = enable_case_exports(request.tenant, actor=request.user)
+    messages.success(request, f"Enabled {len(created)} structured case destinations. Reapprove existing cases to include their mappings.")
+    return redirect("connectors:index")
 
 
 @require_POST

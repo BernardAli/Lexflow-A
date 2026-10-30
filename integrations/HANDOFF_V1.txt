@@ -9,8 +9,11 @@ is an independent, synthetic-only contract fixture with its own durable database
 
 For plugin APIs, expansion priorities, proposed vendor adapters and acceptance
 steps, see integrations/EXPANSION_GUIDE.txt. That roadmap adds no fields or
-behaviors to this v1 contract. Native Office plugins, per-plugin credentials,
-per-destination mapping profiles and a background retry scheduler remain proposed.
+behaviors to this v1 transport contract. Native Office plugins, per-plugin
+credentials and a background retry scheduler remain proposed. Structured case
+JSON and frozen per-destination mapping revisions are documented in
+integrations/PRONOTAR32_READINESS.txt. Their JSON envelope adds case_schema and
+mapping metadata; the existing signing and receipt protocol is unchanged.
 
 Sender configuration
 --------------------
@@ -23,7 +26,9 @@ Supply a random 32–64 character shared secret through a private regular file
     --endpoint-key office-import --destination "Approved office destination" \
     --secret-file /run/secrets/handoff-key
 
-Changing a connector that already has exports requires a new versioned name.
+Changing a connector's transport contract or secret after it has exports requires
+a new versioned name. Mapping-only changes use a new MappingProfile revision;
+existing approvals retain their frozen revision and rendered bytes.
 Retain historical secrets/receipts under the office's key policy. The application
 stores the connector secret encrypted. URLs come only from operator settings;
 request data cannot choose a network destination. Credentials in URLs, query
@@ -57,6 +62,26 @@ JSON body:
   approved_at: ISO 8601 timestamp
   approved_by: approver's frozen display name or username
   data: nested object produced by the office's approved destination mappings
+
+Structured-case JSON (canonical-json-v1) adds:
+  case_schema: "lexflow.case/1"
+  mapping: {key, version, digest, adapter}
+    key: office-scoped mapping identifier
+    version: positive mapping revision number
+    digest: SHA-256 of the frozen profile definition
+    adapter: "canonical-json-v1"
+
+With empty mapping rules, data is the complete canonical case with metadata,
+fields, participants and properties. Custom rules produce a selected/renamed
+projection in data; case_schema identifies the source model, not a guarantee
+that the mapped output still has every canonical field. Legacy JSON omits these
+additional envelope fields. Both variants retain schema="lexflow.handoff/1" and
+use exactly the same signature, idempotency and receipt rules below.
+
+These are distinct versions: the internal approval snapshot is version 2; the
+public case schema is lexflow.case/1; the transport remains lexflow.handoff/1;
+each mapping has its own revision. Do not use one version as a substitute for
+another when validating an import.
 
 Sign/hash raw body bytes; do not reserialize them before checking. The reference
 receiver rejects bodies above 2 MiB, signatures outside a 300-second clock
@@ -115,5 +140,7 @@ Verification
 apps/core/tests/test_handoff.py exercises actual HTTP, durable remote bytes,
 wrong keys, expired timestamps, invalid receipt signatures, role/reopen gates
 and recovery after a response is lost following remote acceptance.
+apps/core/tests/test_case_adapters.py checks frozen profile revisions, collection
+mapping, required fields, blocked vendor adapters and omission prevention.
 tools/verify_pilot_acceptance.py checks a separate receiver process, remote
 scanner/email intake, encrypted recovery, independent checkpoints and extraction.

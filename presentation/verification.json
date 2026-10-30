@@ -1,47 +1,72 @@
 {
   "date": "2026-10-22",
-  "updated": "2026-10-23",
+  "updated": "2026-10-30",
   "latest_application_checks": {
-    "date": "2026-10-23",
+    "date": "2026-10-30",
+    "source": "Implementation-session execution results summarized in VERIFICATION.txt; no new application-suite run during documentation refresh.",
+    "postgresql": {
+      "version": 17,
+      "total": 152,
+      "passed": 152,
+      "skipped": 0,
+      "duration_seconds": 76.618,
+      "concurrency_tests": 7,
+      "isolated_database": true
+    },
     "sqlite": {
-      "total": 128,
-      "passed": 123,
+      "total": 150,
+      "passed_initially": 137,
       "skipped": 5,
-      "duration_seconds": 49.775,
-      "skip_reason": "PostgreSQL-only concurrency tests"
+      "sandbox_socket_errors": 8,
+      "http_tests_passed_on_retry": 8,
+      "note": "Two later concurrency tests were run on PostgreSQL. No complete final 152-test SQLite run is claimed."
     },
-    "analytics_tests": 19,
-    "postgresql_expanded_suite_rerun": false,
-    "analytics_browser": {
+    "structured_case_browser": {
+      "browser": "Chromium",
+      "desktop_width": 1440,
+      "mobile_width": 390,
       "passed": true,
-      "sections": 4,
-      "initialized_charts": 7,
-      "browser_errors": [],
-      "evidence": "analytics-browser-verification.json"
+      "participants_in_export": 3,
+      "properties_in_export": 2,
+      "mobile_horizontal_overflow": false,
+      "locked_after_approval": true,
+      "isolated_synthetic_database": true,
+      "evidence": "VERIFICATION.txt"
     },
-    "tabs_browser_evidence": "tabs-browser-verification.json",
-    "workflow_browser_evidence": "browser-verification.json",
     "system_check_passed": true,
     "migration_drift_check_passed": true,
-    "javascript_syntax_checks_passed": true,
-    "note": "The original automated_tests and acceptance sections retain the 22 October evidence; they do not claim a 128-test PostgreSQL run."
+    "applied_migration_check_passed": true,
+    "pronotar32_vendor_contacted": false,
+    "vendor_import_implemented": false,
+    "note": "Original automated_tests, browser and acceptance sections retain earlier dated evidence; the new implementation-session results are summarized here."
   },
   "documentation": {
-    "updated": "2026-10-23",
+    "updated": "2026-10-30",
     "integration_expansion_guide": "../integrations/EXPANSION_GUIDE.txt",
-    "demo_guide_pages": 5,
+    "pronotar32_readiness_guide": "../integrations/PRONOTAR32_READINESS.txt",
+    "demo_guide_pages": 6,
     "presentation_slides": 12,
     "powerpoint_xml_and_relationships_verified": true,
     "sample_archive_matches_updated_guide": true,
     "source_pdfs_unchanged": 7,
     "readme_links_verified": true,
+    "presenter_template_compiles": true,
+    "example_mapping_validates": true,
     "visual_checks": [
-      "analytics guide page",
-      "integration roadmap guide page",
-      "analytics slide",
-      "integration roadmap slide"
+      "Structured-case guide page 5",
+      "Integration roadmap guide page 6",
+      "ProNotar32 extension slide 11"
     ],
-    "roadmap_status": "Native Office/cloud plugins, named vendor adapters, per-plugin credentials, setup catalog, per-destination mapping profiles and background retries remain proposed."
+    "implemented": [
+      "Encrypted case-detail forms",
+      "Repeated participants and properties",
+      "Immutable destination mappings",
+      "Canonical JSON adapter",
+      "Approved-case API",
+      "Export-readiness checks"
+    ],
+    "roadmap_status": "ProNotar32 import remains unimplemented. Native Office/cloud plugins, per-plugin credentials, setup/connection tests and background retries remain planned.",
+    "video_status": "Existing video and transcript retain the earlier recording and do not demonstrate the new case-details screens."
   },
   "scope": "dedicated-office pilot prototype; synthetic local acceptance",
   "automated_tests": {
@@ -292,5 +317,52 @@
     "full_decode_passed": true,
     "synthetic_data_only": true,
     "existing_cases_untouched": true
-  }
+  },
+  "application_check_history": [
+    {
+      "date": "2026-10-23",
+      "sqlite": {
+        "total": 128,
+        "passed": 123,
+        "skipped": 5,
+        "duration_seconds": 49.775,
+        "skip_reason": "PostgreSQL-only concurrency tests"
+      },
+      "analytics_tests": 19,
+      "postgresql_expanded_suite_rerun": false,
+      "analytics_browser": {
+        "passed": true,
+        "sections": 4,
+        "initialized_charts": 7,
+        "browser_errors": [],
+        "evidence": "analytics-browser-verification.json"
+      },
+      "tabs_browser_evidence": "tabs-browser-verification.json",
+      "workflow_browser_evidence": "browser-verification.json",
+      "system_check_passed": true,
+      "migration_drift_check_passed": true,
+      "javascript_syntax_checks_passed": true,
+      "note": "The original automated_tests and acceptance sections retain the 22 October evidence; they do not claim a 128-test PostgreSQL run."
+    }
+  ],
+  "documentation_history": [
+    {
+      "updated": "2026-10-23",
+      "integration_expansion_guide": "../integrations/EXPANSION_GUIDE.txt",
+      "demo_guide_pages": 5,
+      "presentation_slides": 12,
+      "powerpoint_xml_and_relationships_verified": true,
+      "sample_archive_matches_updated_guide": true,
+      "source_pdfs_unchanged": 7,
+      "readme_links_verified": true,
+      "visual_checks": [
+        "analytics guide page",
+        "integration roadmap guide page",
+        "analytics slide",
+        "integration roadmap slide"
+      ],
+      "roadmap_status": "Native Office/cloud plugins, named vendor adapters, per-plugin credentials, setup catalog, per-destination mapping profiles and background retries remain proposed."
+    }
+  ],
+  "automated_tests_date": "2026-10-22"
 }

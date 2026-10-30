@@ -1,0 +1,28 @@
+{
+  "key": "property-case-example",
+  "name": "Property case JSON example",
+  "matter_type": "property-purchase",
+  "adapter": "canonical-json-v1",
+  "target_version": "LexFlow example 1",
+  "specification": "LexFlow development example; not a ProNotar import schema",
+  "rules": [
+    {"source": "ref", "target": "case.reference", "required": true},
+    {"source": "metadata", "target": "case.office_references"},
+    {"source": "fields.purchase_price", "target": "case.purchase_price", "required": true},
+    {"source": "participants", "target": "case.participants", "required": true, "items": [
+      {"source": "id", "target": "id", "required": true},
+      {"source": "name", "target": "name", "required": true},
+      {"source": "kind", "target": "kind", "required": true},
+      {"source": "role", "target": "role", "required": true},
+      {"source": "register_number", "target": "company.register_number"},
+      {"source": "external_id", "target": "external_id"}
+    ]},
+    {"source": "properties", "target": "case.properties", "required": true, "items": [
+      {"source": "id", "target": "id", "required": true},
+      {"source": "address", "target": "address"},
+      {"source": "land_register", "target": "land_register"},
+      {"source": "parcel", "target": "parcel"},
+      {"source": "external_id", "target": "external_id"}
+    ]}
+  ]
+}

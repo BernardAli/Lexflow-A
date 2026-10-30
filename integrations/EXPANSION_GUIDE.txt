@@ -1,12 +1,13 @@
 LEXFLOW PLUGINS AND DESTINATION INTEGRATIONS
-Updated 23 October 2026
+Updated 30 October 2026
 
 Purpose
 -------
 Expand the dedicated-office pilot through working source plugins and destination
-adapters. Start with Outlook intake and one office-selected destination, after
-adding the shared credential and configuration capabilities below. This guide is
-an implementation roadmap; proposed capabilities are not installed integrations.
+adapters. The structured case and mapping foundation is implemented; ProNotar32
+is the selected extension target, with its vendor import still unimplemented.
+Use PRONOTAR32_READINESS.txt to prepare that adapter. Native Outlook and the
+remaining credential/setup capabilities below are separate work.
 
 Current capabilities
 --------------------
@@ -16,6 +17,10 @@ Implemented:
 - tools/scanner_agent.py: remote folder and saved-.eml intake over the API.
 - XML, JSON and CSV export from a frozen approval, with download/folder delivery.
 - Authenticated HTTP JSON handoff with signed receipts and idempotent retries.
+- Versioned per-destination mapping profiles, frozen in approvals.
+- Canonical case JSON with encrypted repeated-party/property review forms.
+- GET /api/v1/matters/<ref>/approved/: frozen approved canonical case data.
+- An adapter registry with working canonical JSON and a blocked ProNotar32 entry.
 - Connectors > Destinations / Transfer history; Security > Plugin access.
 - Analytics > Delivery and audit: connector outcomes, retries, pending receipts
   and receipt timing for the selected intake cohort.
@@ -24,10 +29,10 @@ Not implemented:
 - Native Outlook/Word add-ins, cloud-storage connectors or a named vendor adapter.
 - A self-service integration catalog, connection-test wizard or OAuth setup flow.
 - Separate plugin credentials, credential scopes, expiry or individual revocation.
-- Independent field-mapping profiles for each destination.
 - An automatic background send/retry queue or plugin-level analytics.
 
-The current connector page lists configured destinations and transfers. HTTP
+The current connector page lists destinations, mapping versions, adapter
+availability and transfers, and lets administrators enable structured exports. HTTP
 configuration is operator-managed. Labels such as "Official API" or "SDK" in a
 connector model do not provide the corresponding vendor implementation. The
 reference receiver accepts synthetic cases only; a real adapter must implement
@@ -36,14 +41,18 @@ the chosen vendor's supported import/write interface and acceptance semantics.
 1. Select the first integrations
 --------------------------------
 Recommended sequence:
-1. Build the shared configuration and credential foundation.
-2. Build an Outlook add-in that submits selected mail/attachments and shows the
-   resulting case status. Keep review and approval in the existing workflow.
-3. Implement one named notary/DMS destination against its documented API or
+1. Enable canonical case exports, review repeated participants/properties and
+   agree required fields using representative sanitized office examples.
+2. Obtain the office's ProNotar32 version, documented import/API and test access.
+   Implement its adapter against the frozen case/mapping contracts. Validate
+   schema, identity matching, duplicates and durable acceptance before live use.
+3. Add per-plugin credentials and setup/connection tests before distributing
+   native add-ins; build Outlook intake using the existing intake/review workflow.
+4. For other offices, implement the chosen notary/DMS destination against its API or
    supported import format. Verify durable vendor acceptance and record its
    destination case/receipt reference.
-4. Add Word template filling with approved case values and a versioned template.
-5. Add cloud document intake for the storage service the office actually uses.
+5. Add Word template filling with approved case values and a versioned template,
+   then cloud document intake for the storage service the office actually uses.
 
 Before choosing a vendor adapter, record the product name/version, deployment
 type, supported interface and schema, authentication, sandbox access, required
@@ -87,8 +96,20 @@ GET /api/v1/matters/<ref>/ returns the case's status, fields, review blockers,
 approval hash, ready_for_approval and can_export flags. Unknown/other-office case
 references return 404; invalid credentials return 401. These flags describe
 readiness, not permission for a plugin to approve or send an export. This endpoint
-returns current field data; a Word approved-data endpoint bound to the frozen
-snapshot is still proposed work.
+returns current field data. GET /api/v1/matters/<ref>/approved/ returns only the
+frozen canonical case and approval hash, or 409 if a usable approval is absent.
+Native Word template filling is still proposed work.
+
+Approved-case responses:
+  200  {approval_hash, approved_at, case: <lexflow.case/1 object>}
+  401  Invalid/missing office token.
+  404  Missing case or case belonging to another office.
+  409  No current verified structured approval, including legacy approvals.
+
+The successful response uses Cache-Control: no-store. It reads the stored
+approved snapshot rather than reconstructing it from current fields. The payload
+is vendor-neutral and is not a destination-specific mapped export. The shared
+token also authorizes this read; it cannot approve or send a transfer.
 
 Run the existing remote client using a private token file (mode 0600):
 
@@ -120,18 +141,21 @@ The current transport and receipt contract is integrations/HANDOFF_V1.txt.
 Keep that v1 contract unchanged for existing receivers. A vendor adapter can sit
 between LexFlow's signed handoff and the supported vendor API/import mechanism.
 
-Proposed common adapter operations (not existing callable APIs):
+Current rendering adapters implement render(snapshot, profile); see
+PRONOTAR32_READINESS.txt and apps/connectors/adapters.py. Additional proposed
+vendor operations (not existing callable APIs):
   test_connection   Validate credentials and reachable sandbox/service.
   validate          Check required fields and destination schema.
   map_fields        Translate approved values using a versioned mapping profile.
   send              Submit with an approval-bound idempotency key.
   verify_receipt    Bind acceptance to the exact payload, approval and transfer.
 
-Currently, each workflow field has one destination_path, frozen at approval.
-Independent per-destination mapping profiles require model/service work. Bind
-future mapping/schema versions to the approval/export so configuration changes
-cannot change approved or retried bytes. Do not read mutable case fields when
-resending a frozen transfer. Version connectors that already have exports.
+Legacy workflow fields retain their destination_path. Structured destinations
+bind an immutable MappingProfile revision, with scalar/collection mappings from
+the canonical case. Complete profiles and case data are frozen at approval;
+configuration changes cannot change approved or retried bytes. See the readiness
+guide for configure_mapping_profile and the example specification. Transport and
+credentials still require versioning connectors that already have exports.
 
 An existing-contract HTTP destination is configured in the dedicated deployment:
 
@@ -190,7 +214,12 @@ Implementation locations
 apps/intake/api.py                 Current intake and case-read endpoints.
 tools/scanner_agent.py             Existing thin-client example.
 apps/core/models.py                Current shared office-token lifecycle.
-apps/connectors/models.py          Connector/transfer records.
+apps/matters/case_data.py          Canonical case projection, validation and locked updates.
+apps/matters/case_forms.py         Staff detail forms and source-bound primary values.
+apps/connectors/models.py          Connector, transfer and immutable mapping revisions.
+apps/connectors/profiles.py        Profile configuration and approval-time bindings.
+apps/connectors/mapping.py         Declarative scalar/collection field mappings.
+apps/connectors/adapters.py        Versioned renderer registry; ProNotar32 blocked.
 apps/connectors/services.py        Frozen export rendering and delivery gates.
 apps/connectors/protocol.py        Endpoint, authentication and receipt contract.
 apps/studio/models.py              Current workflow field destination paths.
@@ -198,6 +227,8 @@ apps/core/analytics.py             Intake-cohort and connector analytics.
 integrations/HANDOFF_V1.txt         Exact current wire contract.
 integrations/reference_receiver.py Independent synthetic contract fixture.
 apps/core/tests/test_handoff.py    HTTP transport/receipt regression coverage.
+apps/core/tests/test_case_adapters.py Structured case, mapping and API contracts.
+integrations/PRONOTAR32_READINESS.txt Case schema, operator workflow and adapter steps.
 
 Primary platform references
 ---------------------------

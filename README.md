@@ -5,11 +5,28 @@ receive digital PDFs/text, scanned PDFs/images and saved email, propose values w
 resolve conflicts, approve an immutable snapshot, create an export, confirm its
 receipt and retain an auditable history.
 
+The 30 October 2026 update adds reviewed case details for multiple participants
+and properties, versioned destination mappings and an adapter interface. Starter
+workflows cover property purchases, GmbH formation and powers of attorney.
+**ProNotar32 import is not implemented:** the working structured export is
+LexFlow case JSON, awaiting a vendor-specific adapter and acceptance tests.
+
 The demonstration uses synthetic records and an independent HTTP reference
 receiver (or the earlier XML file receiver). Local PostgreSQL concurrency,
 authenticated handoff, remote intake, encrypted recovery and extraction have
 reproducible acceptance evidence. A client's supported destination, hosted
 deployment and office measurements still require acceptance.
+
+## Documentation
+
+| Need | Guide |
+| --- | --- |
+| Staff workflow, case schema and ProNotar32 extension steps | [ProNotar32 readiness](integrations/PRONOTAR32_READINESS.txt) |
+| Plugin APIs, mappings and remaining integration work | [Integration expansion](integrations/EXPANSION_GUIDE.txt) |
+| HTTP request, signature and receipt contract | [Handoff v1](integrations/HANDOFF_V1.txt) |
+| Upgrade, deployment, backup and recovery | [Operations](deployment/OPERATIONS.txt) |
+| Present the current build | [Presenter walkthrough](presentation/START_HERE.txt) |
+| Dated test results and limits | [Verification](presentation/VERIFICATION.txt) |
 
 ## Start the presentation
 
@@ -47,8 +64,9 @@ slide text, a timed presenter script and verification notes. Rebuild the slides
 with `.venv/bin/python tools/build_pilot_presentation.py`. The generator uses the
 original client deck's theme; keep that referenced source file available.
 
-The printable [demonstration guide](presentation/LexFlow_Demo_Guide.pdf) covers
-sample uploads, review, handoff, analytics and the integration roadmap. Rebuild
+The printable six-page [demonstration guide](presentation/LexFlow_Demo_Guide.pdf)
+covers sample uploads, review, handoff, analytics, structured case details and the
+integration roadmap. Rebuild
 the guide and its existing sample archive without regenerating source PDFs:
 
 ```sh
@@ -76,6 +94,11 @@ must be available for the scan scene. Use `--check-only` to exercise the flow
 without rendering, or `--output-dir` to change the artifact directory. The output
 includes chapter timestamps, a poster and media/workflow verification results.
 
+The existing video records the earlier workflow and does not demonstrate the
+30 October case-details screen or mapping profiles. Its transcript, subtitles and
+media checks describe that recording. Use the current presenter walkthrough and
+readiness guide for the new features.
+
 ## Page sections
 
 Overview separates the work queue from pilot analytics. Workflow Studio,
@@ -84,6 +107,10 @@ Matter review keeps source documents beside extracted data, with a separate
 Activity tab. Arrow keys, Home and End switch tabs; section and field links open
 the relevant panel. Switching tabs preserves unsaved form values, and all
 sections remain readable when JavaScript is disabled.
+
+**Matter → Case details · parties and properties** opens the additional records,
+office references and export-readiness checks. Saving a record does not approve
+or deliver it. **Connectors** shows each mapping version and adapter availability.
 
 ## Office analytics
 
@@ -110,6 +137,47 @@ and separate from live-office measurements.
 
 ## Plugins and destination integrations
 
+### ProNotar32 extension foundation
+
+The [ProNotar32 readiness guide](integrations/PRONOTAR32_READINESS.txt) describes
+the implemented case model, versioned destination mappings and adapter interface.
+Use **Connectors → Enable structured case exports** as an office administrator
+after applying the migrations. This adds one download destination per active
+workflow; new or reset installations need this setup step. Repeating it does not
+duplicate existing structured destinations. **Matter → Case details** supports additional people,
+companies, representatives, properties and office/destination references.
+Primary values stay linked to extraction review; additional records are entered
+by staff and encrypted. Approval freezes both the full case and applicable mapping
+revisions. Legacy exports reject enriched cases to prevent silently dropping data.
+
+The canonical JSON adapter is implemented. ProNotar32 is explicitly unavailable
+until its supported import contract and acceptance tests are supplied. These
+changes prepare an extension point; they do not establish vendor compatibility.
+The approved case is readable at `GET /api/v1/matters/<ref>/approved/` using the
+existing office token. Native Word integration and automatic vendor matching
+remain future work.
+
+To demonstrate the complete structured workflow:
+
+1. Enable structured exports before approving the case.
+2. Review extracted values, then enter additional parties/properties and office
+   references in **Case details**. Primary values remain linked to Extracted data.
+3. Inspect **Export readiness** and finish the existing source-review requirements.
+4. Approve and select **Case JSON — Property purchase** (or the matching workflow).
+5. Inspect the JSON. Export creation still requires a separate destination receipt
+   before delivery is recorded; the default Case JSON destination is a download.
+
+An undelivered case must be reopened and approved again to use a mapping enabled
+after its approval. Existing approved exports retain their original data and
+mapping revision. Delivered cases require a new intake for amendments. Legacy
+export formats remain available for cases without additional details.
+
+Each structured connector uses a workflow-specific mapping profile. Operators
+can install a new revision with `configure_mapping_profile`; the
+[example profile](integrations/examples/property_case_profile.json) maps LexFlow
+JSON fields and does not define a ProNotar import format. Empty rules export the
+whole case; custom rules select a subset and must be checked for required coverage.
+
 The existing plugin API and remote scanner/email client provide intake and
 office-scoped case reads. Destinations support approved XML/JSON/CSV files and
 authenticated HTTP JSON with signed receipts. Native Outlook/Word add-ins,
@@ -118,13 +186,15 @@ cloud-storage plugins and named vendor adapters remain planned.
 The [integration expansion guide](integrations/EXPANSION_GUIDE.txt) documents
 current API requests/responses, credential limits, HTTP configuration, proposed
 adapter operations, versioned mappings and acceptance criteria. The recommended
-sequence is shared configuration/credentials, Outlook intake, one actual office
-destination, then Word template filling and the office's chosen cloud storage.
+sequence is structured-case validation and the office's ProNotar32 import
+contract, then the vendor adapter. Scoped plugin credentials and native Outlook,
+Word and cloud integrations remain separate work.
 
 The current office token permits intake AND case reads, and rotating it replaces
-the token for every client. Individual plugin credentials/scopes, a setup catalog,
-per-destination mapping profiles and automatic background delivery are proposed
-work. The Connectors page currently lists configured destinations and transfers;
+the token for every client. Individual plugin credentials/scopes, a setup catalog
+and automatic background delivery are proposed work. Versioned per-destination
+mapping profiles and the adapter registry are implemented. The Connectors page
+lists configured destinations, mapping versions, adapter availability and transfers;
 HTTP destinations are configured by the operator. The
 [handoff v1 contract](integrations/HANDOFF_V1.txt) remains the exact implemented
 wire format; each vendor's interface and durable acceptance need their own adapter
@@ -158,6 +228,11 @@ the office's mail service before relying on self-service recovery.
   encrypted snapshot. Its digest is bound to the signed audit chain. Changes in
   the studio do not change an existing approved export. Overlapping destination
   paths are rejected. The GmbH starter schema uses a nested director name/date.
+- Structured approvals also freeze the complete `lexflow.case/1` case and
+  applicable mapping revisions. Staff-entered details use office encryption,
+  stale-form checks and the same locks as approval. Representation links reject
+  cycles and references to absent participants. Export readiness checks a mapping;
+  it does not prove acceptance by a vendor.
 - Source quotes absent from a document are discarded. Conflicting values within
   a document remain conflicts. Duplicate source content cannot inflate confidence.
 - Source selections fill case data only. Administrators explicitly configure
@@ -217,10 +292,12 @@ isolation, analytics filter boundaries, denominators and aggregate CSV privacy.
 `lexflow_pilot_check --demo --json` checks the isolated synthetic demo;
 without `--demo` it fails closed on unmet live-pilot conditions.
 
-On 23 October 2026, the SQLite suite ran 128 tests: 123 passed and five
-PostgreSQL-only tests skipped. The last recorded PostgreSQL run covered 100 tests
-on 22 October; it has not been rerun for the expanded 128-test suite. Analytics,
-tabs and the review/approval/file/HTTP workflow also passed Chromium checks. See
+On 30 October 2026, all 152 tests passed on an isolated PostgreSQL 17 instance,
+including concurrent approval/detail edits and mapping revision allocation.
+The structured-case browser check passed in Chromium at desktop and mobile
+sizes, including additional parties/properties, approval, JSON download and
+locked details after approval. Migration consistency and Django checks passed.
+Earlier analytics, tabs and review/approval/file/HTTP checks are recorded in the
 [verification notes](presentation/VERIFICATION.txt) and
 [analytics browser evidence](presentation/analytics-browser-verification.json).
 The browser tools under `tools/` use an installed Playwright package through
@@ -249,17 +326,33 @@ explicit checks. It is regression evidence, not representative office accuracy.
 Evaluation can use sanitized files referenced by relative paths in a local
 version-1 dataset; reports omit document text and extracted values.
 
-## Existing development database
+## Upgrade an existing installation
 
-Back up the database together with its vault and matching master key before
-migrating. The migration encrypts legacy case fields and seals only an audit chain
-that already verifies. Earlier local exports are relabelled `exported`; earlier
-approvals must be reopened/reviewed and approved with a frozen snapshot before a
-new export. Existing case records and exports are preserved.
+Back up the database, vault, exports and corresponding keys using the configured
+office environment; follow [Operations](deployment/OPERATIONS.txt) for a deployed
+office. Apply migrations before starting the updated application:
 
 ```sh
 .venv/bin/python manage.py migrate
+.venv/bin/python manage.py check
+.venv/bin/python manage.py migrate --check
 ```
+
+The 30 October migrations add encrypted case details (`matters.0003`) and mapping
+profiles/connector bindings (`connectors.0004`). Existing cases receive empty
+details. Existing connectors keep their formats; source documents are not
+re-extracted. Enable structured exports in Connectors, then create a new approval
+when an existing undelivered case needs structured case data or new mappings.
+Legacy frozen exports remain downloadable. These changes do not connect ProNotar.
+
+### Earlier encryption migration
+
+Installations predating the earlier encryption migration also encrypt legacy
+case fields and seal only an audit chain
+that already verifies. Earlier local exports are relabelled `exported`; earlier
+approvals must be reopened/reviewed and approved with a frozen snapshot before a
+new export. Existing case records and exports are preserved. This historical
+migration is separate from the additive case-details update above.
 
 For a legacy SQLite database, compact it after migration to remove old freed-page
 plaintext. Securely retire plaintext-era backups under the office's retention

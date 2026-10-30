@@ -6,6 +6,7 @@
   <div>
     <h1 class="lf-title">Connectors</h1>
     <p class="lf-sub">Approved snapshots produce checksummed XML, JSON and CSV exports. A confirmed destination receipt is required before delivery is recorded.</p>
+    {% if membership.role == 'admin' %}<form method="post" action="{% url 'connectors:enable_structured' %}" class="mt-3">{% csrf_token %}<button class="btn btn-primary">Enable structured case exports</button><div class="form-text">Adds a complete case JSON destination for each active workflow. These are preparation files, not ProNotar imports.</div></form>{% endif %}
   </div>
 </div>
 <div data-tabs="connectors">
@@ -22,6 +23,7 @@
       <div>
         <div class="fw-semibold">{{ c.name }}</div>
         <div class="lf-small lf-muted">{{ c.description }}</div>
+        {% if c.mapping_profile %}<div class="lf-small">Mapping: {{ c.mapping_profile.name }} · version {{ c.mapping_profile.version }} · {{ c.mapping_profile.adapter_key }}</div>{% endif %}
         <div class="lf-xs lf-faint mt-1">Prepared for {{ c.destination }} · {{ c.get_delivery_display }}{% if c.signing_secret %}, signed with HMAC-SHA256{% endif %}</div>
       </div>
       <span class="lf-chip lf-chip--ink lf-chip--plain">{{ c.get_tier_display }}</span>
@@ -37,6 +39,10 @@
     </ol>
   </section>
 </div>
+<section class="lf-panel lf-panel-pad mb-4">
+  <h2 class="lf-h2">Adapter availability</h2>
+  {% for adapter in adapters %}<div class="lf-well mb-2"><strong>{{ adapter.label }}</strong> · {% if adapter.available %}Available{% else %}Not implemented{% endif %}<p class="lf-small mb-0">{{ adapter.description }}</p></div>{% endfor %}
+</section>
 <section class="lf-panel lf-table-wrap" id="connector-transfers" data-tab-panel>
   <div class="lf-panel-head"><h2>Recent transfers</h2></div>
   <table class="lf-table">

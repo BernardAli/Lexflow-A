@@ -4,6 +4,7 @@ from . import views
 
 app_name = "connectors"
 urlpatterns = [
+    path("structured/enable/", views.enable_structured, name="enable_structured"),
     path("transfers/<str:ref>/deliver/", views.deliver, name="deliver"),
     path("transfers/<str:ref>/demo-receive/", views.demo_receive, name="demo_receive"),
     path("transfers/<str:ref>/acknowledge/", views.acknowledge, name="acknowledge"),

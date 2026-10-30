@@ -6,6 +6,7 @@ identifies the office; there is no way to address another office's data.
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
@@ -97,3 +98,30 @@ def matter_detail(request, ref):
     if matter is None:
         return JsonResponse({"error": "not_found"}, status=404)
     return JsonResponse(matter_json(matter))
+
+
+@require_GET
+@transaction.atomic
+def approved_case(request, ref):
+    """Approved data for adapters; never reconstruct an approval from live fields."""
+    from apps.audit.services import verify_chain
+    from apps.connectors.services import approval_snapshot
+    tenant = _tenant(request)
+    if tenant is None:
+        return _denied()
+    Tenant.objects.select_for_update().get(pk=tenant.pk)
+    matter = Matter.objects.filter(tenant=tenant, ref=ref).first()
+    if matter is None:
+        return JsonResponse({"error": "not_found"}, status=404)
+    try:
+        if not matter.is_locked or not verify_chain(tenant).ok:
+            raise ValidationError("A verified, current approval is required.")
+        snapshot = approval_snapshot(matter)
+        if "case" not in snapshot:
+            raise ValidationError("Reopen and approve this case to include structured details.")
+    except ValidationError as exc:
+        return JsonResponse({"error": "approval_required", "detail": exc.messages}, status=409)
+    response = JsonResponse({"approval_hash": matter.approval_hash, "approved_at": snapshot["approved_at"],
+                            "case": snapshot["case"]})
+    response["Cache-Control"] = "no-store"
+    return response

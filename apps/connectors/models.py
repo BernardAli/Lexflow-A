@@ -1,10 +1,65 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
 from apps.core.models import TenantScoped
 from apps.core.fields import EncryptedTextField
 from apps.core.utils import unique_ref
+
+
+class MappingProfileQuerySet(models.QuerySet):
+    def update(self, **kwargs):
+        raise ValidationError("Mapping revisions are immutable. Create a new version.")
+
+    def bulk_update(self, objs, fields, batch_size=None):
+        raise ValidationError("Mapping revisions are immutable. Create a new version.")
+
+
+class MappingProfile(TenantScoped):
+    """Immutable revision. Approval also freezes the complete profile contents."""
+    key = models.SlugField(max_length=60)
+    version = models.PositiveIntegerField()
+    name = models.CharField(max_length=120)
+    matter_type = models.ForeignKey("studio.MatterType", on_delete=models.PROTECT)
+    adapter_key = models.CharField(max_length=60, default="canonical-json-v1")
+    target_version = models.CharField(max_length=80, blank=True)
+    specification = models.CharField(max_length=255, blank=True)
+    rules = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    objects = MappingProfileQuerySet.as_manager()
+
+    class Meta:
+        ordering = ["key", "-version"]
+        constraints = [models.UniqueConstraint(fields=["tenant", "key", "version"], name="mapping_profile_revision")]
+
+    def __str__(self):
+        return f"{self.name} v{self.version}"
+
+    def clean(self):
+        from .adapters import get_adapter
+        from .mapping import validate_sources
+        if self.matter_type_id and self.matter_type.tenant_id != self.tenant_id:
+            raise ValidationError("The workflow and profile must belong to the same office.")
+        if not self.version or self.version < 1:
+            raise ValidationError("Mapping versions start at 1.")
+        get_adapter(self.adapter_key)
+        if self.matter_type_id:
+            validate_sources(self.rules, self.matter_type.fields.values_list("key", flat=True))
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise ValidationError("Mapping revisions are immutable. Create a new version.")
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def snapshot(self):
+        from .mapping import fingerprint
+        self.clean()
+        value = {"key": self.key, "version": self.version, "adapter": self.adapter_key,
+                 "matter_type": self.matter_type.key, "target_version": self.target_version,
+                 "specification": self.specification, "rules": self.rules}
+        return {**value, "digest": fingerprint(value)}
 
 
 class Connector(TenantScoped):
@@ -32,12 +87,20 @@ class Connector(TenantScoped):
     endpoint_key = models.SlugField(max_length=60, blank=True,
         help_text="Operator-configured endpoint key; URLs are never accepted from intake data.")
     is_active = models.BooleanField(default=True)
+    mapping_profile = models.ForeignKey(MappingProfile, null=True, blank=True, on_delete=models.PROTECT)
 
     class Meta:
         ordering = ["name"]
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.mapping_profile_id:
+            if self.mapping_profile.tenant_id != self.tenant_id:
+                raise ValidationError("The mapping profile must belong to the connector's office.")
+            if self.mapping_profile.adapter_key == "canonical-json-v1" and self.kind != self.Kind.JSON:
+                raise ValidationError("The canonical case adapter produces JSON.")
 
 
 class Transfer(TenantScoped):

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Case details · {{ matter.ref }}{% endblock %}
+{% block content %}
+<div class="lf-head">
+  <div>
+    <a href="{% url 'matters:review' matter.ref %}">← Return to document review</a>
+    <h1 class="lf-title mt-3">Case details</h1>
+    <p class="lf-sub">{{ matter.ref }} · {{ matter.title }}</p>
+    <p class="lf-small">Review the parties, properties and office references before approval. Primary values stay linked to Extracted data. Additional details are entered by staff.</p>
+    {% if matter.is_locked %}<p class="lf-well">This case is approved. Its details are locked. An approver can reopen an undelivered case from document review.</p>{% endif %}
+  </div>
+</div>
+<section class="lf-panel lf-panel-pad mb-4" id="metadata">
+  <h2 class="lf-h2">Case references</h2>
+  <form method="post">
+    {% csrf_token %}<input type="hidden" name="group" value="metadata"><input type="hidden" name="revision" value="{{ revision }}">
+    {% include "matters/detail_fields.html" with form=metadata_form %}
+    {% if not matter.is_locked %}<button class="btn btn-primary mt-3">Save references</button>{% endif %}
+  </form>
+</section>
+{% for section in sections %}
+<section class="lf-panel lf-panel-pad mb-4" id="{{ section.group }}">
+  <h2 class="lf-h2">{{ section.label }}</h2>
+  {% for row in section.rows %}
+  <details class="lf-well mb-3" {% if row.form.errors %}open{% endif %}>
+    <summary class="fw-semibold">{{ row.label }}{% if row.primary %} · Primary record{% endif %}</summary>
+    <form method="post" class="mt-3">
+      {% csrf_token %}<input type="hidden" name="group" value="{{ section.group }}"><input type="hidden" name="record_id" value="{{ row.id }}"><input type="hidden" name="revision" value="{{ revision }}">
+      {% include "matters/detail_fields.html" with form=row.form %}
+      {% if not matter.is_locked %}
+      <button class="btn btn-primary mt-3">Save record</button>
+      <button class="btn btn-quiet mt-3" name="action" value="delete" formnovalidate>{% if row.primary %}Clear additional details{% else %}Remove record{% endif %}</button>
+      {% endif %}
+    </form>
+  </details>
+  {% empty %}<p class="lf-muted">No records yet.</p>{% endfor %}
+  {% if not matter.is_locked %}
+  <details class="lf-well" {% if section.new_form.errors %}open{% endif %}>
+    <summary>Add {{ section.label|lower }}</summary>
+    <form method="post" class="mt-3">
+      {% csrf_token %}<input type="hidden" name="group" value="{{ section.group }}"><input type="hidden" name="revision" value="{{ revision }}">
+      {% include "matters/detail_fields.html" with form=section.new_form %}
+      <button class="btn btn-primary mt-3">Add record</button>
+    </form>
+  </details>
+  {% endif %}
+</section>
+{% endfor %}
+<section class="lf-panel lf-panel-pad mb-4">
+  <h2 class="lf-h2">Export readiness</h2>
+  {% for destination in destinations %}
+    <div class="lf-well mb-2"><strong>{{ destination.connector.name }}</strong><p class="mb-0">{{ destination.status }}</p></div>
+  {% empty %}
+    <p class="mb-0">An administrator can enable structured case exports on the <a href="{% url 'connectors:index' %}">Connectors page</a>.</p>
+  {% endfor %}
+</section>
+<p class="lf-small lf-muted">Structured case exports include these details. ProNotar32 import support is awaiting vendor specification and validation.</p>
+{% endblock %}

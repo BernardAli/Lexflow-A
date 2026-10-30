@@ -32,7 +32,7 @@ INK = colors.HexColor("#142D2C")
 GREEN = colors.HexColor("#1E5250")
 PALE = colors.HexColor("#F0F5F3")
 MUTED = colors.HexColor("#526761")
-DATE = "23 October 2026"
+DATE = "30 October 2026"
 
 PROPERTY = {
     "office": "Notariat Dr. Keller (synthetic demonstration)",
@@ -241,6 +241,21 @@ def build_guide():
     p("Arrow keys, Home and End switch section tabs. Section/field links reveal the relevant panel. Tabs preserve unsaved form values, and all sections remain readable without JavaScript. The sign-in eye button toggles password visibility. <b>Forgot password?</b> starts a single-use reset link valid for one hour; the local demo prints the email in the server terminal. Deployed offices must configure SMTP delivery.", small)
 
     story.append(PageBreak())
+    p("STRUCTURED CASES / PRONOTAR32 EXTENSION", small)
+    p("Review the complete case", title)
+    p("Additional participants, companies, representatives, properties and office references can now be reviewed in LexFlow. Their values and destination mapping revisions are frozen at approval.")
+    heading("Demonstrate on a separate unapproved synthetic case")
+    p("<b>1. Enable.</b> Sign in as <b>admin</b>, open <b>Connectors</b> and choose <b>Enable structured case exports</b>. This adds one Case JSON download destination per active workflow. Fresh/reset demos need this step; repeating it does not duplicate destinations.")
+    p("<b>2. Review details.</b> Open <b>Case details · parties and properties</b>. Add a second participant/company and property, plus a case designation or office reference. Primary names, dates and property identifiers remain linked to Extracted data. Additional records are entered by staff and encrypted.")
+    p("<b>3. Check and approve.</b> Inspect <b>Export readiness</b>, resolve source conflicts and complete the required source/price review. As the notary, approve the matter. Readiness checks mappings locally; it does not prove vendor acceptance.")
+    p("<b>4. Export.</b> Choose <b>Case JSON — Property purchase</b> or the matching workflow. Inspect the participants and properties arrays and mapping version. The data is frozen and the forms are locked; download alone does not confirm delivery.")
+    heading("Compatibility and existing approvals")
+    p("Legacy XML/JSON/CSV exports reject cases with saved additional details so data cannot be silently omitted. A mapping enabled after approval requires reopening and reapproving an undelivered case. Existing exports retain their original data and mapping revision. Delivered cases require a new intake for amendments.")
+    heading("What is available for the next integration")
+    p("The <b>canonical-json-v1</b> adapter and versioned mappings are implemented. The approved-case API returns the complete frozen <b>lexflow.case/1</b> object. <b>ProNotar32 import is not implemented.</b> Obtain the office's exact version, supported import schema, accepted sample files and test environment before implementing and accepting its adapter.")
+    p("See <b>integrations/PRONOTAR32_READINESS.txt</b> for the schema, configuration command, extension contract and troubleshooting. All 152 tests passed on PostgreSQL 17 on 30 October; desktop/mobile browser checks covered the new workflow. No vendor was contacted.", small)
+
+    story.append(PageBreak())
     p("PLUGINS AND DESTINATIONS / EXPANSION ROADMAP", small)
     p("Connect the next systems", title)
     p("Extend the existing intake and approved-handoff contracts. The entries below distinguish implemented capabilities from proposed integrations.")
@@ -248,16 +263,17 @@ def build_guide():
         ["Capability", "Status in this build"],
         ["Remote scanner / saved email", "Implemented token-authenticated API client; retains originals and deduplicates repeated submissions."],
         ["XML / JSON / CSV exports", "Implemented LexFlow formats. A vendor's exact import schema needs separate mapping and acceptance."],
+        ["Case JSON / mapping revisions", "Implemented additional records, frozen profiles, approved-case API and adapter registry. ProNotar32 import remains unavailable."],
         ["Authenticated HTTP destination", "Implemented signed handoff/receipt contract with an independent synthetic reference receiver. No named vendor connection is supplied."],
         ["Outlook / Word / cloud intake", "Proposed native integrations. They require their own client/adapter, authentication and target-system validation."],
     ], [160, 335])
     heading("Recommended implementation order")
-    p("<b>1. Shared foundation.</b> Add an integration setup/status page, connection tests, separate scoped plugin credentials, versioned destination mappings and reliable queued delivery. These are proposed capabilities.")
-    p("<b>2. Outlook intake.</b> Submit selected mail/attachments and show the case status. Keep case review and approval in the existing workflow.")
-    p("<b>3. One real destination.</b> Agree the office's vendor and product version, documented API/import format, credentials, required fields, sandbox and durable acceptance/receipt behavior. Build and test that adapter.")
+    p("<b>1. ProNotar32 adapter.</b> Validate representative case data, obtain the supported import contract and test the adapter against accepted vendor fixtures. Verify identity matching, duplicates and durable receipts.")
+    p("<b>2. Plugin access and setup.</b> Add separate scoped credentials, connection tests and queued delivery. These remain proposed capabilities; the rendering/mapping foundation is implemented.")
+    p("<b>3. Outlook intake.</b> Submit selected mail/attachments and show case status, preserving the existing review and approval workflow.")
     p("<b>4. Word and cloud sources.</b> Fill agreed Word templates from approved data, then add the office's chosen cloud document source.")
     heading("Current configuration boundaries")
-    p("Security → Plugin access issues one active office token, allowing intake and case reads. Rotating it replaces the token for every client. Individual credentials/scopes and expiry are not implemented. The Connectors page lists destinations and transfers; HTTP setup is operator-managed. A background retry scheduler and separate per-destination mapping profiles remain planned.")
+    p("Security → Plugin access issues one active office token for intake and case reads, including approved-case reads. Rotation affects every client. Individual scopes/expiry and background retries remain planned. Connectors shows destinations, mapping revisions, adapter availability and transfers; HTTP setup is operator-managed.")
     p("An adapter must preserve frozen approval/export bytes and duplicate protection. Record delivery only after verified destination acceptance. The reference receiver proves the LexFlow contract; each real vendor needs its own acceptance evidence.")
     heading("Developer and operator handoff")
     p("Read <b>integrations/EXPANSION_GUIDE.txt</b> for API requests/responses, current limits, proposed adapter operations and acceptance cases; <b>integrations/HANDOFF_V1.txt</b> for the exact signed wire contract; and <b>deployment/OPERATIONS.txt</b> for credentials, configuration and recovery.", small)

@@ -4,6 +4,20 @@ Open LexFlow_Demonstration.mp4 in a browser or a standard MP4 player. The video
 uses actual application screens from a fresh, disposable synthetic office.
 Existing presentation cases and the development database were not used.
 
+Version note — 30 October 2026
+-----------------------------
+This recording predates the structured case and mapping-profile update. It does
+not demonstrate Case details, repeated participants/properties, the approved-case
+API or the adapter availability list. Its video, subtitles, transcript, chapters
+and verification.json retain the earlier recording's content and evidence.
+
+The current build implements canonical case JSON and frozen mapping revisions.
+ProNotar32 import remains unavailable until its contract and adapter are validated.
+Use ../START_HERE.txt for the current live extension walkthrough and
+../../integrations/PRONOTAR32_READINESS.txt for the implementation boundary.
+The existing recorder still follows the core workflow; re-running it alone does
+not add a demonstration of the new case-details screens.
+
 Contents
 --------
 LexFlow_Demonstration.mp4             1080p H.264/AAC video with English voiceover

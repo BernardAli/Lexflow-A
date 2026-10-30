@@ -39,6 +39,7 @@ urlpatterns = [
     path("audit/", include("apps.audit.urls")),
     path("api/v1/intake/", api.intake, name="api_intake"),
     path("api/v1/matters/<str:ref>/", api.matter_detail, name="api_matter"),
+    path("api/v1/matters/<str:ref>/approved/", api.approved_case, name="api_approved_case"),
     path("admin/", admin.site.urls),
 ]
 

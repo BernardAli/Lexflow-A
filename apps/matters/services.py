@@ -363,6 +363,8 @@ def approval_blockers(matter):
     from apps.studio.validation import validate_paths
     try:
         validate_paths(f.destination_path for f in definitions)
+        from .case_data import validate_details
+        validate_details(matter)
     except ValidationError as exc:
         blockers.extend(exc.messages)
     for f in matter.fields.select_related("definition"):
@@ -411,6 +413,8 @@ def set_matter_type(matter, user, matter_type):
     _lock_matter(matter)
     if matter_type.tenant_id != matter.tenant_id:
         raise PermissionDenied
+    if matter.matter_type_id != matter_type.pk and any(matter.case_data.get(g) for g in ("participants", "properties")):
+        raise ValidationError("Remove saved participant and property details before changing the workflow.")
     matter.matter_type = matter_type
     matter.type_confidence = Decimal("1.0000")
     matter.save()

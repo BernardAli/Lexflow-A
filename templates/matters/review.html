@@ -11,6 +11,7 @@
       <span class="lf-chip lf-chip--{{ matter.status|matter_tone }} ms-1">{{ matter.get_status_display }}</span>
     </div>
     <h1 class="lf-title">{{ matter.title }}</h1>
+    {% if matter.matter_type %}<a class="btn btn-quiet btn-sm mt-2" href="{% url 'matters:case_details' matter.ref %}">Case details · parties and properties</a>{% endif %}
     <p class="lf-sub">
       {% if matter.matter_type %}{{ matter.matter_type.name }} <span class="lf-faint">({{ matter.matter_type.german_name }}, {{ matter.type_pct }}% confident)</span>{% else %}Matter type not recognised{% endif %}.
       From {{ matter.message.sender_name|default:"unknown sender" }}, received {{ matter.created_at|naturaltime }}.

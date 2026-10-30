@@ -4,6 +4,7 @@ from . import views
 
 app_name = "matters"
 urlpatterns = [
+    path("<str:ref>/details/", views.case_details, name="case_details"),
     path("<str:ref>/reopen/", views.reopen, name="reopen"),
     path("<str:ref>/sources/<int:pk>/acknowledge/", views.acknowledge_source, name="acknowledge_source"),
     path("", views.matter_list, name="list"),

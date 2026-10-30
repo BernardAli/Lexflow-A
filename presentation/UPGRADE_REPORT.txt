@@ -1,9 +1,9 @@
 LEXFLOW PILOT — UPGRADE AGAINST THE ORIGINAL PRESENTATION
+Updated 30 October 2026
 
-Assessment: approximately 8/10 for the agreed dedicated-office pilot prototype.
-This is an engineering assessment, not a measured completion percentage or a
-claim that the entire multi-profile platform is complete. A live-client 9/10
-rating still needs the chosen vendor, hosted operations and office acceptance.
+Scope: dedicated-office pilot prototype with a ProNotar32 extension foundation.
+Vendor import, hosted operations and office acceptance remain separate milestones.
+The changes below describe implemented capabilities, not a completion percentage.
 
 Previous gap                      Delivered and verified
 -------------                     ----------------------
@@ -14,8 +14,8 @@ Receipt only simulated in app     Actual signed HTTP transport to an independent
                                   lost-response retries without duplicate imports.
 Folder command needed DB/keys     Remote scanner/saved-email client needs only an
                                   office intake token and HTTPS API access.
-PostgreSQL locking untested       Five actual concurrency tests; full 100-test
-                                  PostgreSQL suite passes.
+PostgreSQL locking untested       Seven concurrency tests; all 152 tests passed
+                                  on isolated PostgreSQL 17 on 30 October.
 Recovery was an operator task     Encrypted maintenance snapshots and fresh-target
                                   restore; both database engines tested end to end.
 Old valid DB replay undetected    Independently held signed checkpoint comparison;
@@ -24,6 +24,23 @@ No extraction acceptance corpus   Twelve explicit synthetic cases, 64 checks;
                                   reusable evaluator for sanitized office samples.
 Presentation lagged the build     Updated editable deck, PDF, talk track, extended
                                   browser walkthrough and current evidence index.
+Single-party/property fields      Encrypted additional participants/properties,
+                                  representation links and office references;
+                                  primary records stay linked to extraction.
+One mapping per workflow          Immutable per-destination mapping revisions,
+                                  frozen with the approved canonical case.
+No destination extension point    Explicit renderer registry and canonical JSON
+                                  adapter; ProNotar32 is listed as unavailable.
+Current-data-only API reads       Read-only approved-case endpoint returns the
+                                  frozen case with its approval hash.
+Extra details could be omitted    Legacy exports reject enriched cases; structured
+                                  destinations expose mapping-readiness errors.
+
+The 30 October browser check verified desktop/mobile forms, approval, a JSON
+export containing three participants/two properties and locked approved details.
+Earlier raw test logs and restore/extraction drills remain dated historical
+evidence. The existing video does not cover the new screens. See VERIFICATION.txt
+for the evidence chronology and integrations/PRONOTAR32_READINESS.txt for scope.
 
 Remaining original-platform scope: native Outlook/Word/DMS integrations, a named
 notary vendor/BNotK connection, hosted deployment acceptance, SSO and additional
