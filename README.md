@@ -34,6 +34,18 @@ contact details are explicitly fictional demo information.
 | Upgrade, deployment, backup and recovery | [Operations](deployment/OPERATIONS.txt) |
 | Present the current build | [Presenter walkthrough](presentation/START_HERE.txt) |
 | Dated test results and limits | [Verification](presentation/VERIFICATION.txt) |
+| EU security, privacy and AI assurance roadmap | [19-page PDF](presentation/LexFlow_EU_Security_and_Compliance_Roadmap.pdf) |
+
+The security roadmap is a prospective assessment dated 30 October 2026. It
+distinguishes implemented pilot controls from required work, conditional legal
+obligations and unverified production behavior. It covers GDPR, the AI Act, CRA,
+NIS2 scope, German notarial confidentiality and ProNotar32 acceptance gates;
+it is not a compliance certificate. Official references and the reviewed project
+baseline are included. The [plain-text companion](presentation/LexFlow_EU_Security_and_Compliance_Roadmap.txt)
+and [editable report source](presentation/security-roadmap.json) are also available.
+After reviewing any legal or project changes, rebuild with
+`.venv/bin/python tools/build_security_report.py` (ReportLab, pypdf and the
+system Lato/DejaVu fonts are required).
 
 ## Start the presentation
 

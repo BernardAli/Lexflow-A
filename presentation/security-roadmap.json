@@ -1,0 +1,325 @@
+{
+  "date": "30 October 2026",
+  "version": "1.0",
+  "baseline": "repository 9ad0caa",
+  "pages": [
+    {
+      "label": "Decision brief",
+      "title": "A credible path to high assurance",
+      "deck": "The project can be developed toward demanding EU requirements. The current pilot is a foundation, not evidence that every obligation has been satisfied.",
+      "blocks": [
+        {"type": "p", "text": "LexFlow supports intake, extraction, source review, approval and controlled export for a dedicated German notary office. Its strongest existing safeguards are human review gates, encrypted office data, frozen approval snapshots and verifiable handoff receipts. The intended product remains an assistant to accountable professionals."},
+        {"type": "box", "title": "What “highest” should mean for this project", "text": "Use a demanding, risk-based security target: applicable law, documented safeguards, independent challenge and sustained operating evidence. There is no single universal EU certificate that proves every software product meets the highest possible safety and security level."},
+        {"type": "table", "headers": ["Decision", "Required outcome"], "widths": [0.28, 0.72], "rows": [
+          ["Keep the purpose narrow", "Propose case data with evidence; require professional review. Do not introduce autonomous legal conclusions or irreversible filing without a fresh assessment."],
+          ["Harden before real data", "Approve supplier and privacy arrangements; enforce strong identity controls; validate the actual hosting, monitoring, key custody and recovery environment."],
+          ["Prove each handoff", "Keep ProNotar32 unavailable until the vendor contract, adapter, authorization and durable import acceptance are demonstrated."],
+          ["Make assurance repeatable", "Maintain control owners, test reports, incident drills, access reviews and independent assessment. Reassess material product and supplier changes."]
+        ]},
+        {"type": "h2", "text": "Reading guide"},
+        {"type": "p", "text": "<b>Pages 3–4:</b> applicability and dates. <b>Pages 5–6:</b> current baseline and target architecture. <b>Pages 7–13:</b> privacy, security, AI safety, integration and operations. <b>Pages 14–16:</b> governance, delivery and release gates. <b>Pages 17–19:</b> evidence and official sources."},
+        {"type": "small", "text": "Status vocabulary: IMPLEMENTED PILOT means supported by reviewed code or recorded local verification. REQUIRED means proposed work or evidence for the selected assurance target. CONDITIONAL means applicability depends on legal classification. UNVERIFIED means the relevant environment or outcome has not been demonstrated. A legal adviser should confirm the applicability record before production use."}
+      ]
+    },
+    {
+      "label": "Regulatory scope",
+      "title": "Apply the right obligations",
+      "deck": "Record the legal entity, deployment model, intended use and responsibilities before selecting a conformity route.",
+      "blocks": [
+        {"type": "table", "headers": ["Framework", "LexFlow assessment and action"], "widths": [0.27, 0.73], "rows": [
+          ["<b>GDPR</b><br/>Directly relevant", "Notarial files contain personal data. Map controller/processor roles, lawful purposes, security, rights and retention. Assess additional conditions for special-category and criminal-offence data. [R01–R04]"],
+          ["<b>EU AI Act</b><br/>Use-dependent", "Determine which components qualify as AI and whether the intended use falls into a regulated category. Administrative notarial intake is not automatically high-risk. Provider and deployer responsibilities require separate analysis. [R05–R08]"],
+          ["<b>Cyber Resilience Act</b><br/>Product-dependent", "Assess distributed/on-premises software and any qualifying remote processing against the product scope. Do not assume all SaaS is covered or exempt. Identify manufacturer, support period and conformity route. [R09–R11]"],
+          ["<b>NIS2</b><br/>Entity-dependent", "Check sector, service, size, designation and national transposition. A notary office is not automatically covered. A cloud or managed-service operator may be; customers may also require supplier controls. [R12]"],
+          ["<b>eIDAS</b><br/>Function-dependent", "Assess if qualified signatures, seals or trust services are introduced. Existing HMAC receipts and audit checkpoints are technical integrity controls, not qualified electronic signatures. [R16]"],
+          ["<b>German notarial duties</b><br/>National overlay", "Review professional secrecy and outsourced access under BNotO §26a. Case-specific services may require participant consent. Data-protection and professional obligations both need to be satisfied. [R13]"]
+        ]},
+        {"type": "p", "text": "<b>Required deliverable:</b> an applicability register signed by office leadership and the product owner, with legal review. For each framework, record the legal basis, responsible entity, scope decision, applicable dates, required evidence and the trigger for reassessment."},
+        {"type": "small", "text": "This is a working applicability assessment, not a legal determination. Country-specific implementation, professional rules and the actual service contract can change the result. Voluntary ISO assurance is addressed on page 14."}
+      ],
+      "refs": ["R02", "R06", "R09", "R12", "R13"]
+    },
+    {
+      "label": "Legal timeline",
+      "title": "Plan against the current dates",
+      "deck": "Research cut-off: 30 October 2026. In particular, do not rely on the original high-risk AI timetable without checking its amendments.",
+      "blocks": [
+        {"type": "table", "headers": ["Date / status", "Consequence for planning"], "widths": [0.29, 0.71], "rows": [
+          ["<b>Already applicable</b><br/>GDPR", "Apply relevant data-protection requirements before processing real office data. Software maturity does not defer these obligations. [R01–R04]"],
+          ["<b>2 February 2025</b><br/>AI Act early duties", "Initial prohibited practices and AI-literacy provisions began applying. The current amended Article 4 requires measures supporting AI literacy; it does not require guaranteeing a particular individual skill level. [R05, R07]"],
+          ["<b>2 August 2026</b><br/>AI Act general date", "Most provisions apply, subject to exceptions. Check transparency rules against actual functions. Using a third-party model does not by itself make LexFlow a general-purpose model provider. [R05]"],
+          ["<b>11 September 2026</b><br/>CRA reporting", "Manufacturer reporting duties for actively exploited vulnerabilities and severe product-security incidents have started, where the product and role are in scope. Check transitional rules for the relevant release. [R09, R11]"],
+          ["<b>2 December 2027</b><br/>Annex III high-risk AI", "Current Commission guidance gives this application date for the relevant high-risk use cases following the AI Omnibus amendment. Determine classification before selecting the obligations. [R05]"],
+          ["<b>11 December 2027</b><br/>CRA main obligations", "Prepare product security, support, documentation and the applicable conformity process for covered products. [R09, R10]"],
+          ["<b>2 August 2028</b><br/>Annex I high-risk AI", "Extended date for relevant AI embedded in regulated products. This is not the default timetable for an administrative notarial assistant. [R05]"]
+        ]},
+        {"type": "small", "text": "The Commission states that the AI Omnibus entered into force on 27 July 2026; its Service Desk reproduces the consolidated text at that date. National NIS2 obligations depend on the applicable implementing law. Recheck the legal register at every release and before any market launch. Official guidance is useful evidence; final legal interpretation requires the applicable legislation and facts."}
+      ],
+      "refs": ["R05", "R07", "R09", "R11", "R12"]
+    },
+    {
+      "label": "Current project baseline",
+      "title": "Useful controls already exist",
+      "deck": "These findings describe repository 9ad0caa and the local pilot evidence. They do not establish production effectiveness.",
+      "blocks": [
+        {"type": "table", "headers": ["Implemented pilot safeguard", "Boundary or remaining work"], "widths": [0.49, 0.51], "rows": [
+          ["<b>Evidence and approval</b><br/>Source checks, conflict handling, scan acknowledgement, role gates and frozen approval snapshots.", "Review quality still depends on trained staff. Heuristic confidence is not a measured probability of correctness. [E01, E03]"],
+          ["<b>Office encryption</b><br/>Per-office encrypted private fields, documents, snapshots and audit metadata; wrapped office keys.", "Application processes can decrypt. Master-key custody, lifecycle, host hardening and operator access need stronger operational assurance. [E02]"],
+          ["<b>Controlled handoff</b><br/>Versioned mappings, byte-bound HMAC requests/receipts, idempotency and pending states after timeout.", "Reference receiver evidence is synthetic. Real vendor import and ProNotar32 support are unverified; the ProNotar32 adapter is unavailable. [E04]"],
+          ["<b>Tamper-evident audit</b><br/>Hash chain, signed checkpoint, mutation guards and separately exportable latest anchors.", "No WORM service is provisioned. An attacker with application keys and database control exceeds ordinary chain protections. [E05]"],
+          ["<b>Recovery and cleanup</b><br/>Encrypted offline backups, fresh-target restore checks and delivery-based source cleanup.", "Writers must be drained for consistent backups. Complete retention, legal holds, monitoring and hosted recovery objectives need acceptance. [E06]"],
+          ["<b>Production configuration guards</b><br/>Dedicated-office requirements, secret checks and a PostgreSQL/HTTPS deployment template.", "Hosted TLS, Docker runtime, cloud isolation and operational monitoring were not validated by the local test record. [E07]"]
+        ]},
+        {"type": "box", "title": "Priority gaps", "text": "MFA/SSO and abuse controls; separate scoped integration credentials; isolated document processing; managed key custody; independent monitoring; supplier/privacy agreements; representative AI validation; external security testing. These are roadmap items, not claimed features."},
+        {"type": "small", "text": "The README records 152 passing tests on isolated PostgreSQL 17 on 30 October 2026. This report does not rerun that suite or independently certify its coverage. The documented 12-case synthetic evaluation is regression evidence, not representative office accuracy. Evidence references E01–E08 appear on page 17."}
+      ]
+    },
+    {
+      "label": "Target architecture",
+      "title": "Contain access and data movement",
+      "deck": "Proposed deployment boundary. This diagram includes controls that still need implementation and environment validation.",
+      "blocks": [
+        {"type": "diagram"},
+        {"type": "p", "text": "<b>Keep each office isolated.</b> Use separate application, database, vault, export storage, service credentials and keys. Validate isolation across requests, jobs, recovery tooling and operator sessions. The public marketing site remains outside the office environment, without case access."},
+        {"type": "p", "text": "<b>Treat every document as hostile input.</b> Move PDF/OCR parsing into restricted workers with CPU, memory, page and time limits; no ambient network or production secrets. Quarantine suspicious files and remove temporary plaintext after processing. Existing parser limits are a starting point, not full sandbox isolation."},
+        {"type": "p", "text": "<b>Explicitly authorize egress.</b> Permit only configured destinations. Keep external AI off until supplier, data categories, processing location and retention are approved. Documents must never choose endpoints, execute commands or change approval policy."},
+        {"type": "small", "text": "Threat model: stolen staff sessions; overprivileged integration tokens; malicious files; prompt injection; compromised administrators; wrong-party exports; dependency compromise; ransomware; backup theft and rollback of audit history. Review these threats with the actual operator before accepting the design."}
+      ],
+      "refs": ["R02", "R10"]
+    },
+    {
+      "label": "Data protection and secrecy",
+      "title": "Make privacy operational",
+      "deck": "GDPR accountability needs records, decisions and working procedures alongside encryption.",
+      "blocks": [
+        {"type": "h2", "text": "1. Establish purposes and responsibilities"},
+        {"type": "p", "text": "The notary will ordinarily control the purposes of office case processing; a hosted LexFlow operator may be a processor. Confirm the actual arrangement, including any separate operator purposes. Document lawful bases by workflow, extra conditions for sensitive data, recipients and notices. Do not default to consent as the basis for every notarial activity. Maintain processing records and assess DPO requirements. [R01]"},
+        {"type": "h2", "text": "2. Assess effects before using real files"},
+        {"type": "p", "text": "Complete and record a DPIA screening. Given confidential documents and potentially sensitive personal information, the proposed assurance target is a full DPIA before the live pilot. Describe necessity, alternatives, misuse, inaccurate extraction, unauthorized access and mitigation. Seek required prior consultation if high residual risk cannot be reduced. [R01]"},
+        {"type": "h2", "text": "3. Control suppliers and international access"},
+        {"type": "p", "text": "Agree processor terms, approved subprocessors, confidentiality, incident assistance, deletion/return, audit rights and exit arrangements. The preferred deployment profile keeps processing, backups and support within controlled EU/EEA arrangements. Hosting region alone does not resolve third-country access. Where transfers occur, establish a valid transfer mechanism and assess safeguards and foreign-access risk. EU-only hosting is a project choice, not a universal GDPR rule. [R03]"},
+        {"type": "h2", "text": "4. Respect notarial professional secrecy"},
+        {"type": "p", "text": "BNotO §26a requires careful service-provider selection and contractual secrecy safeguards. Its paragraph 4 requires participant consent for access to secrets when a service directly serves an individual official matter. Have notarial counsel determine whether the proposed AI or support service falls within that provision. This is a separate question from the GDPR lawful basis. [R13]"},
+        {"type": "box", "title": "Acceptance evidence", "text": "Approved data-flow inventory, processing records, DPIA and risk decisions; notices and supplier agreements; professional-secrecy assessment; transfer assessment where needed; a demonstrated access/correction/deletion request procedure with documented legal exceptions. The software must not silently promise erasure of legally retained records."}
+      ],
+      "refs": ["R01", "R03", "R13"]
+    },
+    {
+      "label": "Technical hardening",
+      "title": "Protect identities, keys and hosts",
+      "deck": "Required controls for the proposed production assurance target. Implementation strength must match the documented risks.",
+      "blocks": [
+        {"type": "table", "headers": ["Control / owner", "Required outcome and acceptance check"], "widths": [0.28, 0.72], "rows": [
+          ["<b>Staff access</b><br/>Security + office", "Introduce SSO and phishing-resistant MFA, named accounts, least privilege and timely offboarding. Validate login/reset rate limits, session expiry, privileged reauthentication and recovery without a bypass. Review access quarterly."],
+          ["<b>Integration identity</b><br/>Engineering", "Replace the shared office token with individual client credentials: intake-only scope where possible, expiry, revocation and usage audit. Prove one client's revocation leaves others intact. Current tokens also permit case reads."],
+          ["<b>Key management</b><br/>Platform", "Use managed KMS/HSM-backed custody where appropriate; separate data, signing and recovery roles. Test rotation, compromise recovery and access revocation. Existing Fernet encryption does not itself demonstrate a managed key lifecycle."],
+          ["<b>Host and network</b><br/>Platform", "Validate TLS, private database/storage, controlled proxy trust, hardened containers, non-root execution, patching and restricted administrative paths. Test tenant isolation and deny-by-default outbound access."],
+          ["<b>Document processing</b><br/>Engineering", "Add quarantine and malware controls, sandbox parsers and enforce resource limits. Verify malformed files cannot escape, exhaust the host or leak temporary data. Do not upload confidential files to public scanning services."],
+          ["<b>Detection and logs</b><br/>Operations", "Alert on privileged changes, excessive downloads, credential abuse, failed receipt verification and audit anomalies. Keep logs free of document bodies, prompts, secrets and unnecessary personal data. Test routing and response."],
+          ["<b>Staff devices</b><br/>Office IT", "Require supported systems, disk encryption, endpoint protection, screen locking and controlled export locations. Test remote access and scanner-agent permissions, including stolen-device recovery."]
+        ]},
+        {"type": "small", "text": "Acceptance should include independent penetration testing of the deployed system, followed by remediation and retesting. No unresolved critical findings or uncontrolled high risks should pass the release gate. Security tooling must itself be approved for confidential notarial information."}
+      ],
+      "refs": ["R02", "R10"]
+    },
+    {
+      "label": "AI safety and human oversight",
+      "title": "Keep human judgment in control",
+      "deck": "The main safety risks are false confidence, missed conflicts, mixed identities and unreviewed downstream action.",
+      "blocks": [
+        {"type": "p", "text": "<b>Classify the intended use.</b> Annex III includes certain systems assisting judicial authorities with interpreting facts/law or applying law. Administrative extraction for a notary is not automatically that use. If an Annex III category applies, a narrow preparatory-task exception requires a reasoned assessment; human review alone is not a blanket exemption. Profiling within the relevant Annex III context cannot use that exception. Document and register an Article 6(3) exemption where required. [R06, R08]"},
+        {"type": "table", "headers": ["Hazard", "Required safeguard and evaluation"], "widths": [0.28, 0.72], "rows": [
+          ["Invented or misplaced facts", "Retain source provenance and originals. Check that cited evidence supports the field and belongs to the correct person/property. An exact quote match alone does not establish semantic correctness."],
+          ["Automation bias", "Show missing values, competing evidence and unread pages. Require active review of critical fields and original scans. Allow correction, abstention and a fully manual route; never label heuristic scores as validated accuracy."],
+          ["Prompt injection", "Treat document content as data, including embedded instructions. Restrict model output to validated schemas. No model-controlled tools, destinations, policy changes or direct approval. Exercise adversarial documents."],
+          ["Model or workflow drift", "Version model/provider settings, prompts, normalizers and mappings. Re-evaluate before changes. Include German names, multiple parties, WEG, poor scans, dates, amounts, conflicting drafts and omitted pages."],
+          ["Uncontrolled external use", "Approve the provider contract, processing purposes, retention and location. Verify restrictions on training/reuse and support access. Use minimum necessary content and a local/manual fallback."]
+        ]},
+        {"type": "p", "text": "<b>Required evidence:</b> an intended-use statement, model/system inventory, hazard log and representative validation set with lawful provenance. Agree acceptance thresholds before testing; report missed critical errors, false matches, abstentions and reviewer corrections by workflow. A small synthetic corpus cannot support a general accuracy claim."},
+        {"type": "small", "text": "GDPR Article 22 also needs assessment if a future workflow makes solely automated decisions with legal or similarly significant effects. The proposed design requires meaningful human judgment and authority to reject the recommendation, rather than a nominal approval click. [R17]"},
+        {"type": "small", "text": "Support staff AI literacy through training on limitations, source checking, escalation and incident reporting. Record training and practical exercises. If classified high-risk, add the applicable risk/quality management, documentation, conformity, monitoring and deployer duties, including a fundamental-rights assessment where required. [R07]"}
+      ],
+      "refs": ["R06", "R07", "R08", "R17"]
+    },
+    {
+      "label": "ProNotar32 and external systems",
+      "title": "Make integration a controlled release",
+      "deck": "Current status: generic structured case export exists; a functioning ProNotar32 adapter and accepted vendor import do not.",
+      "blocks": [
+        {"type": "p", "text": "The supplied screenshots identify useful business fields and workflows. They do not establish an API, import schema, supported automation method, licensing permission or successful import. Obtain current vendor documentation and an authorized test environment before implementation."},
+        {"type": "table", "headers": ["Gate", "Required artifact or demonstrated behavior"], "widths": [0.23, 0.77], "rows": [
+          ["<b>1 · Contract</b>", "Agree the supported interface, schema/version, permitted automation, destination identity, account scope, error model and meaning of durable acceptance. Define responsibility for support and incidents."],
+          ["<b>2 · Mapping</b>", "Map lexflow.case/1 to vendor fields with versioned, reviewed profiles. Include repeated parties/properties, representative relationships, umlauts, missing fields, office file names and register references. Minimize fields sent."],
+          ["<b>3 · Authorization</b>", "Bind the exact office, target account and approved case. Require a new reviewed approval when material values or mappings change. Reauthenticate or obtain a second review for sensitive destination/configuration changes."],
+          ["<b>4 · Delivery</b>", "Test retries after timeout, duplicate requests, partial failure and crash after import. Reconcile the destination's stored data and identifiers. A transport success or checksum alone does not prove correct vendor application."],
+          ["<b>5 · Recovery</b>", "Define correction, cancellation and reconciliation with the vendor. Never assume an accepted legal record can be silently rolled back. Keep a controlled manual workflow when the interface is unavailable."],
+          ["<b>6 · Acceptance</b>", "Use sanitized fixtures followed by the office's authorized validation. Capture exact versions, expected/actual values, negative tests and signed acceptance. Enable the adapter only after all gates pass."]
+        ]},
+        {"type": "box", "title": "Preserve the existing integrity model", "text": "Keep immutable approval snapshots, exact-byte signing, idempotency and receipts. Protect approved export files after they leave LexFlow. Where qualified electronic signatures or seals are needed, integrate appropriate trust services separately; the existing HMAC scheme does not supply them."}
+      ],
+      "refs": ["R16"]
+    },
+    {
+      "label": "Secure product lifecycle",
+      "title": "Build security into every release",
+      "deck": "A secure deployment depends on maintained software, a response process and trustworthy updates.",
+      "blocks": [
+        {"type": "h2", "text": "Before release"},
+        {"type": "p", "text": "Maintain the threat model and security requirements alongside design decisions. Review security-sensitive changes independently. Run meaningful authorization, isolation, parser, approval and handoff tests. Add dependency, secret, container and static-analysis checks; keep the results with the release. Generate a machine-readable software bill of materials, pin dependencies and verify build provenance."},
+        {"type": "h2", "text": "Deliver and maintain safely"},
+        {"type": "p", "text": "Sign release artifacts and verify them before deployment. Document secure defaults, upgrades, backup compatibility, rollback constraints and supported versions. Create a vulnerability-reporting channel with a responsible response team, severity triage and coordinated disclosure. Set patch targets based on exposure and exploitability; emergency fixes must have a tested distribution path and customer communications."},
+        {"type": "table", "headers": ["If CRA applies", "Evidence to prepare"], "widths": [0.31, 0.69], "rows": [
+          ["Product scope and risk", "Document the manufacturer role, intended use, component/remote-processing boundary and product classification. Determine the required conformity assessment rather than assuming self-assessment or third-party certification."],
+          ["Technical documentation", "Trace applicable essential requirements to design, test results and residual-risk decisions. Record the support period and user-facing security instructions."],
+          ["Vulnerability handling", "Maintain intake, triage, remediation, notification and lifecycle records. Connect actively exploited vulnerabilities and severe security incidents to the CRA reporting procedure."],
+          ["Market obligations", "Complete the applicable conformity route and declaration/CE requirements when required. Neither this report nor an ISO certificate establishes product conformity."]
+        ]},
+        {"type": "box", "title": "Release evidence should be reproducible", "text": "Each release should identify its source revision, dependencies, build artifacts, deployment configuration, tests, approvals, known limits and support status. Keep confidential test data out of public repositories and automated external services."}
+      ],
+      "refs": ["R09", "R10", "R11"]
+    },
+    {
+      "label": "Incident response",
+      "title": "Prepare for different reporting clocks",
+      "deck": "One event can trigger several regimes. Track awareness times, thresholds, recipients and follow-up obligations separately.",
+      "blocks": [
+        {"type": "table", "headers": ["Regime / trigger", "Notification path and timing"], "widths": [0.32, 0.68], "rows": [
+          ["<b>GDPR</b><br/>Personal-data breach", "The processor informs the controller without undue delay. The controller notifies the supervisory authority without undue delay and, where feasible, within 72 hours of awareness, unless the breach is unlikely to risk individuals' rights/freedoms. Inform affected people without undue delay where high risk requires it. Record all breaches and decisions. [R04]"],
+          ["<b>NIS2, if in scope</b><br/>Significant incident", "Generally: early warning within 24 hours; incident notification within 72 hours; final report within one month of the incident notification. If ongoing, follow the progress/final-report rules. Confirm national recipients, significance criteria and special-sector exceptions. [R12]"],
+          ["<b>CRA, if in scope</b><br/>Actively exploited vulnerability", "Manufacturer: early warning within 24 hours of awareness; vulnerability notification within 72 hours. Final report within 14 days after a corrective or mitigating measure becomes available. Use the required reporting platform and recipients. [R11]"],
+          ["<b>CRA, if in scope</b><br/>Severe product-security incident", "Manufacturer: early warning within 24 hours; incident notification within 72 hours; final report within one month after the incident notification. Assess affected-user communications and required updates. [R11]"]
+        ]},
+        {"type": "h2", "text": "Operational response sequence"},
+        {"type": "p", "text": "<b>Detect and preserve:</b> alert the incident lead, record awareness, secure relevant logs and preserve evidence without copying entire case files unnecessarily. <b>Contain:</b> revoke affected credentials, isolate workers, suspend risky exports and preserve a manual office workflow. <b>Assess:</b> involve the office, privacy/legal advisers and suppliers; classify each reporting threshold. <b>Recover:</b> restore trusted versions, reconcile receipts and confirm key integrity. <b>Learn:</b> assign corrective actions and retest."},
+        {"type": "small", "text": "Required before live use: named primary/deputy contacts, a maintained authority/CSIRT directory, preapproved report templates and a tabletop exercise covering ransomware, wrong-recipient export and compromised AI/API credentials. Contractual supplier notice targets must leave the controller enough time to act. Do not wait for a complete forensic report before a legally required initial notification."}
+      ],
+      "refs": ["R04", "R11", "R12"]
+    },
+    {
+      "label": "Retention and resilience",
+      "title": "Recover safely. Delete deliberately.",
+      "deck": "Availability and lawful retention must be designed together, including the copies held outside the live database.",
+      "blocks": [
+        {"type": "table", "headers": ["Data class", "Required policy and implementation"], "widths": [0.29, 0.71], "rows": [
+          ["Originals, email and OCR", "Specify the purpose, retention trigger, authorized holds and deletion evidence. Existing cleanup begins after acknowledged delivery and removes source material; verify orphaned files, temporary files and retry failures."],
+          ["Cases and approvals", "Define schedules for structured values, review revisions, frozen snapshots, exports and receipts. The existing source purge does not erase these. Apply notarial record duties and rights-request exceptions before deletion."],
+          ["Logs and analytics", "Minimize personal content, limit readers and set a justified duration. Separate security evidence from operational debugging. Do not keep complete prompts or case text as default diagnostics."],
+          ["Backups and suppliers", "Define expiry, restoration restrictions and deletion/return on exit. A restore must not silently resurrect information due for deletion; replay approved deletion/hold decisions. Verify supplier copies and support attachments."]
+        ]},
+        {"type": "p", "text": "<b>Current boundary:</b> the configured pilot source-retention value is not a legal retention rule. The office must approve a schedule for each data class. Required legal holds need controlled authorization, scope, review and release; unrestricted storage is not an acceptable substitute."},
+        {"type": "h2", "text": "Recovery target and proof"},
+        {"type": "p", "text": "Agree maximum tolerable data loss (RPO) and recovery time (RTO) through an office impact assessment. An initial planning target could be <b>RPO ≤ 4 hours and RTO ≤ 8 hours</b>, subject to office approval and architecture changes. These are proposed engineering targets, not current measurements or legal minima."},
+        {"type": "p", "text": "Protect off-site backups and the recovery key under separate custody. Test fresh-target restoration and the compromise of the primary operator account. The current backup procedure requires draining all writers; meeting the target may require coordinated snapshots or a validated continuous-recovery design. Reconcile approved cases, vendor receipts and separately retained latest audit anchors after recovery."},
+        {"type": "small", "text": "Required evidence: timed restoration in the actual environment, documented writer consistency, integrity verification, independent anchor comparison, successful key recovery, deletion/hold reconciliation and a demonstrated manual continuity procedure. Repeat after major changes and on a risk-based schedule; quarterly drills are the proposed initial cadence."}
+      ],
+      "refs": ["R01", "R02", "R13"]
+    },
+    {
+      "label": "Governance and assurance",
+      "title": "Give every control an owner",
+      "deck": "Strong assurance is a management practice supported by technical evidence and independent review.",
+      "blocks": [
+        {"type": "table", "headers": ["Accountability", "Responsibility"], "widths": [0.31, 0.69], "rows": [
+          ["Office leadership / notary", "Approve intended use, professional-secrecy decisions, staff roles, retention and residual operational risk. Accept the office-specific deployment and handoff."],
+          ["Product owner", "Control feature scope, legal classification triggers and public claims. Own the release evidence pack and supplier interface commitments."],
+          ["Security + platform lead", "Own threat modelling, hardening, keys, monitoring, vulnerability management, recovery and incident command. Maintain named deputies."],
+          ["Privacy/legal advisers; DPO where required", "Advise on lawful basis, DPIA, professional duties, processor/transfer terms and notifications. Preserve DPO independence; management remains accountable."],
+          ["Engineering + AI quality owner", "Implement preventive controls, regression and adversarial tests, representative evaluation, change control and safety monitoring."],
+          ["Independent assessor", "Challenge the deployment and evidence, test security boundaries and verify remediation. Keep the scope and limitations explicit."]
+        ]},
+        {"type": "h2", "text": "Voluntary standards as an assurance framework"},
+        {"type": "p", "text": "Use <b>ISO/IEC 27001:2022</b> to organize information-security risk management and the control system. Consider <b>ISO/IEC 42001:2023</b> for governance of AI development and use. Establish a defined scope, management reviews, internal audits and corrective actions; then consider independent certification when operating evidence is mature. [R14, R15]"},
+        {"type": "box", "title": "Keep claims precise", "text": "An ISO management-system certificate has a defined organization and scope. It does not certify every product feature, satisfy every EU law or replace an applicable CE/conformity process. Do not claim “EU-certified,” “fully GDPR compliant,” “zero risk” or “ProNotar integrated” without specific, defensible evidence."},
+        {"type": "small", "text": "Proposed cadence: monthly risk and incident review; quarterly access, supplier and recovery review; independent assessment before launch and after material boundary changes. Recheck relevant harmonised standards and their actual legal scope before relying on a presumption of conformity."}
+      ],
+      "refs": ["R14", "R15"]
+    },
+    {
+      "label": "Delivery roadmap",
+      "title": "Sequence the work by release gates",
+      "deck": "Indicative phases from an approved start date. Duration depends on team capacity, vendor cooperation and assessment findings.",
+      "blocks": [
+        {"type": "table", "headers": ["Phase / lead", "Work and exit evidence"], "widths": [0.27, 0.73], "rows": [
+          ["<b>0–30 days</b><br/>Scope and ownership<br/>Product + office", "Confirm legal entity, deployment and intended use. Complete applicability register, data flows, supplier inventory, threat model and DPIA screening. Assign owners, classify data and approve the release gates. Start the vendor interface discussion."],
+          ["<b>31–60 days</b><br/>Preventive controls<br/>Engineering + platform", "Implement MFA/SSO, scoped client credentials, parser isolation, controlled egress, key custody and sensitive-log filtering. Test authorization and data isolation. Complete privacy, confidentiality and supplier arrangements."],
+          ["<b>61–90 days</b><br/>Operational proof<br/>Operations + AI quality", "Validate the actual deployment, backup/recovery and deletion policies. Exercise notifications and manual continuity. Evaluate representative authorized documents; tune review controls. Establish SBOM, release provenance and vulnerability response."],
+          ["<b>91–120+ days</b><br/>Independent challenge<br/>Assessor + office", "Run external testing, remediate and retest. Review the evidence pack and residual risks. Accept only the demonstrated office/workflow scope. Start a tightly supervised live pilot only after all blocking gates pass."],
+          ["<b>Separate vendor gate</b><br/>Integration lead", "Develop ProNotar32 only against an agreed interface and authorized fixtures. Validate mapping, duplicate handling, durable import and recovery. Its delivery date depends on vendor evidence, not this indicative schedule."],
+          ["<b>Ongoing</b><br/>Management", "Maintain monitoring, access reviews, supplier assurance, reassessment and drills. Progress any applicable CRA/AI conformity work and optional ISO certification against actual legal deadlines."]
+        ]},
+        {"type": "box", "title": "Do not wait for a future milestone to meet an active duty", "text": "Where CRA reporting or other obligations already apply to an in-scope marketed product or operating service, the relevant process is needed now. The phased engineering plan does not defer statutory requirements."},
+        {"type": "small", "text": "This is a sequencing proposal, not a fixed-price estimate or a promise of certification within 120 days. Budget explicitly for legal/privacy review, managed identity and key services, monitoring, independent testing, representative evaluation and office training."}
+      ],
+      "refs": ["R05", "R11"]
+    },
+    {
+      "label": "Production acceptance",
+      "title": "Release only against evidence",
+      "deck": "Proposed acceptance checklist. Every row requires an accountable sign-off for the actual release and office environment.",
+      "blocks": [
+        {"type": "table", "headers": ["Gate", "Evidence required before acceptance"], "widths": [0.26, 0.74], "rows": [
+          ["<b>G1 · Legal and privacy</b>", "Approved applicability decision, processing records, DPIA/consultation outcome as required, professional-secrecy assessment, retention, notices and signed supplier terms. No unresolved legal blocker."],
+          ["<b>G2 · Access and isolation</b>", "MFA and account-recovery tests; individual client revocation; least-privilege and tenant-boundary tests; verified admin controls. No cross-office disclosure or shared demo credentials in production."],
+          ["<b>G3 · AI and review</b>", "Documented intended use, representative evaluation and pre-agreed thresholds; successful conflict, scan and wrong-party checks; adversarial-document tests; trained reviewers and a manual fallback."],
+          ["<b>G4 · Deployment security</b>", "Verified TLS, secret/key custody, restricted network paths, sandbox behavior, privacy-safe logs and alert response. Independent testing completed; critical findings closed and uncontrolled high risks resolved."],
+          ["<b>G5 · Recovery and lifecycle</b>", "Timed restore within agreed objectives, trusted audit anchors, tested holds/deletion and exit procedures. Incident exercise completed. Supported release, SBOM, patch ownership and reporting readiness recorded."],
+          ["<b>G6 · Destination integrity</b>", "Approved mapping/version and endpoint identity; persisted destination values verified; retry/replay/timeout tests; durable receipt semantics and correction process. Keep unaccepted adapters disabled."],
+          ["<b>G7 · Accountable operation</b>", "Named office and operator owners, escalation contacts, operating runbooks and accepted residual risks. Complete any legally required conformity or registration steps before the relevant release/use."]
+        ]},
+        {"type": "p", "text": "<b>Acceptance record:</b> identify the exact application revision, model/provider configuration, mapping revision, host environment, office, test date and permitted workflows. Attach the supporting artifacts and any narrowly scoped conditions. The approving office and product/operator leads should sign the record."},
+        {"type": "small", "text": "Stop or restrict operation if isolation fails, a critical approval gate can be bypassed, important alerts go unhandled, recovery cannot be demonstrated or a vendor import changes meaning unexpectedly. Scope expansion, a new AI provider, new external data access or a material security change reopens the relevant gates."}
+      ]
+    },
+    {
+      "label": "Evidence and method",
+      "title": "What this report is based on",
+      "deck": "A review of project artifacts and official public guidance. No production audit, vendor acceptance or certification was performed.",
+      "blocks": [
+        {"type": "table", "headers": ["ID / evidence", "Repository reference"], "widths": [0.31, 0.69], "rows": [
+          ["E01 · Baseline and recorded tests", "README.md; presentation/VERIFICATION.txt; apps/core/tests/. The README records 152 passing PostgreSQL tests. Those results were not rerun for this document."],
+          ["E02 · Encryption and identities", "apps/core/crypto.py; apps/core/models.py; config/settings.py. Office key wrapping, field encryption, shared-token limits and production settings."],
+          ["E03 · Review and case integrity", "apps/matters/services.py; apps/matters/case_data.py; apps/matters/engine/; apps/studio/validation.py. Review, evidence and snapshot boundaries."],
+          ["E04 · Connectors", "apps/connectors/adapters.py; apps/connectors/protocol.py; integrations/HANDOFF_V1.txt; integrations/PRONOTAR32_READINESS.txt. Implemented protocol and explicit vendor boundary."],
+          ["E05 · Audit", "apps/audit/models.py; apps/audit/checkpoints.py; apps/audit/services.py. Chain/checkpoint design and independent-anchor requirement."],
+          ["E06 · Recovery and retention", "deployment/OPERATIONS.txt; apps/core/management/commands/lexflow_backup.py; lexflow_restore.py in the same directory; apps/intake/management/commands/lexflow_purge.py."],
+          ["E07 · Hosting", "deployment/compose.yaml; deployment/Caddyfile; config/settings.py; lexflow_pilot_check command. Templates and guardrails do not prove hosted enforcement."],
+          ["E08 · Evaluation limits", "evaluation/property_cases.json; tools/verify_pilot_acceptance.py; apps/core/evaluation.py. Synthetic regression evidence needs representative office validation."]
+        ]},
+        {"type": "small", "text": "Baseline: repository commit 9ad0caa. Negative findings mean a control or its assurance was not established in the reviewed artifacts; an external operator may provide additional evidence. This assessment contains no real case records, credentials or private client details."},
+        {"type": "small", "text": "Official sources were checked on 30 October 2026. The Commission's current AI timetable and Service Desk consolidated articles were used for the 2026 amendments. Some direct EUR-Lex pages returned automated-access challenges; this report does not claim a complete independent review of every consolidated legal text. Legal advisers should verify the definitive texts and national implementation before signing the applicability record."},
+        {"type": "small", "text": "Reproduction: edit presentation/security-roadmap.json, then run .venv/bin/python tools/build_security_report.py. The build writes the PDF and a searchable plain-text companion. Review legal dates and project claims before issuing a new version."}
+      ]
+    },
+    {
+      "label": "Official sources · 1 of 2",
+      "title": "Data protection and AI",
+      "deck": "Clickable primary-source references. Research date: 30 October 2026.",
+      "blocks": [{"type": "sources", "ids": ["R01", "R02", "R03", "R04", "R05", "R06", "R07", "R08"]}]
+    },
+    {
+      "label": "Official sources · 2 of 2",
+      "title": "Cybersecurity and assurance",
+      "deck": "Read each framework within its actual product, entity and deployment scope.",
+      "blocks": [{"type": "sources", "ids": ["R09", "R10", "R11", "R12", "R13", "R14", "R15", "R16", "R17"]}]
+    }
+  ],
+  "sources": [
+    {"id": "R01", "short": "EDPB accountability", "title": "European Data Protection Board — Be compliant", "url": "https://www.edpb.europa.eu/sme/be-compliant/be-compliant_en", "note": "Privacy by design/default, processing records and DPIA. GDPR Regulation (EU) 2016/679 is the underlying law; assess the relevant Articles 5–6, 9–10, 12–22, 24–25, 28, 30 and 35–37."},
+    {"id": "R02", "short": "EDPB security", "title": "European Data Protection Board — Secure personal data", "url": "https://www.edpb.europa.eu/sme/be-compliant/secure-personal-data_en", "note": "Risk-appropriate technical and organizational safeguards under GDPR, including confidentiality, integrity and availability. Supports the security objectives, not a finding that LexFlow has achieved them."},
+    {"id": "R03", "short": "EDPB transfers", "title": "European Data Protection Board — International data transfers", "url": "https://www.edpb.europa.eu/sme/be-compliant/international-data-transfers_en", "note": "Chapter V transfer mechanisms and their relationship to the other GDPR requirements. A hosting-region label alone is not a transfer assessment."},
+    {"id": "R04", "short": "EDPB breaches", "title": "European Data Protection Board — Data breaches", "url": "https://www.edpb.europa.eu/sme/assess-the-risks/data-breaches_en", "note": "Breach assessment, records, supervisory-authority notification and communication to affected people; GDPR Articles 33–34."},
+    {"id": "R05", "short": "Commission AI timetable", "title": "European Commission — AI Act", "url": "https://digital-strategy.ec.europa.eu/en/policies/regulatory-framework-ai", "note": "Current policy overview and application timeline, including the AI Omnibus that the Commission states entered into force on 27 July 2026. Underlying AI Act: Regulation (EU) 2024/1689, as amended."},
+    {"id": "R06", "short": "AI Act Article 6", "title": "Commission AI Act Service Desk — Article 6", "url": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-6", "note": "High-risk classification and the documented Article 6(3) exception; read the displayed statutory text, not only the non-binding summary. Consolidated basis stated as 27 July 2026."},
+    {"id": "R07", "short": "AI Act literacy", "title": "Commission AI Act Service Desk — Article 4", "url": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-4", "note": "Amended AI-literacy support measures for providers and deployers; the text distinguishes supporting development from guaranteeing an individual's skill level."},
+    {"id": "R08", "short": "AI Act Annex III", "title": "Commission AI Act Service Desk — Annex III", "url": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-3", "note": "Listed high-risk uses, including point 8 on administration of justice and democratic processes. Intended use and the relevant conditions drive classification."},
+    {"id": "R09", "short": "Commission CRA scope", "title": "European Commission — Cyber Resilience Act", "url": "https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act", "note": "Regulation (EU) 2024/2847: product-security framework and staged application dates. Scope and transitional treatment require product-specific review."},
+    {"id": "R10", "short": "CRA manufacturers", "title": "European Commission — CRA: Manufacturers", "url": "https://digital-strategy.ec.europa.eu/en/policies/cra-manufacturers", "note": "Risk assessment, technical documentation, conformity, CE/declaration, stated support period and vulnerability handling for manufacturers within scope."},
+    {"id": "R11", "short": "CRA reporting", "title": "European Commission — CRA reporting obligations", "url": "https://digital-strategy.ec.europa.eu/en/policies/cra-reporting", "note": "Reporting from 11 September 2026, distinct vulnerability and severe-incident stages, follow-up deadlines and the Single Reporting Platform."},
+    {"id": "R12", "short": "Commission NIS2", "title": "European Commission — NIS2 Directive: FAQs", "url": "https://digital-strategy.ec.europa.eu/en/faqs/directive-measures-high-common-level-cybersecurity-across-union-nis2-directive-faqs", "note": "Directive (EU) 2022/2555: entity scope, risk management and staged incident reporting. Confirm the applicable Member State's implementation and competent authorities."},
+    {"id": "R13", "short": "BNotO §26a", "title": "German federal legislation portal — BNotO §26a", "url": "https://www.gesetze-im-internet.de/bnoto/__26a.html", "note": "Professional duties for notaries using service providers, including secrecy contracts and paragraph 4's case-specific participant-consent requirement. This is national law, not an EU regulation."},
+    {"id": "R14", "short": "ISO 27001", "title": "ISO — ISO/IEC 27001:2022", "url": "https://www.iso.org/standard/27001", "note": "Official overview of the information security management system standard. Voluntary organizational assurance; not a universal product or EU compliance certificate."},
+    {"id": "R15", "short": "ISO 42001", "title": "ISO — ISO/IEC 42001:2023", "url": "https://www.iso.org/standard/42001", "note": "Official overview of the AI management system standard. The full paid standards were not independently audited against the project for this report."},
+    {"id": "R16", "short": "eIDAS signature distinction", "title": "Court of Justice — Case C-466/22, judgment of 29 February 2024", "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=ecli:ECLI:EU:C:2024:185", "note": "Primary judicial source discussing eIDAS Article 25 and qualified signatures. HMAC evidence must not be represented as a qualified signature or as satisfying notarial form requirements."},
+    {"id": "R17", "short": "GDPR automated decisions", "title": "European Commission — Information for individuals", "url": "https://commission.europa.eu/law/law-topic/data-protection/information-individuals_en", "note": "GDPR rights and automated decision-making, including Article 22. Relevant to any future expansion beyond staff-reviewed extraction."}
+  ]
+}
